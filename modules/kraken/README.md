@@ -10,7 +10,7 @@ In order to set up a new Hadoop worker node:
 ```puppet
 node new_worker {
   include kraken::hadoop::worker
-}_
+}
 ```
 
 See also operations-puppet/manifests/role/analytics.pp for logical groupings of
