@@ -50,7 +50,6 @@ export HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce',
 deb-src http://analytics1001.wikimedia.org/apt source/
 ",
 			mode => 0444,
-			notify => Exec["/usr/bin/apt-get update"],
 	}
 
 	
