@@ -1,0 +1,12 @@
+[submodule "modules/cdh4"]
+	path = modules/cdh4
+	url = git://github.com/wmf-analytics/puppet-cdh4.git
+[submodule "modules/kafka"]
+	path = modules/kafka
+	url = git://github.com/wmf-analytics/puppet-kafka.git
+[submodule "modules/jmxtrans"]
+	path = modules/jmxtrans
+	url = git://github.com/wmf-analytics/puppet-jmxtrans.git 
+[submodule "modules/storm"]
+	path = modules/storm
+	url = git://github.com/wmf-analytics/puppet-storm.git
