@@ -105,8 +105,8 @@ class role::analytics {
 	# ganglia cluster name.
 	$cluster = "analytics"
 
-	include standard,
-		admins::roots,
+	# include standard,
+	include admins::roots,
 		accounts::diederik,
 		accounts::dsc,
 		accounts::otto,
