@@ -193,8 +193,6 @@ node /amssq(4[7-9]|5[0-9]|6[0-2])\.esams\.wikimedia\.org/ {
 	include role::cache::upload
 }
 
-# ------ Analytics Cluster ------
-
 # analytics_basenode
 #
 # This allows us to modify certain nodes
@@ -218,6 +216,9 @@ node analytics_basenode {
 # Analytics node with a public IP.
 node "analytics1001.wikimedia.org" inherits analytics_basenode {
 	include role::analytics::public
+	# analytics1001 will get event.gif UDP stream traffic.
+	# include udp2log iptables rules.
+	include misc::udp2log::iptables
 }
 
 # analytics1002 is Storm Master (i.e. Storm Nimbus server)
