@@ -194,26 +194,77 @@ node /amssq(4[7-9]|5[0-9]|6[0-2])\.esams\.wikimedia\.org/ {
 	include role::cache::upload
 }
 
-# analytics1001.wikimedia.org is the analytics cluster master.
-node "analytics1001.wikimedia.org" {
-	include role::analytics
-}
+# ------ Analytics Cluster ------
 
-# analytics1027 hosts the frontend
-# interfaces to Kraken and Hadoop.
-node "analytics1027.eqiad.wmnet" {
-	include role::analytics::frontend
-}
-
-# analytics1002 - analytics1026
-node /analytics10(0[2-9]|1[0-9]|2[0-6])\.eqiad\.wmnet/ {
+# analytics_basenode
+#
+# This allows us to modify certain nodes
+# based on hostname, without having to
+# create a separate node class for each
+# one.
+node analytics_basenode {
 	# ganglia aggregator for the Analytics cluster.
 	if ($hostname == "analytics1003" or $hostname == "analytics1011") {
 		$ganglia_aggregator = "true"
 	}
 
+	if ($hostname != "analytics1001") {
+		# Most analytics nodes don't have access to internet.  
+		# Set this proxy as default for execs made on these nodes.
+		Exec { environment => 'http_proxy=http://brewster.wikimedia.org:8080' }
+	}
+}
+
+# analytics1001 is currently the only
+# Analytics node with a public IP.
+node analytics1001 inherits analytics_basenode {
+	include role::analytics::public
+}
+
+# analytics1002 is Storm Master (i.e. Storm Nimbus server)
+node analytics1002 inherits analytics_basenode {
+	include role::analytics::storm::master
+}
+
+# analytics1003 - analytics1009 are Storm Workers (i.e. Storm Supervisor servers)
+node /^analytics100[3-9]/ inherits analytics_basenode {
+	include role::analytics::storm::worker
+}
+
+# analytics1010 is Hadoop Master (i.e NameNode, JobTracker, and ResourceManager)
+node analytics1010 inherits analytics_basenode {
+	Exec { environment => 'http_proxy=http://brewster.wikimedia.org:8080' }
+	include role::analytics::hadoop::master
+}
+
+
+# analytics1011-1020 are Hadoop Workers (i.e. NodeManager, DataNode)
+node /^analytics10(1[1-9]|20)/ inherits analytics_basenode {
+	include role::analytics::hadoop::worker
+}
+
+# analytics1021 and analytics1022 are Kafka Brokers
+node analytics1021, analytics1022 inherits analytics_basenode {
+	include role::analytics::kafka
+}
+
+# analytics1023, analytics1024 and anlytics1025 are Zookeeper Servers
+node analytics1023,analytics1024,analytics1025 inherits analytics_basenode {
+	include role::analytics::zookeeper
+}
+
+# analytics1026 does not yet have a role
+node analytics1026 inherits analytics_basenode {
 	include role::analytics
 }
+
+# analytics1027 hosts front end web interfaces
+# (e.g. Hue, Oozie, Storm UI, etc.)
+node analytics1027 inherits analytics_basenode {
+	include role::analytics::frontend
+}
+
+# ------ End Analytics Cluster ------
 
 
 
