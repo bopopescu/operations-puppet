@@ -26,21 +26,11 @@ class kraken::misc::web::index {
 # in production when we are finished with testing.
 class kraken::misc::temp {
 	if $hostname != 'analytics1001' {
-		Exec {
-			environment => "http_proxy=http://brewster.wikimedia.org:8080"
-		}
-
 		file { "/etc/profile.d/http_proxy.sh":
 			mode    => 0755,
 			content => 'export http_proxy="http://brewster.wikimedia.org:8080"
 ',
 		}
-	}
-
-	# Make sure puppet runs apt-get update!
-	exec { "/usr/bin/apt-get update":
-		timeout => 240,
-		returns => [ 0, 100 ],
 	}
 
 	package { ["curl", "dstat"]: ensure => "installed", before => Class["cdh4::apt_source"] }	
