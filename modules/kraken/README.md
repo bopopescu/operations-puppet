@@ -1,5 +1,7 @@
 # WMF Kraken Analytics Puppet Module
 
+See: [Kraken Analytics Cluster](https://www.mediawiki.org/wiki/Analytics/Kraken).
+
 The kraken module contains site specific configurations for
 the WMF Analytics Kraken cluster.  Each file contains classes for
 configuring different pieces of a specific service.  For example,
@@ -11,7 +13,7 @@ node new_worker {
 }_
 ```
 
-See also manifests/roles/analytics.pp for logical groupings of
+See also operations-puppet/manifests/role/analytics.pp for logical groupings of
 different services.
 
 
