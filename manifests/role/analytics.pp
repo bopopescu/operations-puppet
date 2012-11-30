@@ -58,7 +58,9 @@ class role::analytics::kafka inherits role::analytics {
 # Varnish servers and produces the messages to Kafka.
 class role::analytics::kafka::producer::event inherits role::analytics {
 	include kraken::kafka::client
-	include misc::udp2log
+	class { "misc::udp2log":
+		monitor => false,
+	}
 	include misc::udp2log::iptables
 
 	# /event log stream udp2log instance.
