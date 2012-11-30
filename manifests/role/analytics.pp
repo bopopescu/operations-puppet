@@ -67,7 +67,7 @@ class role::analytics::kafka::producer::event inherits role::analytics {
 	misc::udp2log::instance { "event":
 		port                => "8422",
 		monitor_packet_loss => false,
-		monitor_process     => false,
+		monitor_processes   => false,
 		monitor_log_age     => false,
 		require             => [Class["kraken::kafka::client"], Class["misc::udp2log::iptables"]]
 	}
