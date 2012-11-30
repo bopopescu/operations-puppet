@@ -18,3 +18,12 @@ git fetch github
 git checkout analytics
 ```
 
+The analytics branch should stay up to date with the production branch.
+If you followed the instructions above (cloning from gerrit rather than github),
+then you should be able to merge production in to the analytics branch at anytime:
+
+```bash
+git checkout analytics
+git merge production
+git push
+```
