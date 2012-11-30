@@ -1,0 +1,105 @@
+# Note: This file is managed by Puppet.
+
+global
+  log 127.0.0.1  local0
+  log 127.0.0.1  local1 notice
+  #log loghost  local0 info
+  maxconn 4096
+  #chroot /usr/share/haproxy
+  user haproxy
+  group haproxy
+  daemon
+  #debug
+  #quiet
+
+defaults
+  log  global
+  mode  http
+  option  httplog
+  option  dontlognull
+  retries  3
+  option redispatch
+  maxconn  2000
+  contimeout  5000
+  clitimeout  50000
+  srvtimeout  50000
+
+
+userlist wmf-analytics
+  user wmf-analytics  password  $6$k6$kyx9DDXmf5xWvECQYqwRDfwgniFIx.BJIvjiXuf8DHJkPh0pCPckhlGnnHKs9pNthCZ9UyxVQzYq9dbQZNhS6/
+  user louisdang      password  $6$k6$j/f8G9CmFjrwWiflr8O6NXpgadA/kA5FSGe0noZNu.JcMfmpeoSGyglYBpfn/7U6Uz10o.REWqouoyxqZ6FuW1
+
+frontend kraken
+  bind 0.0.0.0:80
+  
+  # Auth ACLs
+  acl auth_ok           http_auth(wmf-analytics)
+
+  # HTTP Host based ACLs
+  acl host_analytics    hdr_beg(host)    -i analytics.
+  acl host_namenode     hdr_beg(host)    -i namenode.analytics.
+  acl host_jobs         hdr_beg(host)    -i jobs.analytics.
+  acl host_history      hdr_beg(host)    -i history.analytics.
+  acl host_hue          hdr_beg(host)    -i hue.analytics.
+  acl host_oozie        hdr_beg(host)    -i oozie.analytics.
+  acl host_storm        hdr_beg(host)    -i storm.analytics.
+
+  # Whitelisted Network/IP ACLs
+  acl src_analyticsA    src 10.64.21.0/24
+  acl src_analyticsB    src 10.64.36.0/24
+  acl src_wmf_office    src 216.38.130.0/24
+  acl src_diederik      src 70.28.63.126
+  acl src_dsc           src 71.198.62.242
+
+  # Kraken Apt repository
+  acl host_analytics1001 hdr_beg(host)   -i analytics1001.
+  acl path_apt           path_beg        -i /apt
+
+  # Allow public access to the Kraken Apt repository
+  http-request allow if host_analytics1001 path_apt
+
+  # Only allow proxying if the request
+  # is coming from a whitelisted network or IP, 
+  # the HTTP auth test passes, or if
+  # the request is to analytics.wikimedia.org.
+  http-request auth unless auth_ok or host_analytics or src_analyticsA or src_analyticsB or src_wmf_office or src_diederik or src_dsc
+
+  # Use appropriate server backend based
+  # on matched HTTP Host ACL
+  use_backend   analytics if host_analytics
+  use_backend   namenode  if host_namenode
+  use_backend   jobs      if host_jobs
+  use_backend   history   if host_history
+  use_backend   hue       if host_hue
+  use_backend   oozie     if host_oozie
+  use_backend   storm     if host_storm
+  
+  default_backend localhost_81
+
+
+
+# Backends
+
+backend analytics
+  server frontend <%= frontend_hostname %>:80
+
+backend namenode
+  server namenode <%= namenode_hostname %>:50070
+
+backend jobs
+  server job_server <%= namenode_hostname %>:8088
+
+backend history
+  server history_server <%= namenode_hostname %>:19888
+
+backend hue
+  server hue_server <%= hue_hostname %>:8888
+
+backend oozie
+  server oozie_server <%= oozie_hostname %>:11000
+
+backend storm
+  server storm_server <%= storm_hostname %>:<%= storm_port %>
+
+backend localhost_81
+  server localhost 127.0.0.1:81
