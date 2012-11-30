@@ -7,7 +7,7 @@ platform.
 
 You probably shouldn't clone this repository from github.  Instead,
 clone the WMF hosted gerrit version, and then fetch from the github
-remote to git a local branch named 'analytics' that is tracking this
+remote to get a local branch named 'analytics' that is tracking this
 github upstream.
 
 ```bash
