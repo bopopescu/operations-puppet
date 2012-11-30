@@ -1,0 +1,31 @@
+# udp2log filters for the /event data stream generated
+# from varnish cache servers.
+
+# Produce events into Kafka.
+
+
+# Filter for generic events (i.e. those without a product code)
+pipe 1 /bin/egrep '^/event(\.gif)?/?\s' | /usr/lib/kafka/bin/kafka-producer-shell.sh --props /etc/kafka/producer.properties --topic event-unknown
+
+# Filter for predetermined event product codes defined here:
+# http://www.mediawiki.org/wiki/Analytics/Product_Codes
+
+<%
+# define product codes.
+product_codes = [
+  'web',
+  'debug',
+  'kraken',
+  'limn',
+  'mw',
+  'i18n-uls',
+  'wlm',
+]
+
+# Iterate over through product codes
+# and generate a filter for each.
+product_codes.each do |product_code| -%>
+# filter and produce into Kafka for <%= product_code %> events
+pipe 1 /bin/egrep '^/event(\.gif)?/<%= product_code %>' | /usr/lib/kafka/bin/kafka-producer-shell.sh --props /etc/kafka/producer.properties --topic event-<%= product_code %>
+
+<% end -%>
