@@ -84,8 +84,9 @@ class mediawiki::math {
 #  Members of $role_config_lines will get inserted into the file verbatim -- be careful about
 #  quoting and escaping!  Note that if you're inserting a bunch of lines you'll be better
 #  served by creating an additional template and including that via $role_requires.
-class mediawiki::singlenode( $keep_up_to_date = false,
+class mediawiki::singlenode( $ensure = 'present',
                              $role_requires = [],
+                             $install_path = "/srv/mediawiki",
                              $role_config_lines = []) {
         require "role::labs-mysql-server",
 		"webserver::php5-mysql",
@@ -99,47 +100,35 @@ class mediawiki::singlenode( $keep_up_to_date = false,
 		memcached_ip => "127.0.0.1" }
 
 	git::clone { "mediawiki":
-		directory => "/srv/mediawiki",
+		directory => $install_path,
 		branch => "master",
 		timeout => 1800,
 		depth => 1,
-		ensure => $keep_up_to_date ? {
-			true => latest,
-			default => present
-		},
+		ensure => $ensure,
 		origin => "https://gerrit.wikimedia.org/r/p/mediawiki/core.git";
 	}
 
 	git::clone { "nuke" :
 		require => git::clone["mediawiki"],
-		directory => "/srv/mediawiki/extensions/Nuke",
+		directory => "${install_path}/extensions/Nuke",
 		branch => "master",
-		ensure => $keep_up_to_date ? {
-			true => latest,
-			default => present
-		},
+		ensure => $ensure,
 		origin => "https://gerrit.wikimedia.org/r/p/mediawiki/extensions/Nuke.git";
 	}
 
 	git::clone { "SpamBlacklist" :
 		require => git::clone["mediawiki"],
-		directory => "/srv/mediawiki/extensions/SpamBlacklist",
+		directory => "${install_path}/extensions/SpamBlacklist",
 		branch => "master",
-		ensure => $keep_up_to_date ? {
-			true => latest,
-			default => present
-		},
+		ensure => $ensure,
 		origin => "https://gerrit.wikimedia.org/r/p/mediawiki/extensions/SpamBlacklist.git";
 	}
 
 	git::clone { "ConfirmEdit" :
 		require => git::clone["mediawiki"],
-		directory => "/srv/mediawiki/extensions/ConfirmEdit",
+		directory => "${install_path}/extensions/ConfirmEdit",
 		branch => "master",
-		ensure => $keep_up_to_date ? {
-			true => latest,
-			default => present
-		},
+		ensure => $ensure,
 		origin => "https://gerrit.wikimedia.org/r/p/mediawiki/extensions/ConfirmEdit.git";
 	}
 
@@ -156,10 +145,10 @@ class mediawiki::singlenode( $keep_up_to_date = false,
 		ensure => 'directory';
 	}
 
-	file { '/var/www/srv/mediawiki':
+	file { '/var/www/${install_path}':
 		require => [File['/var/www/srv'], git::clone['mediawiki']],
 		ensure => 'link',
-		target => '/srv/mediawiki';
+		target => $install_path;
 	}
 
 	if $labs_mediawiki_hostname {
@@ -168,33 +157,33 @@ class mediawiki::singlenode( $keep_up_to_date = false,
 		$mwserver = "http://$hostname.pmtpa.wmflabs"
 	}
 
-	file { '/srv/mediawiki/orig':
+	file { "${install_path}/orig":
 		require => git::clone["mediawiki"],
 		ensure => 'directory';
 	}
 
         exec { 'password_gen':
-		require => [git::clone["mediawiki"],  File["/srv/mediawiki/orig"]],
-		creates => "/srv/mediawiki/orig/adminpass",
-		command => "/usr/bin/openssl rand -base64 32 | tr -dc _A-Z-a-z-0-9 > /srv/mediawiki/orig/adminpass"
+		require => [git::clone["mediawiki"],  File["${install_path}/orig"]],
+		creates => "${install_path}/orig/adminpass",
+		command => "/usr/bin/openssl rand -base64 32 | tr -dc _A-Z-a-z-0-9 > ${install_path}/orig/adminpass"
 	}
 
 	exec { 'mediawiki_setup':
-		require => [git::clone["mediawiki"],  File["/srv/mediawiki/orig"], exec['password_gen']],
-		creates => "/srv/mediawiki/orig/LocalSettings.php",
-		command => "/usr/bin/php /srv/mediawiki/maintenance/install.php testwiki admin --dbname testwiki --dbuser root --passfile '/srv/mediawiki/orig/adminpass' --server $mwserver --scriptpath '/srv/mediawiki' --confpath '/srv/mediawiki/orig/'",
+		require => [git::clone["mediawiki"],  File["${install_path}/orig"], exec['password_gen']],
+		creates => "${install_path}/orig/LocalSettings.php",
+		command => "/usr/bin/php ${install_path}/maintenance/install.php testwiki admin --dbname testwiki --dbuser root --passfile \"${install_path}/orig/adminpass\" --server $mwserver --scriptpath \"${install_path}\" --confpath \"${install_path}/orig/\"",
 		logoutput => "on_failure",
 	}
 
-	if $keep_up_to_date == 'true' {
+	if $ensure == 'latest' {
 		exec { 'mediawiki_update':
 			require => [git::clone["mediawiki"],
 				git::clone["nuke"],
 				git::clone["SpamBlacklist"],
 				git::clone["ConfirmEdit"],
-				File["/srv/mediawiki/LocalSettings.php"]],
-			command => "/usr/bin/php /srv/mediawiki/maintenance/update.php --quick --conf '/srv/mediawiki/LocalSettings.php'",
-			logoutput => " ",
+				File["${install_path}/LocalSettings.php"]],
+			command => "/usr/bin/php ${install_path}/maintenance/update.php --quick --conf \"${install_path}/LocalSettings.php\"",
+			logoutput => "on_failure",
 		}
 	}
 
@@ -206,7 +195,7 @@ class mediawiki::singlenode( $keep_up_to_date = false,
 		command => "/usr/sbin/service apache2 restart"
 	}
 
-	file { '/srv/mediawiki/LocalSettings.php':
+	file { "${install_path}/LocalSettings.php":
 		require => Exec["mediawiki_setup"],
 		content => template('mediawiki/labs-localsettings'),
 		ensure => present,
