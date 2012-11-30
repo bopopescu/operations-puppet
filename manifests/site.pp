@@ -211,13 +211,15 @@ node analytics_basenode {
 	}
 }
 
-# analytics1001 is currently the only
-# Analytics node with a public IP.
+
 node "analytics1001.wikimedia.org" inherits analytics_basenode {
+	# analytics1001 is currently the only
+	# Analytics node with a public IP.
 	include role::analytics::public
-	# analytics1001 will get event.gif UDP stream traffic.
-	# include udp2log iptables rules.
-	include misc::udp2log::iptables
+	
+	# analytics1001 is being sent the /event log data stream.
+	# Use udp2log to produce the stream into Kafka
+	include role::analytics::kafka::producer::event
 }
 
 # analytics1002 is Storm Master (i.e. Storm Nimbus server)

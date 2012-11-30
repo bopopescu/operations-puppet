@@ -53,6 +53,24 @@ class role::analytics::kafka inherits role::analytics {
 	include kraken::kafka::server
 }
 
+# == Class role::analytics::kafka::producer::event
+# Reads from the /event log stream coming from
+# Varnish servers and produces the messages to Kafka.
+class role::analytics::kafka::producer::event inherits role::analytics {
+	include kraken::kafka::client
+	include misc::udp2log
+	include misc::udp2log::iptables
+
+	# /event log stream udp2log instance.
+	# This udp2log instance has filters
+	# to produce into Kafka.
+	misc::udp2log::instance { "event":
+		port                => "8422",
+		monitor_packet_loss => false,
+		require             => [Class["kraken::kafka::client"], Class["misc::udp2log::iptables"]]
+	}
+}
+
 # == Class role::analytics::zookeeper
 # Zookeeper Server Role
 class role::analytics::zookeeper inherits role::analytics {
