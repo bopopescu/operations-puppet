@@ -19,7 +19,7 @@ product_codes = [
 
 # Filter for generic events (i.e. those without a predetermined product code)
 # and produce into Kafka topic 'event-unknown'.
-pipe 1 /bin/grep -v '^/event(\.gif)?/(<%= product_codes.join('|') %>)\s' | /usr/lib/kafka/bin/kafka-producer-shell.sh --props /etc/kafka/producer.properties --topic event-unknown
+pipe 1 /bin/egrep -v '^/event(\.gif)?/(<%= product_codes.join('|') %>)\s' | /usr/lib/kafka/bin/kafka-producer-shell.sh --props /etc/kafka/producer.properties --topic event-unknown
 # NOTE: This perl regex also works, but uses negative lookhead to match lines.  The above grep -v is simpler :p
 # /bin/grep -P '^(/event(\.gif)?/(?!<%= product_codes.join('|') %>))|/event(\.gif)?\s'
 
