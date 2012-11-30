@@ -16,6 +16,9 @@ cd puppet
 git remote add github git@github.com:wmf-analytics/operations-puppet.git
 git fetch github
 git checkout analytics
+# since the analytics branch uses git submodules, initialize those now:
+git submodule init
+git submodule update
 ```
 
 The analytics branch should stay up to date with the production branch.
@@ -27,3 +30,4 @@ git checkout analytics
 git merge production
 git push
 ```
+
