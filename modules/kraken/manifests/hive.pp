@@ -57,3 +57,19 @@ class kraken::hive::database {
 		require => [Exec["hive_mysql_create_database"], Exec["hive_mysql_create_stats_database"]],
 	}
 }
+
+
+# == Class kraken::hive::database::backup
+# Daily mysqldumps hive database and stores into HDFS. 
+class kraken::hive::database::backup {
+	require kraken::hive::database
+	require kraken::hadoop::config
+	
+	kraken::misc::backup::hdfs::mysql { "hive":
+		databases => [$kraken::hive::database::db_name, $kraken::hive::database::stats_db_name],
+		mysql_user => $kraken::hive::database::db_user,
+		mysql_pass => $kraken::hive::database::db_pass,
+		minute  => 0,
+		hour    => 6,
+	}
+}

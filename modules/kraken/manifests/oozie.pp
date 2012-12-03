@@ -49,3 +49,19 @@ class kraken::oozie::database {
 		require => Exec["oozie_mysql_create_database"],
 	}
 }
+
+
+# == Class kraken::oozie::database::backup
+# Daily mysqldumps oozie database and stores into HDFS. 
+class kraken::oozie::database::backup {
+	require kraken::oozie::database
+	require kraken::hadoop::config
+	
+	kraken::misc::backup::hdfs::mysql { "oozie":
+		databases => $kraken::oozie::database::db_name,
+		mysql_user => $kraken::oozie::database::db_user,
+		mysql_pass => $kraken::oozie::database::db_pass,
+		minute  => 0,
+		hour    => 7,
+	}
+}
