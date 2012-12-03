@@ -1,6 +1,7 @@
 class kraken::hive::server {
 	include kraken::misc::mysql_java
 	include kraken::hive::database
+	include kraken::hive::database::backup
 
 	# symlink the mysql.jar into /var/lib/hive/lib
 	file { "/usr/lib/hive/lib/mysql.jar":

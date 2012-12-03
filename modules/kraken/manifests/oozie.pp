@@ -2,6 +2,7 @@
 class kraken::oozie::server {
 	include kraken::misc::mysql_java
 	include kraken::oozie::database
+	include kraken::oozie::database::backup
 
 	# symlink the mysql.jar into /var/lib/oozie
 	file { "/var/lib/oozie/mysql.jar":
