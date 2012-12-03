@@ -6,7 +6,7 @@ class kraken {
 	include kraken::misc::temp
 	include cdh4::apt_source
 
-	include kraken::misc::cron::email
+	include kraken::misc::email::aliases
 
 	# install common cdh4 packages and config
 	class { "cdh4":
