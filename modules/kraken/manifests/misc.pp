@@ -1,3 +1,4 @@
+
 # == Class kraken::misc::web::index
 #
 class kraken::misc::web::index {
@@ -35,6 +36,24 @@ class kraken::misc::mysql::server {
 		version => "5.5",
 	}
 }
+
+# == Class kraken::misc::root_email
+#
+define kraken::misc::email::alias($email) {
+	file_line { "email_aliases_$name":
+		path => "/etc/aliases",
+		line => "$name: $email"
+	}
+}
+
+# == Class kraken::misc::cron::email
+# Make sure all cron email goes to otto@wikimedia.org
+class kraken::misc::cron::email {
+	$admin_email = "otto@wikimedia.org"
+	kraken::misc::email::alias { "root": email => $admin_email }
+	kraken::misc::email::alias { "hdfs": email => $admin_email }
+}
+
 
 
 
