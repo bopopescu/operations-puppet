@@ -57,7 +57,7 @@ class kraken::misc::mysql::server {
 define kraken::misc::backup::hdfs(
 	$command         = undef,
 	$source_file     = undef,
-	$compress        = false,
+	$compress        = true,
 	$backup_filename = undef,
 	$backup_dirname  = undef,
 	$backup_dir      = "/backups",
