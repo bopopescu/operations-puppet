@@ -31,5 +31,7 @@ class kraken::hue::database::backup {
 		command         => "/usr/bin/sqlite3 $hue_database_path .dump",
 		backup_dirname  => "hue",
 		backup_filename => "hue_desktop.db",
+		minute          => 0,
+		hour            => 8,
 	}
 }
