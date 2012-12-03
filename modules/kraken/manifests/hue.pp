@@ -11,7 +11,7 @@ class kraken::hue {
 		require    => [Class["kraken::hadoop::config"], Class["kraken::oozie::server"], Class["kraken::hive::server"]],
 	}
 
-	include kraken::hue::backup
+	include kraken::hue::database::backup
 }
 
 # == Class kraken::hue::backup
@@ -20,7 +20,7 @@ class kraken::hue {
 # Since we are already using Hadoop, and hadoop
 # has a redundant filesystem, then lets save this in
 # HDFS!
-class kraken::hue::backup {
+class kraken::hue::database::backup {
 	# we need sqlite3 to do dumps of hue desktop.db SQLite database.
 	package { "sqlite3": ensure => "installed" }
 
@@ -28,7 +28,7 @@ class kraken::hue::backup {
 	$hue_hdfs_backup_path = "/backups/hue"
 
 	kraken::misc::backup::hdfs { "hue_database":
-		command         => "/usr/bin/sqlite3 $hue_database_path .dump"
+		command         => "/usr/bin/sqlite3 $hue_database_path .dump",
 		backup_dirname  => "hue",
 		backup_filename => "hue_desktop.db",
 	}
