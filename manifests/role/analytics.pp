@@ -157,13 +157,3 @@ class role::analytics::hadoop inherits role::analytics {
 		require => Class["kraken::hadoop::config"],
 	}
 }
-
-# front end interfaces for Kraken and Hadoop
-class role::analytics::frontend inherits role::analytics {
-	# include a mysql database for Sqoop and Oozie
-	# with the datadir at /a/mysql
-	class { "generic::mysql::server":
-		datadir => "/a/mysql",
-		version => "5.5",
-	}
-}

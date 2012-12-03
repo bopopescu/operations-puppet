@@ -45,3 +45,5 @@ class kraken::oozie::database {
 		require => Exec["oozie_mysql_create_database"],
 	}
 }
+
+
