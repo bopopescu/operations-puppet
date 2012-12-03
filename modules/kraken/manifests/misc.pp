@@ -39,10 +39,10 @@ class kraken::misc::mysql::server {
 
 # == Class kraken::misc::root_email
 #
-define kraken::misc::email::alias($email) {
+define kraken::misc::email::alias($alias) {
 	file_line { "email_aliases_$name":
 		path => "/etc/aliases",
-		line => "$name: $email"
+		line => "$name: $alias"
 	}
 }
 
@@ -50,8 +50,8 @@ define kraken::misc::email::alias($email) {
 # Make sure all cron email goes to otto@wikimedia.org
 class kraken::misc::email::aliases {
 	$admin_email = "otto@wikimedia.org"
-	kraken::misc::email::alias { "root": email => $admin_email }
-	kraken::misc::email::alias { "hdfs": email => $admin_email }
+	kraken::misc::email::alias { "hdfs": alias => 'root' }
+	kraken::misc::email::alias { "root": alias => $admin_email }
 }
 
 
