@@ -10,6 +10,10 @@ class kraken::oozie::server {
 	}
 
 	class { "cdh4::oozie::server":
+		# disable authorization service security, for now.
+		# TODO:  enable this once we better figure out
+		# oozie jobs.
+		authorization_service_security_enabled => false,
 		jdbc_driver       => "com.mysql.jdbc.Driver",
 		jdbc_url          => "jdbc:mysql://localhost:3306/$kraken::oozie::database::db_name",
 		jdbc_database     => $kraken::oozie::database::db_name,
