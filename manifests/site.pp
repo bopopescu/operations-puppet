@@ -1163,7 +1163,8 @@ node /lvs[1-6]\.wikimedia\.org/ {
 			$sip['search_pool3'][$::site],
 			$sip['search_pool4'][$::site],
 			$sip['search_prefix'][$::site],
-			$sip['swift'][$::site]
+			$sip['swift'][$::site],
+			$sip['parsoid'][$::site]
 			]
 	}
 
@@ -2544,12 +2545,18 @@ node "wtp1.pmtpa.wmnet" {
 	include standard,
 		admins::roots,
 		misc::parsoid
+
+	class { "lvs::realserver": realserver_ips => [ "10.2.1.28" ] }
+
 }
 
 node "wtp1001.eqiad.wmnet" {
 	include standard,
 		admins::roots,
 		misc::parsoid
+
+	class { "lvs::realserver": realserver_ips => [ "10.2.2.28" ] }
+
 }
 
 node  "yongle.wikimedia.org" {
