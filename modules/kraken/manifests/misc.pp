@@ -14,6 +14,27 @@ class kraken::misc::web::index {
 }
 
 
+# == Class kraken::misc::mysql_java
+# Installs libmysql-java Java mysql bindings.
+class kraken::misc::mysql_java {
+	package { "libmysql-java":
+		ensure => installed,
+	}	
+}
+
+# == Class kraken::misc::mysql::server
+# Sets up a mysql server for misc Kraken services.
+# TODO:  This reaches out to a generic manifest,
+# rather than a module.  We should have a mysql module.
+class kraken::misc::mysql::server {
+	# Set up a mysql database
+	# with the datadir at /a/mysql
+	class { "generic::mysql::server":
+		datadir => "/a/mysql",
+		version => "5.5",
+	}
+}
+
 
 
 

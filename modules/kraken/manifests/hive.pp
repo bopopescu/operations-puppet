@@ -1,5 +1,5 @@
 class kraken::hive::server {
-	require kraken::packages::mysql_java
+	require kraken::misc::mysql_java
 	# require kraken::db::mysql
 
 	# symlink the mysql.jar into /var/lib/hive/lib

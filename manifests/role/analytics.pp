@@ -27,13 +27,6 @@ class role::analytics::public inherits role::analytics {
 # Frontend web services for Analytics Cluster.
 # E.g. Hue, Oozie, etc.
 class role::analytics::frontend inherits role::analytics {
-	# include a mysql database for Sqoop and Oozie
-	# with the datadir at /a/mysql
-	class { "generic::mysql::server":
-		datadir => "/a/mysql",
-		version => "5.5",
-	}
-	
 	# include the kraken index.php file.
 	# TODO:  Puppetize webserver classes.
 	include kraken::misc::web::index
