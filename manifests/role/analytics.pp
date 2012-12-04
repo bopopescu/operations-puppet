@@ -110,9 +110,9 @@ class role::analytics::hadoop::worker inherits role::analytics::hadoop {
 # consume wikipedia zero logs every hour
 class role::analytics::kafka::consumer::wikipedia_zero {
 	kraken::kafka::consumer::hadoop { "wikipedia_zero":
-		topic           => "wikipedia-zero",
+		topics          => "wikipedia-zero",
 		consumer_group  => "kconsumer0",
-		hdfs_output_dir => "/wmf/raw/wikipedia-zero",
+		hdfs_output_dir => "/wmf/raw",
 		minute          => "0",
 		hour            => "*/1",
 	}
