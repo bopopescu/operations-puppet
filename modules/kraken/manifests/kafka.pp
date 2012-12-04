@@ -58,7 +58,7 @@ define kraken::kafka::consumer::hadoop(
 	require kraken::zookeeper::config
 	require kraken::kafka::consumer::hadoop::package
 
-	$consume_command = "/opt/kraken/bin/kafka-hadoop-consume --topic=$topics --group=$consumer_group --output=$output_dir --limit=$limit"
+	$consume_command = "/opt/kraken/bin/kafka-hadoop-consume --topic=$topics --group=$consumer_group --output=$hdfs_output_dir --limit=$limit"
 	# append --regex if we should use a regex topic match
 	$command = $regex ? {
 		true  => "$consume_command --regex",
