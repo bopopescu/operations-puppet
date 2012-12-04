@@ -30,48 +30,49 @@ class kraken::kafka::consumer::hadoop::package {
 # a Kafka topic into Hadoop.
 #
 # == Parameters:
-# $topic             - Kafka topic to consume from
+# $topics            - Kafka topics to consume from, comma separated.  If $regex is true, then $topics should be a regex.
 # $consumer_group    - Kafka Consumer Group, this is used to ID consumption state in ZooKeeper
 # $hdfs_output_dir   - HDFS path to save consumed messages in
 # $limit             - Number of messages to consume.  Default: -1.  -1 means messages will be consumed until the end of the Kafka buffer.
+# $regex             - true or false.  If true, $topics should be a regex.
 # $user              - Cron job will be installed in this user's crontab
 #
 # $hour,$minute,$month,$monthday,$weekday - Same parameters as the cron puppet resource type.
 #
 define kraken::kafka::consumer::hadoop(
-	$topic,
+	$topics,
 	$consumer_group,
 	$hdfs_output_dir,
 	$limit           = "-1",
+	$regex           = false,
 	$user            = "hdfs",
 	$hour            = undef,
 	$minute          = undef,
 	$month           = undef,
 	$monthday        = undef,
 	$weekday         = undef)
-	
 {
 	require kraken
+	require kraken::repository # the consumer script we use is from this repository
 	require kraken::hadoop::config
 	require kraken::zookeeper::config
 	require kraken::kafka::consumer::hadoop::package
 
-	# Use kraken::zookeeper::config to locate zookeeper hosts
-	$zookeeper = inline_template("<%= scope.lookupvar('kraken::zookeeper::config::zookeeper_hosts').join(',') %>")
-
-	# $timestamp_command will be prefixed at the end of each file backup.
-	# (Need to escape %; cron uses this as newline separator.)
-	$timestamp_command = "\$(/bin/date \"+\\%Y-\\%m-\\%d_\\%H.\\%M.\\%S\")"	
-	$output_dir = "$hdfs_output_dir/$timestamp_command"
+	$consume_command = "/opt/kraken/bin/kafka-hadoop-consume --topic=$topics --group=$consumer_group --output=$output_dir --limit=$limit"
+	# append --regex if we should use a regex topic match
+	$command => $regex ? {
+		true  => "$consume_command --regex"
+		false => "$consume_command"
+	}
 
 	cron { "kafka_hadoop_consumer_${name}":
-		command  => "/usr/bin/kafka-hadoop-consumer -t $topic -g $consumer_group -o $output_dir -l $limit -z $zookeeper",
+		command  => $consume_command
 		user     => $user,
 		hour     => $hour,
 		minute   => $minute,
 		month    => $month,
 		monthday => $monthday,
 		weekday  => $weekday,
-		require  => Class["kraken::kafka::consumer::hadoop::package"],
+		require  => [Class["kraken::kafka::consumer::hadoop::package"], Class["kraken::repository"]],
 	}
 }
