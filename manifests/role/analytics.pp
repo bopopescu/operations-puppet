@@ -75,7 +75,7 @@ class role::analytics::kafka::consumer::event {
 		topics          => "^event",
 		regex           => true,
 		consumer_group  => "kconsumer0",
-		hdfs_output_dir => "/wmf/raw",
+		hdfs_output_dir => "/wmf/raw/event",
 		minute          => "10",
 		hour            => "*/1",
 	}
