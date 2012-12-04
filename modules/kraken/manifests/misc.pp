@@ -217,6 +217,14 @@ class kraken::misc::temp {
 			content => 'export http_proxy="http://brewster.wikimedia.org:8080"
 ',
 		}
+
+		# set git proxy for root on non analytics1001 hosts
+		exec { "git_proxy":
+			command => "/usr/bin/git config --global --add http.proxy http://brewster.wikimedia.org:8080",
+			unless  => "/bin/grep -q 'proxy = http://brewster.wikimedia.org:8080' /root/.gitconfig",
+			user    => "root",
+			require => Package["git-core"],
+		}
 	}
 
 	package { ["curl", "dstat"]: ensure => "installed", before => Class["cdh4::apt_source"] }	

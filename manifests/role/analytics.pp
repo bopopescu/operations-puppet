@@ -143,7 +143,10 @@ class role::analytics {
 
 	# udp-filter is a useful thing!
 	include misc::udp2log::udp_filter
-	
+
+	# git-core jajajaj
+	include generic::packages::git-core
+
 	# include default kraken classes, woohoo!
 	include kraken
 }
