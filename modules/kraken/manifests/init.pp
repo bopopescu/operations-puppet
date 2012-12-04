@@ -48,7 +48,8 @@ class kraken::repository {
 	# many kraken scripts require Python docopt from Pip
 	include generic::pythonpip
 	exec { "install-python-docopt":
-		command => "/usr/bin/pip --proxy=http://brewster.wikimedia.org:8080 install docopt",
+		command => "pip --proxy=http://brewster.wikimedia.org:8080 install docopt",
+		path    => ["/usr/bin", "/usr/local/bin"],
 		creates => "/usr/local/lib/python2.7/dist-packages/docopt.py",
 		require => Class["generic::pythonpip"],
 	}
