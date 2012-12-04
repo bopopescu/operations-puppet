@@ -8,6 +8,9 @@ class kraken {
 
 	include kraken::misc::email::aliases
 
+	# kraken repository should be available on all kraken nodes
+	include kraken::repository
+
 	# install common cdh4 packages and config
 	class { "cdh4":
 		require => Class["cdh4::apt_source"],
@@ -33,4 +36,22 @@ class kraken {
 	# class { "kraken::storm::client":
 	# 	require => File["/etc/apt/sources.list.d/kraken.list"],
 	# }
+}
+
+# clone the kraken working repository into /opt
+class kraken::repository {
+	$directory = "/opt/kraken"
+	$url       = "git://github.com/wmf-analytics/kraken.git"
+	$owner     = "root"
+	$group     = "root"
+
+	# Clone the kraken repository and ensure it
+	# is at its latest revision
+	git::clone{ "kraken":
+		directory => $directory,
+		origin    => $url,
+		owner     => $owner,
+		group     => $group,
+		ensure    => "latest",
+	}
 }
