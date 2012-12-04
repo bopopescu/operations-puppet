@@ -30,9 +30,9 @@ class kraken {
 	# Some things will write logs files here.
 	file { "/var/log/kraken":
 		ensure => "directory",
-		mode   => 0755,
+		mode   => 0775,
 		owner  => "root",
-		group  => "root",
+		group  => "hadoop",
 	}
 
 	# 
