@@ -225,6 +225,10 @@ node "analytics1001.wikimedia.org" inherits analytics_basenode {
 # analytics1002 is Storm Master (i.e. Storm Nimbus server)
 node "analytics1002.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::master
+	
+	# analytics1002 is also being used to consume
+	# from Kafka Brokers into hadoop.
+	include role::analytics::kafka::consumer::wikipedia_zero
 }
 
 # analytics1003 - analytics1009 are Storm Workers (i.e. Storm Supervisor servers)
