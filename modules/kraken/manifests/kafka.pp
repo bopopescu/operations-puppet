@@ -59,8 +59,13 @@ define kraken::kafka::consumer::hadoop(
 	# Use kraken::zookeeper::config to locate zookeeper hosts
 	$zookeeper = inline_template("<%= scope.lookupvar('kraken::zookeeper::config::zookeeper_hosts').join(',') %>")
 
+	# $timestamp_command will be prefixed at the end of each file backup.
+	# (Need to escape %; cron uses this as newline separator.)
+	$timestamp_command = "\$(/bin/date \"+\\%Y-\\%m-\\%d_\\%H.\\%M.\\%S\")"	
+	$output_dir = "$hdfs_output_dir/$timestamp_command"
+
 	cron { "kafka_hadoop_consumer_${name}":
-		command  => "/usr/bin/kafka-hadoop-consumer -t $topic -g $consumer_group -o $hdfs_output_dir  -l $limit -z $zookeeper",
+		command  => "/usr/bin/kafka-hadoop-consumer -t $topic -g $consumer_group -o $output_dir -l $limit -z $zookeeper",
 		user     => $user,
 		hour     => $hour,
 		minute   => $minute,
