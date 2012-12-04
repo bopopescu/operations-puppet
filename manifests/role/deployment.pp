@@ -5,30 +5,30 @@ class role::deployment::salt_masters::production {
     deployment_repo_urls => {
       'pmtpa' => {
         'common' => 'http://deployment.pmtpa.wmnet/mediawiki/common',
-        'slot0' => 'http://deployment.pmtpa.wmnet/mediawiki/common/slot0',
-        'slot1' => 'http://deployment.pmtpa.wmnet/mediawiki/common/slot1',
+        'slot0' => 'http://deployment.pmtpa.wmnet/mediawiki/slot0',
+        'slot1' => 'http://deployment.pmtpa.wmnet/mediawiki/slot1',
       },
       'eqiad' => {
         'common' => 'http://tin.eqiad.wmnet/mediawiki/common',
-        'slot0' => 'http://tin.eqiad.wmnet/mediawiki/common/slot0',
-        'slot1' => 'http://tin.eqiad.wmnet/mediawiki/common/slot1',
+        'slot0' => 'http://tin.eqiad.wmnet/mediawiki/slot0',
+        'slot1' => 'http://tin.eqiad.wmnet/mediawiki/slot1',
       },
     },
     deployment_repo_regex => {
       'common' => {},
       'slot0' => {
-        'https://gerrit.wikimedia.org/r/p/mediawiki' => '__REPO_URL__',
-        '.git' => '/.git',
+        'https://gerrit.wikimedia.org/r/p/mediawiki' => '__REPO_URL__/.git/modules',
+        '.git' => '',
       },
       'slot1' => {
-        'https://gerrit.wikimedia.org/r/p/mediawiki' => '__REPO_URL__',
-        '.git' => '/.git',
+        'https://gerrit.wikimedia.org/r/p/mediawiki' => '__REPO_URL__/.git/modules',
+        '.git' => '',
       },
     },
     deployment_repo_locations => {
       'common' => '/srv/deployment/mediawiki/common',
-      'slot0' => '/srv/deployment/mediawiki/common/slot0',
-      'slot1' => '/srv/deployment/mediawiki/common/slot1',
+      'slot0' => '/srv/deployment/mediawiki/slot0',
+      'slot1' => '/srv/deployment/mediawiki/slot1',
     },
   }
 }
