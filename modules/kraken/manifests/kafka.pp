@@ -60,13 +60,13 @@ define kraken::kafka::consumer::hadoop(
 
 	$consume_command = "/opt/kraken/bin/kafka-hadoop-consume --topic=$topics --group=$consumer_group --output=$output_dir --limit=$limit"
 	# append --regex if we should use a regex topic match
-	$command => $regex ? {
-		true  => "$consume_command --regex"
-		false => "$consume_command"
+	$command = $regex ? {
+		true  => "$consume_command --regex",
+		false => "$consume_command",
 	}
 
 	cron { "kafka_hadoop_consumer_${name}":
-		command  => $consume_command
+		command  => $consume_command,
 		user     => $user,
 		hour     => $hour,
 		minute   => $minute,
