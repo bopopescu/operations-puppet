@@ -20,7 +20,7 @@ class kraken::misc::web::index {
 class kraken::misc::mysql_java {
 	package { "libmysql-java":
 		ensure => installed,
-	}	
+	}
 }
 
 
@@ -39,10 +39,10 @@ class kraken::misc::mysql::server {
 
 # == Class kraken::misc::root_email
 #
-define kraken::misc::email::alias($alias) {
+define kraken::misc::email::alias($email) {
 	file_line { "email_aliases_$name":
 		path => "/etc/aliases",
-		line => "$name: $alias"
+		line => "$name: $email"
 	}
 }
 
@@ -50,8 +50,8 @@ define kraken::misc::email::alias($alias) {
 # Make sure all cron email goes to otto@wikimedia.org
 class kraken::misc::email::aliases {
 	$admin_email = "otto@wikimedia.org"
-	kraken::misc::email::alias { "hdfs": alias => 'root' }
-	kraken::misc::email::alias { "root": alias => $admin_email }
+	kraken::misc::email::alias { "hdfs": email => 'root' }
+	kraken::misc::email::alias { "root": email => $admin_email }
 }
 
 
