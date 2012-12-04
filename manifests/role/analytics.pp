@@ -69,7 +69,7 @@ class role::analytics::kafka::producer::event inherits role::analytics {
 }
 
 # == role::analytics::kafka::consumer::event
-# consume wikipedia zero logs every hour
+# consume /event logs every hour
 class role::analytics::kafka::consumer::event {
 	kraken::kafka::consumer::hadoop { "event":
 		topics          => "^event",
