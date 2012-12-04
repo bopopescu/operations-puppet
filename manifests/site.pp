@@ -229,6 +229,7 @@ node "analytics1002.eqiad.wmnet" inherits analytics_basenode {
 	# analytics1002 is also being used to consume
 	# from Kafka Brokers into hadoop.
 	include role::analytics::kafka::consumer::wikipedia_zero
+	include role::analytics::kafka::consumer::event
 }
 
 # analytics1003 - analytics1009 are Storm Workers (i.e. Storm Supervisor servers)
