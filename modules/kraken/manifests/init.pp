@@ -41,9 +41,17 @@ class kraken {
 # clone the kraken working repository into /opt
 class kraken::repository {
 	$directory = "/opt/kraken"
-	$url       = "git://github.com/wmf-analytics/kraken.git"
+	$url       = "https://github.com/wmf-analytics/kraken.git"
 	$owner     = "root"
 	$group     = "root"
+
+	# many kraken scripts require Python docopt from Pip
+	include generic::pythonpip
+	exec { "install-python-docopt":
+		command => "/usr/bin/pip --proxy=http://brewster.wikimedia.org:8080 install docopt",
+		creates => "/usr/local/lib/python2.7/dist-packages/docopt.py",
+		require => Class["generic::pythonpip"],
+	}
 
 	# Clone the kraken repository and ensure it
 	# is at its latest revision
