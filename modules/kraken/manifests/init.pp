@@ -25,6 +25,16 @@ class kraken {
 	class { "kraken::hadoop::config":
 		require => Class["cdh4::apt_source"],
 	}
+
+	# Ensure /var/log/kraken exists.
+	# Some things will write logs files here.
+	file { "/var/log/kraken":
+		ensure => "directory",
+		mode   => 0755,
+		owner  => "root",
+		group  => "root",
+	}
+
 	# 
 	# # kafka client and config is common to all nodes
 	# class { "kraken::kafka::client":
