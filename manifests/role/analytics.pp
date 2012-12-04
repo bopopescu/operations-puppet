@@ -68,6 +68,33 @@ class role::analytics::kafka::producer::event inherits role::analytics {
 	}
 }
 
+# == role::analytics::kafka::consumer::event
+# consume wikipedia zero logs every hour
+class role::analytics::kafka::consumer::event {
+	kraken::kafka::consumer::hadoop { "event":
+		topics          => "^event",
+		regex           => true,
+		consumer_group  => "kconsumer0",
+		hdfs_output_dir => "/wmf/raw",
+		minute          => "10",
+		hour            => "*/1",
+	}
+}
+
+
+# == role::analytics::kafka::consumer::wikipedia_zero
+# consume wikipedia zero logs every hour
+class role::analytics::kafka::consumer::wikipedia_zero {
+	kraken::kafka::consumer::hadoop { "wikipedia_zero":
+		topics          => "wikipedia-zero",
+		consumer_group  => "kconsumer0",
+		hdfs_output_dir => "/wmf/raw",
+		minute          => "0",
+		hour            => "*/1",
+	}
+}
+
+
 # == Class role::analytics::zookeeper
 # Zookeeper Server Role
 class role::analytics::zookeeper inherits role::analytics {
@@ -104,18 +131,6 @@ class role::analytics::hadoop::master inherits role::analytics::hadoop {
 # Hadoop DataNode and NodeManager
 class role::analytics::hadoop::worker inherits role::analytics::hadoop {
 	include kraken::hadoop::worker
-}
-
-# == role::analytics::kafka::consumer::wikipedia_zero
-# consume wikipedia zero logs every hour
-class role::analytics::kafka::consumer::wikipedia_zero {
-	kraken::kafka::consumer::hadoop { "wikipedia_zero":
-		topics          => "wikipedia-zero",
-		consumer_group  => "kconsumer0",
-		hdfs_output_dir => "/wmf/raw",
-		minute          => "0",
-		hour            => "*/1",
-	}
 }
 
 # Base role classes
