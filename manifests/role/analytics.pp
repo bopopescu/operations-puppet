@@ -40,6 +40,14 @@ class role::analytics::frontend inherits role::analytics {
 }
 
 
+# == Class role::analytics::zookeeper
+# Zookeeper Server Role
+class role::analytics::zookeeper inherits role::analytics {
+	# zookeeper server
+	include kraken::zookeeper::server
+}
+
+
 # == Class role::analytics::kafka
 # Kafka Broker Server role
 class role::analytics::kafka inherits role::analytics {
@@ -73,38 +81,27 @@ class role::analytics::udp2log::kraken inherits role::analytics::udp2log {
 	}
 }
 
-# == role::analytics::kafka::consumer::event
-# consume /event logs every hour
-class role::analytics::kafka::consumer::event {
+# == role::analytics::kafka::consumer
+# Installs cron jobs to consume from Kafka into hadoop
+class role::analytics::kafka::consumer {
 	kraken::kafka::consumer::hadoop { "event":
 		topics          => "^event",
 		regex           => true,
 		consumer_group  => "kconsumer0",
 		hdfs_output_dir => "/wmf/raw/event",
-		minute          => "10",
-		hour            => "*/1",
-	}
-}
-
-
-# == role::analytics::kafka::consumer::wikipedia_zero
-# consume wikipedia zero logs every hour
-class role::analytics::kafka::consumer::wikipedia_zero {
-	kraken::kafka::consumer::hadoop { "wikipedia_zero":
-		topics          => "wikipedia-zero",
-		consumer_group  => "kconsumer0",
-		hdfs_output_dir => "/wmf/raw",
 		minute          => "0",
 		hour            => "*/1",
 	}
-}
 
-
-# == Class role::analytics::zookeeper
-# Zookeeper Server Role
-class role::analytics::zookeeper inherits role::analytics {
-	# zookeeper server
-	include kraken::zookeeper::server
+	$request_log_topics = "en-wikipedia,wikipedia-mobile,wikipedia-zero"
+	# TODO: Choose a better name than 'kraken'
+	kraken::kafka::consumer::hadoop { "kraken":
+		topics          => $request_log_topics
+		consumer_group  => "kconsumer0",
+		hdfs_output_dir => "/wmf/raw",
+		minute          => "10",
+		hour            => "*/1",
+	}
 }
 
 # Storm roles
