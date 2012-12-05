@@ -57,6 +57,7 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 	# to produce into Kafka.
 	misc::udp2log::instance { "event":
 		port                => "8422",
+		log_directory       => "/var/log/udp2log/event"
 	}
 }
 
@@ -68,6 +69,7 @@ class role::analytics::udp2log::kraken inherits role::analytics::udp2log {
 	misc::udp2log::instance { "kraken":
 		port                => "8420",
 		multicast           => true,
+		log_directory       => "/var/log/udp2log/kraken"
 	}
 }
 
