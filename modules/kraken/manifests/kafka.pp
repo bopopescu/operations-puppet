@@ -1,8 +1,23 @@
 class kraken::kafka {
+	require kraken  # need this to make sure hadoop group is present
 	require kraken::zookeeper::config
 	include kafka, kafka::install
+
+	# make sure kafka log directory exists (this is not the data log buffer dir).
+	$log_directory = "/var/log/kafka"
+	$log_file = "$log_directory/kafka.log"
+
+	# ensure that Kafka log directory exists
+	file { $log_directory:
+		ensure => "directory",
+		mode   => 0775,
+		owner  => "kafka",
+		group  => "hadoop",
+	}
+
 	class { "kafka::config":
 		zookeeper_hosts => $kraken::zookeeper::config::zookeeper_hosts,
+		kafka_log_file  => $log_file,
 	}
 }
 
