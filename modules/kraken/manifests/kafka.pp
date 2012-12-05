@@ -15,9 +15,19 @@ class kraken::kafka {
 		group  => "hadoop",
 	}
 
+	# ensure that Kafka log file is writeable
+	file { $log_file:
+		ensure  => "file",
+		mode    => 0664,
+		owner   => "kafka",
+		group   => "hadoop",
+		require => File[$log_directory]
+	}
+
 	class { "kafka::config":
 		zookeeper_hosts => $kraken::zookeeper::config::zookeeper_hosts,
 		kafka_log_file  => $log_file,
+		require         => File[$log_file],
 	}
 }
 
