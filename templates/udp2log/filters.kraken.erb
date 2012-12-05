@@ -3,7 +3,7 @@
 <%
 # quick and easy method for DRYing piping into kafka producer.
 def kafka_producer(topic)
-  "/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic}"
+  "/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic} > /dev/null"
 end
 -%>
 
