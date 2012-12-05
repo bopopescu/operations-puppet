@@ -216,10 +216,15 @@ node "analytics1001.wikimedia.org" inherits analytics_basenode {
 	# analytics1001 is currently the only
 	# Analytics node with a public IP.
 	include role::analytics::public
-	
+
+	# Starts a multicast listening udp2log instance
+	# to read from the request log firehose.
+	# Many filters produce into Kafka.s
+	include role::analytics::udp2log::kraken
+
 	# analytics1001 is being sent the /event log data stream.
 	# Use udp2log to produce the stream into Kafka
-	include role::analytics::kafka::producer::event
+	include role::analytics::udp2log::event
 }
 
 # analytics1002 is Storm Master (i.e. Storm Nimbus server)

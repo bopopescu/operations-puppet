@@ -46,25 +46,28 @@ class role::analytics::kafka inherits role::analytics {
 	include kraken::kafka::server
 }
 
-# == Class role::analytics::kafka::producer::event
+
+
+# == Class role::analytics::udp2log::event
 # Reads from the /event log stream coming from
 # Varnish servers and produces the messages to Kafka.
-class role::analytics::kafka::producer::event inherits role::analytics {
-	include kraken::kafka::client
-	class { "misc::udp2log":
-		monitor => false,
-	}
-	include misc::udp2log::iptables
-
+class role::analytics::udp2log::event inherits role::analytics::udp2log {
 	# /event log stream udp2log instance.
 	# This udp2log instance has filters
 	# to produce into Kafka.
 	misc::udp2log::instance { "event":
 		port                => "8422",
-		monitor_packet_loss => false,
-		monitor_processes   => false,
-		monitor_log_age     => false,
-		require             => [Class["kraken::kafka::client"], Class["misc::udp2log::iptables"]]
+	}
+}
+
+# == Class role::analytics::udp2log::kraken
+# Reads from the udp2log web request log firehose
+# and produces selected streams into Kafka
+# TODO:  This needs a better name than "kraken".
+class role::analytics::udp2log::kraken inherits role::analytics::udp2log {
+	misc::udp2log::instance { "kraken":
+		port                => "8420",
+		multicast           => true,
 	}
 }
 
@@ -183,5 +186,23 @@ class role::analytics::hadoop inherits role::analytics {
 	# hadoop metrics is common to all hadoop nodes
 	class { "kraken::hadoop::metrics":
 		require => Class["kraken::hadoop::config"],
+	}
+}
+
+# == Class role::analytics::udp2log inherits role::analytics
+# Base class for analytics udp2log classes
+class role::analytics::udp2log inherits role::analytics {
+	include kraken::kafka::client
+	class { "misc::udp2log":
+		monitor => false,
+	}
+	include misc::udp2log::iptables
+
+	# Set defaults for udp2log instances
+	Misc::Udp2log::Instance { 
+		monitor_packet_loss => false,
+		monitor_processes   => false,
+		monitor_log_age     => false,
+		require             => [Class["kraken::kafka::client"], Class["misc::udp2log::iptables"]]
 	}
 }
