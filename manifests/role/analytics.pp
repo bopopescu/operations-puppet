@@ -84,13 +84,14 @@ class role::analytics::udp2log::kraken inherits role::analytics::udp2log {
 # == role::analytics::kafka::consumer
 # Installs cron jobs to consume from Kafka into hadoop
 class role::analytics::kafka::consumer {
+	# consume event logs daily.
 	kraken::kafka::consumer::hadoop { "event":
 		topics          => "^event",
 		regex           => true,
 		consumer_group  => "kconsumer0",
 		hdfs_output_dir => "/wmf/raw/event",
 		minute          => "0",
-		hour            => "*/1",
+		hour            => "6",
 	}
 
 	$request_log_topics = "en-wikipedia,wikipedia-mobile,wikipedia-zero"
@@ -99,7 +100,7 @@ class role::analytics::kafka::consumer {
 		topics          => $request_log_topics,
 		consumer_group  => "kconsumer0",
 		hdfs_output_dir => "/wmf/raw",
-		minute          => "10",
+		minute          => "30",
 		hour            => "*/1",
 	}
 }
