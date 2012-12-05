@@ -13,6 +13,11 @@ product_codes = [
   'i18n-uls',
   'wlm',
 ]
+
+# quick and easy method for DRYing piping into kafka producer.
+def kafka_producer(topic)
+  "/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic} > /dev/null"
+end
 -%>
 
 # Produce events into Kafka.
@@ -32,6 +37,6 @@ pipe 1 /bin/egrep -v '^/event(\.gif)?/(<%= product_codes.join('|') %>)\s' | /usr
 product_codes.each do |product_code|
 -%>
 # filter and produce into Kafka for <%= product_code %> events
-pipe 1 /bin/egrep '^/event(\.gif)?/<%= product_code %>' | /usr/lib/kafka/bin/kafka-producer-shell.sh --props /etc/kafka/producer.properties --topic event-<%= product_code %>
+pipe 1 /bin/egrep '^/event(\.gif)?/<%= product_code %>' | <%= kafka_producer("event-#{product_code}") %>
 
 <% end -%>
