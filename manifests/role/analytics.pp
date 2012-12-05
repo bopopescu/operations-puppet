@@ -96,7 +96,7 @@ class role::analytics::kafka::consumer {
 	$request_log_topics = "en-wikipedia,wikipedia-mobile,wikipedia-zero"
 	# TODO: Choose a better name than 'kraken'
 	kraken::kafka::consumer::hadoop { "kraken":
-		topics          => $request_log_topics
+		topics          => $request_log_topics,
 		consumer_group  => "kconsumer0",
 		hdfs_output_dir => "/wmf/raw",
 		minute          => "10",
