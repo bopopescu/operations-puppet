@@ -198,11 +198,18 @@ class role::analytics::udp2log inherits role::analytics {
 	}
 	include misc::udp2log::iptables
 
+	# add the udp2log user to the kafka group
+	exec { "udp2log_add_to_group_kafka":
+		command => "/usr/sbin/usermod -a -G kafka udp2log",
+		unless  => "/usr/bin/groups udp2log | grep -q kafka",
+		require => [Class["misc::udp2log"], Class["kraken::kafka::client"]],
+	}
+
 	# Set defaults for udp2log instances
 	Misc::Udp2log::Instance { 
 		monitor_packet_loss => false,
 		monitor_processes   => false,
 		monitor_log_age     => false,
-		require             => [Class["kraken::kafka::client"], Class["misc::udp2log::iptables"]]
+		require             => [Class["kraken::kafka::client"], Class["misc::udp2log::iptables"], Exec["udp2log_add_to_group_kafka"]],
 	}
 }
