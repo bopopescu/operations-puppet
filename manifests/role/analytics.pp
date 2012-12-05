@@ -35,8 +35,11 @@ class role::analytics::frontend inherits role::analytics {
 	include kraken::oozie::server
 	# Hive metastore and hive server
 	include kraken::hive::server
+
 	# Hue server
-	include kraken::hue
+	class { "kraken::hue": 
+		require => Class["role::ldap::client::labs"],
+	}
 }
 
 
