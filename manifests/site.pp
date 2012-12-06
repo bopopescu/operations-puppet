@@ -192,6 +192,7 @@ node /amssq(4[7-9]|5[0-9]|6[0-2])\.esams\.wikimedia\.org/ {
 	include role::cache::upload
 }
 
+<<<<<<< HEAD
 # analytics_basenode
 #
 # This allows us to modify certain nodes
@@ -881,6 +882,8 @@ node "gallium.wikimedia.org" {
 		misc::contint::test::jenkins,
 		misc::contint::android::sdk,
 		misc::contint::test::testswarm,
+		misc::docsite,
+		misc::docs::puppet,
 		role::zuul::production,
 		admins::roots,
 		admins::jenkins
@@ -2551,19 +2554,33 @@ node "williams.wikimedia.org" {
 	install_certificate{ "star.wikimedia.org": }
 }
 
-node "wtp1.pmtpa.wmnet" {
+node /(wtp1|kuo|lardner|mexia|tola)\.pmtpa\.wmnet/ {
+	$cluster = "parsoid"
+	$nagios_group = "${cluster}_$::site"
+
 	include standard,
 		admins::roots,
 		misc::parsoid
+
+	if $hostname == "wtp1.pmtpa.wmnet" {
+		$ganglia_aggregator = "true"
+	}
 
 	class { "lvs::realserver": realserver_ips => [ "10.2.1.28" ] }
 
 }
 
 node "wtp1001.eqiad.wmnet" {
+	$cluster = "parsoid"
+	$nagios_group = "${cluster}_$::site"
+
 	include standard,
 		admins::roots,
 		misc::parsoid
+
+	if $hostname == "wtp1001.eqiad.wmnet" {
+		$ganglia_aggregator = "true"
+	}
 
 	class { "lvs::realserver": realserver_ips => [ "10.2.2.28" ] }
 

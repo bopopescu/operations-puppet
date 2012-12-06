@@ -22,6 +22,8 @@ def sync_all():
         repoloc = repolocs[repo]
         if not __salt__['file.directory_exists'](repoloc + '/.git'):
             __salt__['git.clone'](repoloc,repourl + '/.git')
+        else:
+            ret = __salt__['deploy.checkout'](repo)
         ret = __salt__['deploy.checkout'](repo)
         if ret != 0:
             status = 1
@@ -87,6 +89,12 @@ def checkout(repo,reset=False):
         ret = __salt__['cmd.retcode'](cmd,repoloc)
         if ret != 0:
             return 20
+    else:
+        cmd = '/usr/bin/git describe --always --tag'
+        current_tag = __salt__['cmd.run'](cmd,repoloc)
+        current_tag = current_tag.strip()
+        if current_tag == tag:
+            return 0
 
     # Switch to the tag defined in the server's .deploy file
     cmd = '/usr/bin/git checkout --force --quiet tags/%s' % (tag)
