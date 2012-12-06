@@ -192,7 +192,6 @@ node /amssq(4[7-9]|5[0-9]|6[0-2])\.esams\.wikimedia\.org/ {
 	include role::cache::upload
 }
 
-<<<<<<< HEAD
 # analytics_basenode
 #
 # This allows us to modify certain nodes
