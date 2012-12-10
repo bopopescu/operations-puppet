@@ -217,11 +217,6 @@ node "analytics1001.wikimedia.org" inherits analytics_basenode {
 	# Analytics node with a public IP.
 	include role::analytics::public
 
-	# Starts a multicast listening udp2log instance
-	# to read from the request log firehose.
-	# Many filters produce into Kafka.s
-	include role::analytics::udp2log::kraken
-
 	# analytics1001 is being sent the /event log data stream.
 	# Use udp2log to produce the stream into Kafka
 	include role::analytics::udp2log::event
@@ -236,8 +231,19 @@ node "analytics1002.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::kafka::consumer
 }
 
+# debugging udp2log producers.  Run the kraken
+# producer on analytics1003 for now.
+node "analytics1003.eqiad.wmnet" inherits analytics_basenode {
+	include role::analytics::storm::worker
+
+	# Starts a multicast listening udp2log instance
+	# to read from the request log firehose.
+	# Many filters produce into Kafka.s
+	include role::analytics::udp2log::kraken
+}
+
 # analytics1003 - analytics1009 are Storm Workers (i.e. Storm Supervisor servers)
-node /^analytics100[3-9].eqiad.wmnet/ inherits analytics_basenode {
+node /^analytics100[4-9].eqiad.wmnet/ inherits analytics_basenode {
 	include role::analytics::storm::worker
 }
 
