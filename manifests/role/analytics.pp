@@ -82,7 +82,18 @@ class role::analytics::udp2log::kraken inherits role::analytics::udp2log {
 		port                => "8420",
 		multicast           => true,
 		log_directory       => "/var/log/udp2log/kraken",
-		monitor_packet_loss => true,
+	}
+}
+
+# == Class role::analytics::udp2log::zero
+# Reads from the udp2log web request log firehose
+# and produces selected wikipedia zero stream into Kafka
+# TODO:  This needs a better name than "zero".
+class role::analytics::udp2log::zero inherits role::analytics::udp2log {
+	misc::udp2log::instance { "zero":
+		port                => "8420",
+		multicast           => true,
+		log_directory       => "/var/log/udp2log/zero",
 	}
 }
 

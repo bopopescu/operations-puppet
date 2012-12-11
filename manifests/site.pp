@@ -242,6 +242,17 @@ node "analytics1003.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::udp2log::kraken
 }
 
+# debugging udp2log producers.  Run the zero
+# producer on analytics1004 for now.
+node "analytics1003.eqiad.wmnet" inherits analytics_basenode {
+	include role::analytics::storm::worker
+
+	# Starts a multicast listening udp2log instance
+	# to read from the request log firehose.
+	# Many filters produce into Kafka.
+	include role::analytics::udp2log::zero
+}
+
 # analytics1003 - analytics1009 are Storm Workers (i.e. Storm Supervisor servers)
 node /^analytics100[4-9].eqiad.wmnet/ inherits analytics_basenode {
 	include role::analytics::storm::worker
