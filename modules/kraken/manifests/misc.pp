@@ -37,13 +37,22 @@ class kraken::misc::mysql::server {
 	}
 }
 
-# == Class kraken::misc::root_email
-#
+# == Define kraken::misc::email::aliases
+# TODO: I don't think this define should
+# be part of the kraken module.
 define kraken::misc::email::alias($email) {
-	file_line { "email_aliases_$name":
-		path => "/etc/aliases",
-		line => "$name: $email"
+	$line = "$name: $email"
+	exec { "email_aliases_$name":
+		command => "/bin/echo '$line' >> /etc/aliases",
+		unless  => "/bin/grep -q '$line' /etc/aliases",
 	}
+
+	# TODO:  Why isn't this working?
+	# Nothing actually happens. :(
+	# file_line { "email_aliases_$name":
+	# 		path => "/etc/aliases",
+	# 		line => "$name: $email"
+	# 	}
 }
 
 # == Class kraken::misc::cron::email
