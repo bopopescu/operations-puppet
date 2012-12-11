@@ -27,13 +27,6 @@ class role::analytics::public inherits role::analytics {
 # Frontend web services for Analytics Cluster.
 # E.g. Hue, Oozie, etc.
 class role::analytics::frontend inherits role::analytics {
-	# include a mysql database for Sqoop and Oozie
-	# with the datadir at /a/mysql
-	class { "generic::mysql::server":
-		datadir => "/a/mysql",
-		version => "5.5",
-	}
-	
 	# include the kraken index.php file.
 	# TODO:  Puppetize webserver classes.
 	include kraken::misc::web::index
@@ -42,8 +35,20 @@ class role::analytics::frontend inherits role::analytics {
 	include kraken::oozie::server
 	# Hive metastore and hive server
 	include kraken::hive::server
+
 	# Hue server
-	include kraken::hue
+	class { "kraken::hue": }
+	# TODO: require this when we back in the real production branch
+		# require => Class["role::ldap::client::labs"],
+	# }
+}
+
+
+# == Class role::analytics::zookeeper
+# Zookeeper Server Role
+class role::analytics::zookeeper inherits role::analytics {
+	# zookeeper server
+	include kraken::zookeeper::server
 }
 
 
@@ -53,33 +58,55 @@ class role::analytics::kafka inherits role::analytics {
 	include kraken::kafka::server
 }
 
-# == Class role::analytics::kafka::producer::event
+
+
+# == Class role::analytics::udp2log::event
 # Reads from the /event log stream coming from
 # Varnish servers and produces the messages to Kafka.
-class role::analytics::kafka::producer::event inherits role::analytics {
-	include kraken::kafka::client
-	class { "misc::udp2log":
-		monitor => false,
-	}
-	include misc::udp2log::iptables
-
+class role::analytics::udp2log::event inherits role::analytics::udp2log {
 	# /event log stream udp2log instance.
 	# This udp2log instance has filters
 	# to produce into Kafka.
 	misc::udp2log::instance { "event":
 		port                => "8422",
-		monitor_packet_loss => false,
-		monitor_processes   => false,
-		monitor_log_age     => false,
-		require             => [Class["kraken::kafka::client"], Class["misc::udp2log::iptables"]]
+		log_directory       => "/var/log/udp2log/event"
 	}
 }
 
-# == Class role::analytics::zookeeper
-# Zookeeper Server Role
-class role::analytics::zookeeper inherits role::analytics {
-	# zookeeper server
-	include kraken::zookeeper::server
+# == Class role::analytics::udp2log::kraken
+# Reads from the udp2log web request log firehose
+# and produces selected streams into Kafka
+# TODO:  This needs a better name than "kraken".
+class role::analytics::udp2log::kraken inherits role::analytics::udp2log {
+	misc::udp2log::instance { "kraken":
+		port                => "8420",
+		multicast           => true,
+		log_directory       => "/var/log/udp2log/kraken"
+	}
+}
+
+# == role::analytics::kafka::consumer
+# Installs cron jobs to consume from Kafka into hadoop
+class role::analytics::kafka::consumer {
+	# consume event logs daily.
+	kraken::kafka::consumer::hadoop { "event":
+		topics          => "^event",
+		regex           => true,
+		consumer_group  => "kconsumer0",
+		hdfs_output_dir => "/wmf/raw/event",
+		minute          => "0",
+		hour            => "6",
+	}
+
+	$request_log_topics = "en-wikipedia,wikipedia-mobile,wikipedia-zero"
+	# TODO: Choose a better name than 'kraken'
+	kraken::kafka::consumer::hadoop { "kraken":
+		topics          => $request_log_topics,
+		consumer_group  => "kconsumer0",
+		hdfs_output_dir => "/wmf/raw",
+		minute          => "30",
+		hour            => "*/1",
+	}
 }
 
 # Storm roles
@@ -112,8 +139,6 @@ class role::analytics::hadoop::master inherits role::analytics::hadoop {
 class role::analytics::hadoop::worker inherits role::analytics::hadoop {
 	include kraken::hadoop::worker
 }
-
-
 
 # Base role classes
 
@@ -150,7 +175,10 @@ class role::analytics {
 
 	# udp-filter is a useful thing!
 	include misc::udp2log::udp_filter
-	
+
+	# git-core jajajaj
+	include generic::packages::git-core
+
 	# include default kraken classes, woohoo!
 	include kraken
 }
@@ -165,12 +193,27 @@ class role::analytics::hadoop inherits role::analytics {
 	}
 }
 
-# front end interfaces for Kraken and Hadoop
-class role::analytics::frontend inherits role::analytics {
-	# include a mysql database for Sqoop and Oozie
-	# with the datadir at /a/mysql
-	class { "generic::mysql::server":
-		datadir => "/a/mysql",
-		version => "5.5",
+# == Class role::analytics::udp2log inherits role::analytics
+# Base class for analytics udp2log classes
+class role::analytics::udp2log inherits role::analytics {
+	include kraken::kafka::client
+	class { "misc::udp2log":
+		monitor => false,
+	}
+	include misc::udp2log::iptables
+
+	# add the udp2log user to the kafka group
+	exec { "udp2log_add_to_group_kafka":
+		command => "/usr/sbin/usermod -a -G kafka udp2log",
+		unless  => "/usr/bin/groups udp2log | grep -q kafka",
+		require => [Class["misc::udp2log"], Class["kraken::kafka::client"]],
+	}
+
+	# Set defaults for udp2log instances
+	Misc::Udp2log::Instance { 
+		monitor_packet_loss => false,
+		monitor_processes   => false,
+		monitor_log_age     => false,
+		require             => [Class["kraken::kafka::client"], Class["misc::udp2log::iptables"], Exec["udp2log_add_to_group_kafka"]],
 	}
 }

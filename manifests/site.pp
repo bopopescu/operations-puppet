@@ -216,19 +216,34 @@ node "analytics1001.wikimedia.org" inherits analytics_basenode {
 	# analytics1001 is currently the only
 	# Analytics node with a public IP.
 	include role::analytics::public
-	
+
 	# analytics1001 is being sent the /event log data stream.
 	# Use udp2log to produce the stream into Kafka
-	include role::analytics::kafka::producer::event
+	include role::analytics::udp2log::event
 }
 
 # analytics1002 is Storm Master (i.e. Storm Nimbus server)
 node "analytics1002.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::master
+
+	# analytics1002 is also being used to consume
+	# from Kafka Brokers into hadoop.
+	include role::analytics::kafka::consumer
+}
+
+# debugging udp2log producers.  Run the kraken
+# producer on analytics1003 for now.
+node "analytics1003.eqiad.wmnet" inherits analytics_basenode {
+	include role::analytics::storm::worker
+
+	# Starts a multicast listening udp2log instance
+	# to read from the request log firehose.
+	# Many filters produce into Kafka.s
+	include role::analytics::udp2log::kraken
 }
 
 # analytics1003 - analytics1009 are Storm Workers (i.e. Storm Supervisor servers)
-node /^analytics100[3-9].eqiad.wmnet/ inherits analytics_basenode {
+node /^analytics100[4-9].eqiad.wmnet/ inherits analytics_basenode {
 	include role::analytics::storm::worker
 }
 
@@ -872,6 +887,8 @@ node "gallium.wikimedia.org" {
 		misc::contint::test::jenkins,
 		misc::contint::android::sdk,
 		misc::contint::test::testswarm,
+		misc::docsite,
+		misc::docs::puppet,
 		role::zuul::production,
 		admins::roots,
 		admins::jenkins
@@ -1163,7 +1180,8 @@ node /lvs[1-6]\.wikimedia\.org/ {
 			$sip['search_pool3'][$::site],
 			$sip['search_pool4'][$::site],
 			$sip['search_prefix'][$::site],
-			$sip['swift'][$::site]
+			$sip['swift'][$::site],
+			$sip['parsoid'][$::site]
 			]
 	}
 
@@ -1235,7 +1253,8 @@ node /lvs100[1-6]\.wikimedia\.org/ {
 			$sip['search_pool3'][$::site],
 			$sip['search_pool4'][$::site],
 			$sip['search_prefix'][$::site],
-			$sip['swift'][$::site]
+			$sip['swift'][$::site],
+			$sip['parsoid'][$::site]
 			]
 	}
 
@@ -1525,7 +1544,7 @@ node /^ms-fe100[1-4]\.eqiad\.wmnet$/ {
 	include role::swift::eqiad-prod::proxy
 }
 
-node /^ms-be([1-4]|13)\.pmtpa\.wmnet$/ {
+node /^ms-be(1|2|4|13)\.pmtpa\.wmnet$/ {
 	$all_drives = [ '/dev/sdc', '/dev/sdd', '/dev/sde',
 		'/dev/sdf', '/dev/sdg', '/dev/sdh', '/dev/sdi', '/dev/sdj', '/dev/sdk',
 		'/dev/sdl' ]
@@ -1546,7 +1565,7 @@ node /^ms-be(5|9)\.pmtpa\.wmnet$/ {
 	swift::create_filesystem{ $all_drives: partition_nr => "1" }
 }
 
-node /^ms-be([6-8]|10)\.pmtpa\.wmnet$/ {
+node /^ms-be(3|[6-8]|10)\.pmtpa\.wmnet$/ {
 	# the ms-be hosts that are 720xds with ssds have two more disks
 	# but they show up as m and n, those get the OS
 	$all_drives = [ '/dev/sda', '/dev/sdb', '/dev/sdc', '/dev/sdd',
@@ -2009,7 +2028,7 @@ node "sockpuppet.pmtpa.wmnet" {
 	include standard,
 		backup::client,
 		misc::management::ipmi,
-		role::salt::masters::labs,
+		role::salt::masters::production,
 		role::deployment::salt_masters::production
 
 	class { puppetmaster:
@@ -2540,16 +2559,36 @@ node "williams.wikimedia.org" {
 	install_certificate{ "star.wikimedia.org": }
 }
 
-node "wtp1.pmtpa.wmnet" {
+node /(wtp1|kuo|lardner|mexia|tola)\.pmtpa\.wmnet/ {
+	$cluster = "parsoid"
+	$nagios_group = "${cluster}_$::site"
+
 	include standard,
 		admins::roots,
 		misc::parsoid
+
+	if $hostname == "wtp1.pmtpa.wmnet" {
+		$ganglia_aggregator = "true"
+	}
+
+	class { "lvs::realserver": realserver_ips => [ "10.2.1.28" ] }
+
 }
 
 node "wtp1001.eqiad.wmnet" {
+	$cluster = "parsoid"
+	$nagios_group = "${cluster}_$::site"
+
 	include standard,
 		admins::roots,
 		misc::parsoid
+
+	if $hostname == "wtp1001.eqiad.wmnet" {
+		$ganglia_aggregator = "true"
+	}
+
+	class { "lvs::realserver": realserver_ips => [ "10.2.2.28" ] }
+
 }
 
 node  "yongle.wikimedia.org" {

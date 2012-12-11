@@ -300,7 +300,7 @@ host cp1030 {
 	fixed-address cp1030.eqiad.wmnet;
 }
 host cp1031 {
-	hardware ethernet d4:be:d9:f4:c8:0e;
+	hardware ethernet 18:03:73:f7:73:c9;
 	fixed-address cp1031.eqiad.wmnet;
 }
 host cp1032 {
@@ -1066,6 +1066,11 @@ host iron {
 	fixed-address iron.wikimedia.org;
 }
 
+host kuo {
+	hardware ethernet D4:AE:52:AD:56:10;
+	fixed-address kuo.pmtpa.wmnet;
+}
+
 host labstore1 {
 	hardware ethernet 78:2b:cb:76:1c:d2;
 	fixed-address 10.0.0.41;
@@ -1086,14 +1091,19 @@ host labstore4 {
 	fixed-address 10.0.0.44;
 }
 
+host lardner {
+	hardware ethernet D4:AE:52:AD:59:99;
+	fixed-address lardner.pmtpa.wmnet;
+}
+
 host lvs5 {
-        hardware ethernet 00:21:9B:97:EE:7A;
-        fixed-address lvs5.wikimedia.org;
+	hardware ethernet 00:21:9B:97:EE:7A;
+	fixed-address lvs5.wikimedia.org;
 }
 
 host lvs6 {
-        hardware ethernet 00:21:9B:97:EE:71;
-        fixed-address lvs6.wikimedia.org;
+	hardware ethernet 00:21:9B:97:EE:71;
+	fixed-address lvs6.wikimedia.org;
 }
 
 host lvs1001 {
@@ -1102,13 +1112,13 @@ host lvs1001 {
 }
 
 host lvs1002 {
-        hardware ethernet 18:03:73:f0:8e:dc;
-        fixed-address lvs1002.wikimedia.org;
+	hardware ethernet 18:03:73:f0:8e:dc;
+	fixed-address lvs1002.wikimedia.org;
 }
 
 host lvs1003 {
-        hardware ethernet 18:03:73:f0:8b:07;
-        fixed-address lvs1003.wikimedia.org;
+	hardware ethernet 18:03:73:f0:8b:07;
+	fixed-address lvs1003.wikimedia.org;
 }
 
 host lvs1004 {
@@ -1117,13 +1127,13 @@ host lvs1004 {
 }
 
 host lvs1005 {
-        hardware ethernet 18:03:73:f0:8e:28;
-        fixed-address lvs1005.wikimedia.org;
+	hardware ethernet 18:03:73:f0:8e:28;
+	fixed-address lvs1005.wikimedia.org;
 }
 
 host lvs1006 {
-        hardware ethernet 18:03:73:f0:8a:77;
-        fixed-address lvs1006.wikimedia.org;
+	hardware ethernet 18:03:73:f0:8a:77;
+	fixed-address lvs1006.wikimedia.org;
 }
 
 host maerlant {
@@ -1236,9 +1246,8 @@ host mc1001 {
 	fixed-address mc1001.eqiad.wmnet;
 }
 
-## mac not correct. not 10g nic.
 host mc1002 {
-	hardware ethernet 84:2b:2b:fc:49:d8;
+	hardware ethernet 00:1b:21:70:8e:df;
 	fixed-address mc1002.eqiad.wmnet;
 }
 
@@ -1257,9 +1266,8 @@ host mc1005 {
 	fixed-address mc1005.eqiad.wmnet;
 }
 
-## mac not correct. not 10g nic.
 host mc1006 {
-	hardware ethernet 84:2b:2b:fc:4a:cb;
+	hardware ethernet 00:1b:21:70:8d:e3;
 	fixed-address mc1006.eqiad.wmnet;
 }
 
@@ -1348,7 +1356,7 @@ host ms-be2 {
 }
 
 host ms-be3 {
-	hardware ethernet 04:7D:7B:2E:2E:D6;
+	hardware ethernet 90:B1:1C:18:EE:F1;
 	fixed-address ms-be3.pmtpa.wmnet;
 }
 
@@ -1472,10 +1480,10 @@ host ms-be3003 {
 	fixed-address ms-be3003.esams.wikimedia.org;
 }
 
-#host ms-be3004 {
-#	hardware ethernet ;
-#	fixed-address ms-be3004.esams.wikimedia.org;
-#}
+host ms-be3004 {
+	hardware ethernet 24:B6:FD:F6:1C:3C;
+	fixed-address ms-be3004.esams.wikimedia.org;
+}
 
 host ms-fe1 {
 	hardware ethernet d4:be:d9:af:84:27;
@@ -1535,6 +1543,11 @@ host ms-fe3001 {
 host ms-fe3002 {
 	hardware ethernet 24:B6:FD:F5:B3:E4;
 	fixed-address ms-fe3002.esams.wikimedia.org;
+}
+
+host mexia {
+	hardware ethernet D4:AE:52:AD:62:75;
+	fixed-address mexia.pmtpa.wmnet;
 }
 
 host mw1 {
@@ -3605,6 +3618,11 @@ host tmh1 {
 host tmh2 {
 	hardware ethernet d4:be:d9:af:68:6a;
 	fixed-address tmh2.pmtpa.wmnet;
+}
+
+host tola {
+	hardware ethernet 90:B1:1C:00:AE:28;
+	fixed-address tola.pmtpa.wmnet;
 }
 
 host vanadium {

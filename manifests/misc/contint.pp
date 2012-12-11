@@ -41,8 +41,14 @@ class misc::contint::android::sdk {
 	require misc::contint::jdk
 	include generic::packages::ant18
 
+	# 32bit libs needed by Android SDK
+	# ..but NOT just all of ia32-libs ..
 	package { [
-		"ia32-libs",
+		"libstdc++6:i386",
+		"libgcc1:i386",
+		"zlib1g:i386",
+		"libncurses5:i386",
+		"libsdl1.2debian:i386",
 		"libswt-gtk-3.5-java"
 		]: ensure => installed;
 	}
@@ -53,7 +59,7 @@ class misc::contint::android::sdk {
 # E.g. udp-filter, etc.
 class misc::contint::analytics::packages {
 	# these are needed to build libanon and udp-filter
-	package { ["pkg-config", "libpcap-dev"]:
+	package { ["pkg-config", "libpcap-dev", "libdb-dev"]:
 		ensure => "installed",
 	}
 
@@ -76,9 +82,10 @@ class misc::contint::test {
 
 		# split up packages into groups a bit for readability and flexibility ("ensure present" vs. "ensure latest" ?)
 
-		$CI_PHP_packages = [ "libapache2-mod-php5", "php-apc", "php5-cli", "php5-curl", "php5-gd", "php5-intl", "php5-mysql", "php-pear", "php5-sqlite", "php5-tidy", "php5-pgsql" ]
+		$CI_PHP_packages = [ "php-apc", "php5-cli", "php5-curl", "php5-gd", "php5-intl", "php5-mysql", "php-pear", "php5-sqlite", "php5-tidy", "php5-pgsql" ]
 		$CI_DB_packages  = [ "mysql-server", "sqlite3", "postgresql" ]
-		$CI_DEV_packages = [ "imagemagick" ]
+		$CI_DEV_packages = [ "imagemagick", "librsvg2-2", "librsvg2-bin" ]
+		$CI_DOC_packages = [ "asciidoc" ]
 
 		package { $CI_PHP_packages:
 			ensure => present;
@@ -89,6 +96,10 @@ class misc::contint::test {
 		}
 
 		package { $CI_DEV_packages:
+			ensure => present;
+		}
+
+		package { $CI_DOC_packages:
 			ensure => present;
 		}
 
@@ -105,7 +116,6 @@ class misc::contint::test {
 	}
 
 	# Common apache configuration
-	apache_module { ssl: name => "ssl" }
 	apache_site { integration: name => "integration.mediawiki.org" }
 
 	class jenkins {
@@ -258,7 +268,7 @@ class misc::contint::test {
 
 		# run jenkins behind Apache and have pretty URLs / proxy port 80
 		# https://wiki.jenkins-ci.org/display/JENKINS/Running+Jenkins+behind+Apache
-		require webserver::apache2
+		class {'webserver::php5': ssl => 'true'; }
 
 		apache_module { proxy: name => "proxy" }
 		apache_module { proxy_http: name => "proxy_http" }
