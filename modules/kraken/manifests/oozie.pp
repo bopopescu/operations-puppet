@@ -21,7 +21,7 @@ class kraken::oozie::server {
 		jdbc_username                          => $kraken::oozie::database::db_user,
 		jdbc_password                          => $kraken::oozie::database::db_pass,
 		smtp_host                              => $kraken::smtp_host,
-		smtp_default_email                     => $kraken::email,
+		smtp_from_email                        => $kraken::email,
 		require                                => [File["/var/lib/oozie/mysql.jar"], Class["kraken::oozie::database"]],
 	}
 }
