@@ -2,7 +2,6 @@
 # This class should be included on all analytics nodes.
 class kraken {
 	$smtp_host = "mchenry.wikimedia.org"
-	$email     = "kraken@wikimedia.org"
 
 	# TODO: remove apt_source and kraken::misc::temp
 	# when we go to production
