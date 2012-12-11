@@ -198,10 +198,7 @@ class role::analytics::hadoop inherits role::analytics {
 # Base class for analytics udp2log classes
 class role::analytics::udp2log inherits role::analytics {
 	include kraken::kafka::client
-	class { "misc::udp2log":
-		monitor => false,
-	}
-	include misc::udp2log::iptables
+	include misc::udp2log
 
 	# add the udp2log user to the kafka group
 	exec { "udp2log_add_to_group_kafka":
@@ -215,6 +212,6 @@ class role::analytics::udp2log inherits role::analytics {
 		monitor_packet_loss => false,
 		monitor_processes   => false,
 		monitor_log_age     => false,
-		require             => [Class["kraken::kafka::client"], Class["misc::udp2log::iptables"], Exec["udp2log_add_to_group_kafka"]],
+		require             => [Class["kraken::kafka::client"], Class["misc::udp2log"], Exec["udp2log_add_to_group_kafka"]],
 	}
 }
