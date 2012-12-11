@@ -244,7 +244,7 @@ node "analytics1003.eqiad.wmnet" inherits analytics_basenode {
 
 # debugging udp2log producers.  Run the zero
 # producer on analytics1004 for now.
-node "analytics1003.eqiad.wmnet" inherits analytics_basenode {
+node "analytics1004.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::worker
 
 	# Starts a multicast listening udp2log instance
