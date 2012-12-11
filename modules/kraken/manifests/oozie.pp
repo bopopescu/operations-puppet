@@ -15,19 +15,22 @@ class kraken::oozie::server {
 		# TODO:  enable this once we better figure out
 		# oozie jobs.
 		authorization_service_security_enabled => false,
-		jdbc_driver       => "com.mysql.jdbc.Driver",
-		jdbc_url          => "jdbc:mysql://localhost:3306/$kraken::oozie::database::db_name",
-		jdbc_database     => $kraken::oozie::database::db_name,
-		jdbc_username     => $kraken::oozie::database::db_user,
-		jdbc_password     => $kraken::oozie::database::db_pass,
-		require           => [File["/var/lib/oozie/mysql.jar"], Class["kraken::oozie::database"]],
+		jdbc_driver                            => "com.mysql.jdbc.Driver",
+		jdbc_url                               => "jdbc:mysql://localhost:3306/$kraken::oozie::database::db_name",
+		jdbc_database                          => $kraken::oozie::database::db_name,
+		jdbc_username                          => $kraken::oozie::database::db_user,
+		jdbc_password                          => $kraken::oozie::database::db_pass,
+		smtp_host                              => $kraken::smtp_host,
+		smtp_default_email                     => $kraken::email,
+		require                                => [File["/var/lib/oozie/mysql.jar"], Class["kraken::oozie::database"]],
 	}
 }
 
 
+
 class kraken::oozie::database {
 	include kraken::misc::mysql::server
-	
+
 	$db_name    = "oozie"
 	$db_user    = "oozie"
 	# TODO: put this in private puppet repo

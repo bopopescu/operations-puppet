@@ -9,7 +9,7 @@ class kraken::hue {
 		# TODO:  Change secret_key and put it in private puppet repo.
 		secret_key            => "MQBvbk9fk9u1hSr7S13auZyYbRAPK0BbSr6k0NLokTNswv1wNU4v90nUhZE3",
 		smtp_host             => $kraken::smtp_host,
-		smtp_default_email    => $kraken::email,
+		smtp_from_email       => $kraken::email,
 		ldap_url              => "ldaps://virt0.wikimedia.org ldaps://virt1000.wikimedia.org",
 		ldap_base_dn          => "dc=wikimedia,dc=org",
 		ldap_username_pattern => "uid=<username>,ou=people,dc=wikimedia,dc=org",
