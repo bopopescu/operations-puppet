@@ -59,7 +59,7 @@ define kraken::misc::email::alias($email) {
 # Make sure all cron email goes to otto@wikimedia.org
 class kraken::misc::email::aliases {
 	$admin_email = "otto@wikimedia.org"
-	kraken::misc::email::alias { "hdfs": email => 'root' }
+	kraken::misc::email::alias { "hdfs": email => $admin_email }
 	kraken::misc::email::alias { "root": email => $admin_email }
 }
 
