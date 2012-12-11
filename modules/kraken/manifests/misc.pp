@@ -245,14 +245,4 @@ deb-src http://analytics1001.wikimedia.org/apt source/
 ",
 			mode => 0444,
 	}
-
-    # alias root and hdfs to otto@wikimedia.org
-	file_line { 'hdfs_email_alias':
-		path => '/etc/aliases',
-		line => 'hdfs: root',
-	}
-	file_line { 'root_email_alias':
-		path     => '/etc/aliases',
-		line     => 'root: otto@wikimedia.org',
-	}
 }
