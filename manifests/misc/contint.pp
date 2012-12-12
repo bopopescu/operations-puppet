@@ -63,6 +63,11 @@ class misc::contint::analytics::packages {
 		ensure => "installed",
 	}
 
+        # these packages are used by the tests for wikistats to parse the
+        # generated reports to see if they are correct
+	package { ["libhtml-treebuilder-xpath-perl","libweb-scraper-perl"]:
+		ensure => "installed",
+	}
 	# need geoip to build udp-filter
 	include geoip
 }
@@ -79,6 +84,9 @@ class misc::contint::test {
 		include generic::packages::ant18
 
 		include generic::packages::maven
+
+		# Get perl dependencies so we can lint the wikibugs perl script
+		include misc::irc::wikibugs::packages
 
 		# split up packages into groups a bit for readability and flexibility ("ensure present" vs. "ensure latest" ?)
 

@@ -10,7 +10,7 @@ class icinga::monitor {
 		icinga::monitor::packages,
 		passwords::nagios::mysql,
 		icinga::monitor::firewall,
-#		icinga::monitor::files::configuration,
+		icinga::monitor::configuration::files,
 		icinga::monitor::files::nagios-plugins,
 		icinga::monitor::snmp,
 		icinga::monitor::checkpaging,
@@ -26,13 +26,13 @@ class icinga::monitor {
 
 	systemuser { icinga: name => "icinga", home => "/home/icinga", groups => [ "icinga", "dialout", "nagios" ] }
 
-	Class['icinga::monitor'] -> Class['icinga::monitor::packages'] -> Class['icinga::monitor::service'] -> Class['icinga::monitor::service'] -> Class['icinga::configuration::variables']
+	Class['icinga::monitor::packages'] -> Class['icinga::monitor::configuration::files'] -> Class['icinga::monitor::service']
 
 }
 
 # Nagios/icinga configuration files
 
-class icinga::configuration::variables {
+class icinga::monitor::configuration::variables {
 
 	#This variable declares the monitoring hosts
 	#It is called master hosts as monitor_host is already
@@ -45,22 +45,22 @@ class icinga::configuration::variables {
 
 	# puppet_hosts.cfg must be first
 	$puppet_files = [
-			  "${icinga::configuration::variables::icinga_config_dir}/puppet_hostgroups.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/puppet_servicegroups.cfg"]
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/puppet_hostgroups.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/puppet_servicegroups.cfg"]
 
 	$static_files = [
-			  "${icinga::configuration::variables::icinga_config_dir}/puppet_hostextinfo.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/puppet_services.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/icinga.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/cgi.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/checkcommands.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/contactgroups.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/contacts.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/migration.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/misccommands.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/resource.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/timeperiods.cfg",
-			  "${icinga::configuration::variables::icinga_config_dir}/htpasswd.users"]
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/puppet_hostextinfo.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/puppet_services.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/icinga.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/cgi.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/checkcommands.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/contactgroups.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/contacts.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/migration.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/misccommands.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/resource.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/timeperiods.cfg",
+			  "${icinga::monitor::configuration::variables::icinga_config_dir}/htpasswd.users"]
 
 }
 class icinga::monitor::apache {
@@ -100,6 +100,8 @@ class icinga::monitor::apache {
 
 class icinga::monitor::checkpaging {
 
+  require icinga::monitor::packages
+
 	file {"/usr/lib/nagios/plugins/check_to_check_nagios_paging":
 		source => "puppet:///files/nagios/check_to_check_nagios_paging",
 		owner => root,
@@ -116,12 +118,15 @@ class icinga::monitor::checkpaging {
 	}
 }
 
-class icinga::monitor::files::configuration {
+class icinga::monitor::configuration::files {
 	# For all files dealing with icinga configuration
 
+  require icinga::monitor::packages
 	require passwords::nagios::mysql
 
 	$nagios_mysql_check_pass = $passwords::nagios::mysql::mysql_check_pass
+
+  Class['icinga::monitor::configuration::variables'] -> Class['icinga::monitor::configuration::files']
 
 	# Icinga configuration files
 
@@ -156,13 +161,13 @@ class icinga::monitor::files::configuration {
 			mode => 0644;
 
 		"/etc/icinga/contactgroups.cfg":
-			source => "puppet:///files/nagios/contactgroups.cfg",
+			source => "puppet:///files/nagios/contactgroups_fake.cfg",
 			owner => root,
 			group => root,
 			mode => 0644;
 
 		"/etc/icinga/contacts.cfg":
-			source => "puppet:///private/nagios/contacts.cfg",
+			source => "puppet:///private/nagios/contacts_fake.cfg",
 			owner => root,
 			group => root,
 			mode => 0644;
@@ -216,11 +221,23 @@ class icinga::monitor::files::misc {
 			group => root,
 			mode => 0755;
 
+		"/var/cache/icinga":
+			ensure => directory,
+			owner => icinga,
+			group => www-data,
+			mode => 0775;
+
 		"/var/lib/nagios/rw":
 			ensure => directory,
 			owner => icinga,
 			group => nagios,
 			mode => 0777;
+
+		"/var/lib/icinga":
+			ensure => directory,
+			owner => icinga,
+			group => www-data,
+			mode => 0755;
 
 		# Script to purge resources for non-existent hosts
 		 "/usr/local/sbin/purge-nagios-resources.py":
@@ -229,7 +246,7 @@ class icinga::monitor::files::misc {
 			group => root,
 			mode => 0755;
 	}
-	
+
 	# fix permissions on all individual service files
 	exec {
 		"fix_nagios_perms":
@@ -250,6 +267,9 @@ class icinga::monitor::files::misc {
 }
 
 class icinga::monitor::files::nagios-plugins {
+
+  require icinga::monitor::packages
+
 	file {
 		"/usr/lib/nagios":
 			owner => root,
@@ -600,6 +620,8 @@ class icinga::monitor::firewall {
 
 class icinga::monitor::jobqueue {
 
+  require icinga::monitor::packages
+
 	file {"/usr/lib/nagios/plugins/check_job_queue":
 		source => "puppet:///files/nagios/check_job_queue",
 		owner => root,
@@ -619,6 +641,8 @@ class icinga::monitor::jobqueue {
 class icinga::monitor::naggen {
 
 	# Naggen takes exported resources from hosts and creates nagios configuration files
+
+  require icinga::monitor::packages
 
 	file {
 		"/etc/icinga/puppet_hosts.cfg":
@@ -640,7 +664,7 @@ class icinga::monitor::naggen {
 
 	# Fix permissions
 
-	file { $icinga::configuration::variables::puppet_files:
+	file { $icinga::monitor::configuration::variables::puppet_files:
 		mode => 0644,
 		ensure => present;
 	}
@@ -660,11 +684,22 @@ class icinga::monitor::naggen {
 	decommission_monitor_host { $decommissioned_servers: }
 }
 
+# NSCA - Nagios Service Check Acceptor
+# package contains daemon and client script
+class icinga::nsca {
+
+	package { "nsca":
+		ensure => latest;
+	}
+
+}
+
+# NSCA - daemon config
 class icinga::monitor::nsca::daemon {
 
 	system_role { "icinga::nsca::daemon": description => "Nagios Service Checks Acceptor Daemon" }
 
-	require nagios::nsca
+	require icinga::nsca
 
 	file { "/etc/nsca.cfg":
 		source => "puppet:///private/icinga/nsca.cfg",
@@ -700,11 +735,13 @@ class icinga::monitor::packages {
 
 class icinga::monitor::service {
 
+  require icinga::monitor::apache
+
 	service { "icinga":
 		ensure => running,
-		subscribe => [ File[$icinga::configuration::variables::puppet_files],
-			       File[$icinga::configuration::variables::static_files],
-			       File["/etc/icinga/puppet_hosts.cfg"]]; 
+		subscribe => [ File[$icinga::monitor::configuration::variables::puppet_files],
+			       File[$icinga::monitor::configuration::variables::static_files],
+			       File["/etc/icinga/puppet_hosts.cfg"]];
 	}
 }
 

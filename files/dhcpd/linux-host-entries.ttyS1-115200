@@ -164,9 +164,19 @@ host carbon {
 	fixed-address carbon.wikimedia.org;
 }
 
+host celsus {
+	hardware ethernet D4:AE:52:B3:90:36;
+	fixed-address celsus.wikimedia.org;
+}
+
 host chromium {
 	hardware ethernet 78:2b:cb:08:aa:48;
 	fixed-address chromium.wikimedia.org;
+}
+
+host constable {
+	hardware ethernet D4:AE:52:AC:4D:C8;
+	fixed-address constable.wikimedia.org;
 }
 
 host copper {
@@ -1411,7 +1421,7 @@ host ms-be1001 {
 }
 
 host ms-be1002 {
-	hardware ethernet 04:7D:7B:2E:2E:36;
+	hardware ethernet 90:B1:1C:14:C0:2C;
 	fixed-address ms-be1002.eqiad.wmnet;
 }
 
@@ -1421,47 +1431,47 @@ host ms-be1003 {
 }
 
 host ms-be1004 {
-	hardware ethernet 04:7D:7B:44:C3:E2;
+	hardware ethernet 90:B1:1C:14:B5:9A;
 	fixed-address ms-be1004.eqiad.wmnet;
 }
 
 host ms-be1005 {
-	hardware ethernet 04:7D:7B:2E:2E:0C;
+	hardware ethernet 90:B1:1C:1C:2C:3C;
 	fixed-address ms-be1005.eqiad.wmnet;
 }
 
 host ms-be1006 {
-	hardware ethernet 04:7D:7B:2E:2C:0E;
+	hardware ethernet 90:B1:1C:14:B6:42;
 	fixed-address ms-be1006.eqiad.wmnet;
 }
 
 host ms-be1007 {
-	hardware ethernet 04:7D:7B:2E:2B:E2;
+	hardware ethernet 90:B1:1C:1C:2A:DC;
 	fixed-address ms-be1007.eqiad.wmnet;
 }
 
 host ms-be1008 {
-	hardware ethernet 04:7D:7B:2E:2C:08;
+	hardware ethernet 90:B1:1C:1C:24:45;
 	fixed-address ms-be1008.eqiad.wmnet;
 }
 
 host ms-be1009 {
-	hardware ethernet 04:7D:7B:2E:2E:88;
+	hardware ethernet 90:B1:1C:1B:8F:B0;
 	fixed-address ms-be1009.eqiad.wmnet;
 }
 
 host ms-be1010 {
-	hardware ethernet 04:7D:7B:2E:2E:2E;
+	hardware ethernet 90:B1:1C:1C:2D:38;
 	fixed-address ms-be1010.eqiad.wmnet;
 }
 
 host ms-be1011 {
-	hardware ethernet 04:7D:7B:2E:2B:FE;
+	hardware ethernet 90:B1:1C:1B:9E:E6;
 	fixed-address ms-be1011.eqiad.wmnet;
 }
 
 host ms-be1012 {
-	hardware ethernet 04:7D:7B:2E:2E:16;
+	hardware ethernet 90:B1:1C:1B:89:1E;
 	fixed-address ms-be1012.eqiad.wmnet;
 }
 
@@ -3347,7 +3357,7 @@ host srv265 {
 }
 
 host srv266 {
-	hardware ethernet 00:21:9b:9f:ab:98;
+	hardware ethernet  00:22:19:6b:cd:6a;
 	fixed-address srv266.pmtpa.wmnet;
 }
 
@@ -3672,7 +3682,7 @@ host wtp1001 {
 
 host yttrium {
 	hardware ethernet 18:03:73:f1:4f:82;
-	fixed-address yttrium.wikimedia.org;
+	fixed-address yttrium.eqiad.wmnet;
 }
 
 host zhen {

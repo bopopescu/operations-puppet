@@ -43,8 +43,7 @@ class role::fundraising::civicrm {
 		backup::client,
 		ganglia,
 		misc::fundraising,
-		misc::fundraising::backup::archive,
-		misc::fundraising::backup::offhost,
+		misc::fundraising::backup::backupmover_user,
 		misc::fundraising::mail,
 		nrpe,
 		ntp::client,
@@ -64,20 +63,6 @@ class role::fundraising::civicrm {
         base::vimconfig,
         passwords::root,
         ssh
-
-	if $hostname == "aluminium" {
-		include misc::fundraising::jenkins,
-			misc::fundraising::jenkins_maintenance
-	}
-
-	cron {
-		'offhost_backups':
-			user => root,
-			minute => '5',
-			hour => '0',
-			command => '/usr/local/bin/offhost_backups',
-			ensure => present,
-	}
 
 	monitor_service { "smtp": description => "Exim SMTP", check_command => "check_smtp" }
 	monitor_service { "http": description => "HTTP", check_command => "check_http" }
@@ -119,28 +104,7 @@ class role::fundraising::database::slave {
 class role::fundraising::database::dump_slave {
 	system_role { "role::fundraising::database::dump": description => "Fundraising Database Dump/Backup" }
 	include role::fundraising::database::slave,
-		misc::fundraising::backup::offhost
+		misc::fundraising::backup::backupmover_user
 
-	file {
-		'/usr/local/bin/dump_fundraisingdb':
-			mode => 0755,
-			owner => root,
-			group => root,
-			source => "puppet:///files/misc/scripts/dump_fundraisingdb";
-	}
-
-	cron {
-		'dump_fundraising_database':
-			user => root,
-			minute => '0',
-			hour => '9',
-			command => '/usr/local/bin/dump_fundraisingdb',
-			ensure => present;
-		'offhost_backups':
-			user => root,
-			minute => '0',
-			hour => '15',
-			command => '/usr/local/bin/offhost_backups',
-			ensure => present;
-	}
+	class { 'misc::fundraising::backup::dump_fundraising_database': hour => 9, minute => 0 }
 }

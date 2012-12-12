@@ -2,7 +2,9 @@
 The MIT License
 
 Copyright (c) 2008 Gilad Raphaelli <gilad@raphaelli.com>
-Adapted for 5.1+ InnoDB status 2012 Asher Feldman <asher@wikimedia.org>
+
+Adapted for 5.1-facebook, 5.5, and other additions
+2012 Asher Feldman <asher@wikimedia.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -57,10 +59,11 @@ mysql_stats_last = {}
 REPORT_INNODB = True
 REPORT_MASTER = True
 REPORT_SLAVE  = True
+INNODB_VERSION = '51fb'
 
 MAX_UPDATE_TIME = 15
 
-def update_stats(get_innodb=True, get_master=True, get_slave=True):
+def update_stats(get_innodb=True, get_master=True, get_slave=True, innodb_version='51fb'):
 	logging.debug('updating stats')
 	global last_update
 	global mysql_stats, mysql_stats_last
@@ -111,7 +114,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		if get_innodb:
 			cursor = conn.cursor(MySQLdb.cursors.Cursor)
 			cursor.execute("SHOW ENGINE INNODB STATUS")
-			innodb_status = parse_innodb_status(cursor.fetchone()[2].split('\n'))
+			innodb_status = parse_innodb_status(cursor.fetchone()[2].split('\n'), innodb_version)
 			cursor.close()
 			logging.debug('innodb_status: ' + str(innodb_status))
 
@@ -310,8 +313,9 @@ def get_stat(name):
 	global REPORT_INNODB
 	global REPORT_MASTER
 	global REPORT_SLAVE
+	global INNODB_VERSION
 
-	ret = update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE)
+	ret = update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE, INNODB_VERSION)
 
 	if ret:
 		if name.startswith('mysql_'):
@@ -336,10 +340,12 @@ def metric_init(params):
 	global REPORT_INNODB
 	global REPORT_MASTER
 	global REPORT_SLAVE
+	global INNODB_VERSION
 
 	REPORT_INNODB = str(params.get('get_innodb', True)) == "True"
 	REPORT_MASTER = str(params.get('get_master', True)) == "True"
 	REPORT_SLAVE  = str(params.get('get_slave', True)) == "True"
+	INNODB_VERSION = str(params.get('innodb_version', "51fb"))
 
 	logging.debug("init: " + str(params))
 
@@ -971,10 +977,10 @@ def metric_init(params):
 		)
 
 	descriptors = []
-	update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE)
+	update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE, INNODB_VERSION)
 
 	time.sleep(MAX_UPDATE_TIME)
-	update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE)
+	update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE, INNODB_VERSION)
 
 	for stats_descriptions in (innodb_stats_descriptions, master_stats_descriptions, misc_stats_descriptions, slave_stats_descriptions):
 		for label in stats_descriptions:

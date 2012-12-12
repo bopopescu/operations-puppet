@@ -4,7 +4,7 @@ class role::coredb::config {
 			'hosts' => ['db32', 'db36', 'db38', 'db59', 'db60', 'db61', 'db63', 'db67',
 				'db1001', 'db1017', 'db1042', 'db1043', 'db1047', 'db1049', 'db1050'],
 			'primary_site' => "pmtpa",
-			'masters' => {'pmtpa' => "db63", 'eqiad' => "db1017"},
+			'masters' => {'pmtpa' => "db61", 'eqiad' => "db1017"},
 			'snapshot' => ["db32", "db1050"],
 		},
 		's2' => {
@@ -14,7 +14,7 @@ class role::coredb::config {
 			'snapshot' => ["db53", "db1018"],
 		},
 		's3' => {
-			'hosts' => ['db11', 'db34', 'db39', 'db64', 'db1003', 'db1010', 'db1019', 'db1035'],
+			'hosts' => ['db34', 'db39', 'db64', 'db66', 'db1003', 'db1010', 'db1019', 'db1035'],
 			'primary_site' => "pmtpa",
 			'masters' => {'pmtpa' => "db34", 'eqiad' => "db1019"},
 			'snapshot' => ["db64", "db1035"],
@@ -38,10 +38,10 @@ class role::coredb::config {
 			'snapshot' => ["db46", "db1022"],
 		},
 		's7' => {
-			'hosts' => ['db26', 'db37', 'db56', 'db58', 'db1007', 'db1024', 'db1028', 'db1041'],
+			'hosts' => ['db37', 'db56', 'db58', 'db68', 'db1007', 'db1024', 'db1028', 'db1041'],
 			'primary_site' => "pmtpa",
 			'masters' => {'pmtpa' => "db37", 'eqiad' => "db1041"},
-			'snapshot' => ["db26", "db1007"],
+			'snapshot' => ["db56", "db1007"],
 		},
 		'm1' => {
 			'hosts' => ['bellin', 'blondel'],
@@ -193,7 +193,7 @@ class role::coredb::researchdb{
 
 class role::coredb::common(
 	$shard,
-	$read_only = false,
+	$read_only = true,
 	$skip_name_resolve = true,
 	$mysql_myisam = false,
 	$mysql_max_allowed_packet = "16M",
@@ -210,14 +210,29 @@ class role::coredb::common(
 	system_role { "dbcore": description => "Shard ${shard} Core Database server" }
 
 	include standard,
-		coredb_mysql,
 		mysql::coredb::ganglia
 
 	if $::hostname in $topology[$shard]['snapshot'] {
 		include coredb_mysql::snapshot
 	}
 
-	Class["role::coredb::common"] -> Class["coredb_mysql"]
+	if $::hostname == $topology[$shard]['masters'][$::site] {
+		$readonly = false
+	}
+
+	class { "coredb_mysql":
+		shard => $shard,
+		read_only => $read_only,
+		skip_name_resolve => $skip_name_resolve,
+		mysql_myisam => $mysql_myisam,
+		mysql_max_allowed_packet => $mysql_max_allowed_packet,
+		disable_binlogs => $disable_binlogs,
+		innodb_log_file_size => $innodb_log_file_size,
+		innodb_file_per_table => $innodb_file_per_table,
+		long_timeouts => $long_timeouts,
+		enable_unsafe_locks => $enable_unsafe_locks,
+		large_slave_trans_retries => $large_slave_trans_retries
+	}
 
 	if $topology[$shard]['masters'][$::site] == $::hostname {
 		class { "mysql::coredb::monitoring": crit => true }

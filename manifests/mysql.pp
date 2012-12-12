@@ -12,7 +12,7 @@ class mysql {
 	#######################################################################
 	### MASTERS - make sure to update here whenever changing replication
 	#######################################################################
-	if $hostname =~ /^db(63|52|34|31|45|47|37|48|1048)|blondel|^es(5|8)$/ {
+	if $hostname =~ /^db(61|63|52|34|31|45|47|37|48|1048)|blondel|^es(5|8)$/ {
 		$master = true
 		$writable = true
 	} else {
@@ -144,8 +144,14 @@ class mysql {
 			}
 		}
 		if $::lsbdistid == "Ubuntu" and versioncmp($::lsbdistrelease, "12.04") >= 0 {
-			package { [ 'mysqlfb-client-5.1', 'mysqlfb-server-core-5.1', 'mysqlfb-server-5.1', 'libmysqlfbclient16' ]:
-				ensure => "5.1.53-fb3875-wm1",
+			if $mariadb {
+				package { [ 'mariadb-client-5.5', 'mariadb-server-core-5.5', 'mariadb-server-5.5', 'libmariadbclient18' ]:
+					ensure => "5.5.28-mariadb-wmf201212041~precise",
+				}
+			} else {
+				package { [ 'mysqlfb-client-5.1', 'mysqlfb-server-core-5.1', 'mysqlfb-server-5.1', 'libmysqlfbclient16' ]:
+					ensure => "5.1.53-fb3875-wm1",
+				}
 			}
 		}
 		package { ["percona-xtrabackup", "percona-toolkit", "libaio1", "lvm2" ]:
@@ -157,6 +163,10 @@ class mysql {
 
 		include passwords::ganglia
 		$ganglia_mysql_pass = $passwords::ganglia::ganglia_mysql_pass
+
+		if $mariadb {
+			$innodb_version = "55xdb"
+		}
 
 		# Ganglia
 		package { python-mysqldb:
@@ -421,7 +431,7 @@ class mysql {
 			content => template("mysql/prod.my.cnf.erb")
 		}
 		file { "/etc/mysql/my.cnf":
-			source => "puppet:///files/mysql/empty-my.cnf"
+			ensure => "/etc/my.cnf"
 		}
 
 		file {
@@ -527,6 +537,10 @@ class mysql::coredb::ganglia{
 	include passwords::ganglia
 	$ganglia_mysql_pass = $passwords::ganglia::ganglia_mysql_pass
 
+	if $mariadb {
+		$innodb_version = "55xdb"
+	}
+
 	# Ganglia
 	package { python-mysqldb:
 		ensure => present;
@@ -560,7 +574,7 @@ class mysql::coredb::monitoring( $crit = false ) {
 				owner => root,
 				group => nagios,
 				mode => 0440,
-				content => template("nagios/nrpe_percona.cfg.erb"),
+				content => template("nagios/nrpe_coredb_percona.cfg.erb"),
 				notify => Service[nagios-nrpe-server];
 			"/usr/lib/nagios/plugins/percona":
 				ensure => directory,
@@ -577,11 +591,9 @@ class mysql::coredb::monitoring( $crit = false ) {
 	monitor_service { "full lvs snapshot": description => "Full LVS Snapshot", check_command => "nrpe_check_lvs", critical => false }
 	monitor_service { "mysql idle transaction": description => "MySQL Idle Transactions", check_command => "nrpe_check_mysql_idle_transactions", critical => false }
 	monitor_service { "mysql replication heartbeat": description => "MySQL Replication Heartbeat", check_command => "nrpe_check_mysql_slave_heartbeat", critical => false }
+	monitor_service { "mysql slave delay": description => "MySQL Slave Delay", check_command => "nrpe_check_mysql_slave_delay", critical => false }
+	monitor_service { "mysql slave running": description => "MySQL Slave Running", check_command => "nrpe_check_mysql_slave_running", critical => false }
 
-	if $role::coredb::config::topology[$::shard][master] {
-		monitor_service { "mysql slave delay": description => "MySQL Slave Delay", check_command => "nrpe_check_mysql_slave_delay", critical => false }
-		monitor_service { "mysql slave running": description => "MySQL Slave Running", check_command => "nrpe_check_mysql_slave_running", critical => false }
-	}
 }
 
 class mysql::client::default-charset-binary {

@@ -3,7 +3,7 @@
 @monitor_group { "parsoid_pmtpa": description => "pmtpa parsoid servers" }
 
 class misc::parsoid {
-	package { [ "nodejs", "npm", "build-essential" ]:
+	package { [ "nodejs", "npm", "build-essential", "git-core" ]:
 		ensure => latest
 	}
 
@@ -41,5 +41,5 @@ class misc::parsoid {
 			require => [File["/etc/init.d/parsoid"]];
 	}
 
-	monitor_service { "parsoid": description => "Parsoid", check_command => "check_http_lvs_on_port!{$hostname}!8000!/_html/" }
+	monitor_service { "parsoid": description => "Parsoid", check_command => "check_http_on_port!8000" }
 }

@@ -1,4 +1,4 @@
-class deployment::salt_master($runner_dir="/srv/runners", $pillar_dir="/srv/pillars", $module_dir="/srv/salt/_modules", $deployment_servers=[], $deployment_minion_regex=".*", $deployment_repo_urls={}, $deployment_repo_regex={}, $deployment_repo_locations={}) {
+class deployment::salt_master($runner_dir="/srv/runners", $pillar_dir="/srv/pillars", $module_dir="/srv/salt/_modules", $deployment_servers=[], $deployment_minion_regex=".*", $deployment_repo_urls={}, $deployment_repo_regex={}, $deployment_repo_locations={}, $deployment_repo_checkout_module_calls={}, $deployment_repo_checkout_submodules={}) {
   file {
     "${runner_dir}/deploy.py":
       content => template("deployment/runners/deploy.py.erb"),
@@ -31,6 +31,12 @@ class deployment::salt_master($runner_dir="/srv/runners", $pillar_dir="/srv/pill
       owner => root,
       group => root,
       require => [File["${module_dir}"]];
+    "${module_dir}/parsoid.py":
+      source => "puppet:///deployment/modules/parsoid.py",
+      mode => 0555,
+      owner => root,
+      group => root,
+      require => [File["${module_dir}"]];
   }
 
   # If pillars or modules change, we need to sync them to the deployment hosts
@@ -42,7 +48,7 @@ class deployment::salt_master($runner_dir="/srv/runners", $pillar_dir="/srv/pill
       require => [Package["salt-master"]];
     "refresh_deployment_modules":
       command => "/usr/bin/salt -E '${deployment_minion_regex}' saltutil.sync_modules",
-      subscribe => [File["${module_dir}/deploy.py"]],
+      subscribe => [File["${module_dir}/deploy.py"],File["${module_dir}/parsoid.py"]],
       refreshonly => true,
       require => [Package["salt-master"]];
   }

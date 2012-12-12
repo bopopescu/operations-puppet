@@ -620,6 +620,10 @@ node /db5[0-9]\.pmtpa\.wmnet/ {
 		$ganglia_aggregator = "true"
 	}
 
+	if $hostname == "db59" {
+		$mariadb = true
+	}
+
 	include role::db::core,
 		mysql::mysqluser,
 		mysql::datadirs,
@@ -648,14 +652,18 @@ node /db6([2-9])\.pmtpa\.wmnet/ {
 }
 
 node "db78.pmtpa.wmnet" {
-	include role::fundraising::database::dump_slave,
-		misc::fundraising::backup::archive
+	include role::fundraising::database::dump_slave
+	class { 'misc::fundraising::backup::archive_sync': hour => [4,12,20], minute => 5 }
 }
 
 # eqiad dbs
 node /db10[0-9][0-9]\.eqiad\.wmnet/ {
 	if $hostname =~ /^db(1001|1017|1021)$/ {
 		$ganglia_aggregator = "true"
+	}
+
+	if $hostname == "db1043" {
+		$mariadb = true
 	}
 
 	include mysql::mysqluser,
@@ -762,8 +770,15 @@ node "loudon.wikimedia.org" {
 	include	role::fundraising::logger
 }
 
-node /^(grosley|aluminium)\.wikimedia\.org$/ {
+node "grosley.wikimedia.org" {
 	include role::fundraising::civicrm
+	class { 'misc::fundraising::backup::archive_sync': hour => 0, minute => 5 }
+}
+
+node "aluminium.wikimedia.org" {
+	include role::fundraising::civicrm,
+		misc::fundraising::jenkins
+	class { 'misc::fundraising::backup::archive_sync': hour => [0,8,16], minute => 5 }
 }
 
 
@@ -905,6 +920,7 @@ node "gallium.wikimedia.org" {
 		admins::jenkins
 
 	install_certificate{ "star.mediawiki.org": }
+	install_certificate{ "star.wikimedia.org": }
 }
 
 node "gurvin.wikimedia.org" {
@@ -989,7 +1005,7 @@ node "manutius.wikimedia.org" {
 		"psw1-eqiad.mgmt.eqiad.wmnet",
 		"msw1-eqiad.mgmt.eqiad.wmnet",
 		"msw2-pmtpa.mgmt.pmtpa.wmnet",
-		"msw2-sdtpa.mgmt.pmpta.wmnet"
+		"msw2-sdtpa.mgmt.pmtpa.wmnet"
 	]
 
 	$storagehosts = [ "nas1-a.pmtpa.wmnet", "nas1-b.pmtpa.wmnet", "nas1001-a.eqiad.wmnet", "nas1001-b.eqiad.wmnet" ]
@@ -1040,6 +1056,10 @@ node "hume.wikimedia.org" {
 		misc::maintenance::pagetriage,
 		misc::maintenance::refreshlinks,
 		misc::maintenance::translationnotifications,
+		misc::maintenance::wikidata,
+		misc::maintenance::tor_exit_node,
+		misc::maintenance::update_flaggedrev_stats,
+		misc::maintenance::update_special_pages,
 		admins::roots,
 		admins::mortals,
 		admins::restricted,
@@ -1406,34 +1426,7 @@ node "marmontel.wikimedia.org" {
 	include standard,
 		admins::roots,
 		svn::client,
-		misc::blogs::wikimedia,
-		webserver::apache2::rpaf
-
-		class { "memcached":
-			memcached_ip => "127.0.0.1" }
-
-	install_certificate{ "star.wikimedia.org": }
-
-	varnish::instance { "blog":
-		name => "",
-		vcl => "blog",
-		port => 80,
-		admin_port => 6082,
-		storage => "-s malloc,1G",
-		backends => [ 'localhost' ],
-		directors => { 'backend' => [ 'localhost' ] },
-		vcl_config => {
-			'retry5xx' => 0
-		},
-		backend_options => {
-			'port' => 81,
-			'connect_timeout' => "5s",
-			'first_byte_timeout' => "35s",
-			'between_bytes_timeout' => "4s",
-			'max_connections' => 100,
-			'probe' => "blog",
-		},
-	}
+		misc::blogs::wikimedia
 }
 
 node /mc(1[0-9]|[0-9])\.pmtpa\.wmnet/ {
@@ -2391,10 +2384,6 @@ node "storage2.wikimedia.org" {
 	include standard
 }
 
-node "storage3.pmtpa.wmnet" {
-	include role::fundraising::database
-}
-
 node "streber.wikimedia.org" {
 	system_role { "misc": description => "network monitoring server" }
 
@@ -2570,17 +2559,17 @@ node "williams.wikimedia.org" {
 	install_certificate{ "star.wikimedia.org": }
 }
 
-node /(wtp1|kuo|lardner|mexia|tola)\.pmtpa\.wmnet/ {
+node /((wtp1|kuo|lardner|mexia|tola)\.pmtpa\.wmnet)|((celsus|constable)\.wikimedia\.org)/ {
 	$cluster = "parsoid"
 	$nagios_group = "${cluster}_$::site"
+
+	if $hostname == "wtp1" {
+		$ganglia_aggregator = "true"
+	}
 
 	include standard,
 		admins::roots,
 		misc::parsoid
-
-	if $hostname == "wtp1.pmtpa.wmnet" {
-		$ganglia_aggregator = "true"
-	}
 
 	class { "lvs::realserver": realserver_ips => [ "10.2.1.28" ] }
 
@@ -2590,13 +2579,13 @@ node "wtp1001.eqiad.wmnet" {
 	$cluster = "parsoid"
 	$nagios_group = "${cluster}_$::site"
 
+	if $hostname == "wtp1001" {
+		$ganglia_aggregator = "true"
+	}
+
 	include standard,
 		admins::roots,
 		misc::parsoid
-
-	if $hostname == "wtp1001.eqiad.wmnet" {
-		$ganglia_aggregator = "true"
-	}
 
 	class { "lvs::realserver": realserver_ips => [ "10.2.2.28" ] }
 
@@ -2623,9 +2612,12 @@ node "zhen.wikimedia.org" {
 		mobile::vumi
 }
 
-node "yttrium.wikimedia.org" {
-	# Was used for wlm.wikimedia.org, now remains allocated to the mobile team
+node "yttrium.eqiad.wmnet" {
+	system_role { "solr-geodata": description => "Solr server for GeoData"}
+
 	include standard
+
+	class { "solr": schema => "puppet:///modules/solr/schema-geodata.xml" }
 }
 
 node "zirconium.wikimedia.org" {

@@ -111,3 +111,99 @@ class misc::maintenance::translationnotifications {
 			mode => 0444;
 	}
 }
+
+class misc::maintenance::tor_exit_node {
+	cron {
+		tor_exit_node_update:
+			command => "php /home/wikipedia/common/multiversion/MWScript.php extensions/TorBlock/loadExitNodes.php aawiki 2>&1",
+			user => apache,
+			minute => '*/20',
+			ensure => present;
+	}
+}
+
+class misc::maintenance::update_flaggedrev_stats{
+	file {
+		"/home/wikipedia/common/php/extensions/FlaggedRevs/maintenance/wikimedia-periodic-update.sh":
+			source => "puppet:///files/misc/scripts/wikimedia-periodic-update.sh",
+			owner => apache,
+			group => wikidev,
+			mode => 0755,
+			ensure => present;
+	}
+
+	cron {
+		update_flaggedrev_stats:
+			command => "/home/wikipedia/common/php/extensions/FlaggedRevs/maintenance/wikimedia-periodic-update.sh 2>&1",
+			user => "apache",
+			hour => "*/2",
+			minute => "0",
+			ensure => present;
+	}
+}
+
+class misc::maintenance::update_special_pages {
+	cron {
+		update_special_pages:
+			command => "flock -n /var/lock/update-special-pages /usr/local/bin/update-special-pages > /home/wikipedia/logs/norotate/updateSpecialPages.log 2>&1",
+			user => "apache",
+			monthday => "*/3",
+			hour => 5,
+			minute => 0,
+			ensure => present;
+		update_special_pages_small:
+			command => "flock -n /var/lock/update-special-pages-small /usr/local/bin/update-special-pages-small > /home/wikipedia/logs/norotate/updateSpecialPages-small.log 2>&1",
+			user => "apache",
+			monthday => "*/3",
+			hour => 4,
+			minute => 0,
+			ensure => present;
+	}
+
+	file {
+		"/usr/local/bin/update-special-pages":
+			source => "puppet:///files/misc/scripts/update-special-pages",
+			owner => apache,
+			group => wikidev,
+			mode => 0755,
+			ensure => present;
+		"/usr/local/bin/update-special-pages-small":
+			source => "puppet:///files/misc/scripts/update-special-pages-small",
+			owner => apache,
+			group => wikidev,
+			mode => 0755,
+			ensure => present;
+	}
+}
+
+class misc::maintenance::wikidata {
+	cron {
+		wikibase-repo-prune:
+			command => "/usr/local/bin/mwscript extensions/Wikibase/repo/maintenance/pruneChanges.php --wiki wikidatawiki --number-of-days=1 2>&1 >> /var/log/wikidata/prune.log",
+			user => mwdeploy,
+			minute => [0,15,30,45],
+			ensure => present;
+	}
+
+	# Run the polling script every 5 minutes for test2.
+	# This is a hack, and will be replaced before we roll it out to other wikis
+	# We know it won't scale
+	cron {
+		wikibase-poll-test2:
+			command => "/usr/local/bin/mwscript extensions/Wikibase/lib/maintenance/pollForChanges.php --wiki test2wiki --statefile=/home/wikipedia/common/wikibase-test2-poll.changeid --all 2>&1 >> /var/log/wikidata/poll.test2wiki.log",
+			user => mwdeploy,
+			minute => "*/5",
+			ensure => present;
+	}
+
+	file {
+		"/var/log/wikidata":
+			owner => mwdeploy,
+			group => mwdeploy,
+			mode => 0664,
+			ensure => directory;
+		"/etc/logrotate.d/wikidata":
+			source => "puppet:///files/logrotate/wikidata",
+			mode => 0444;
+	}
+}
