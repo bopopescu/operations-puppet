@@ -1,38 +1,38 @@
 Listen <%= port %>
 <VirtualHost *:<%= port %>
-	ErrorLog /var/log/apache2/error.log
-	# Possible values include: debug, info, notice, warn, error, crit,
-	# alert, emerg.
-	LogLevel warn
+  ErrorLog /var/log/apache2/error.log
+  # Possible values include: debug, info, notice, warn, error, crit,
+  # alert, emerg.
+  LogLevel warn
 
-	#Diederik: I think we should leave this off as the access.log will grow very fast
-	#and we should not keep track of our colleagues browsing behavior.
-	#CustomLog /var/log/apache2/access.log combined
-	ServerSignature On
+  #Diederik: I think we should leave this off as the access.log will grow very fast
+  #and we should not keep track of our colleagues browsing behavior.
+  #CustomLog /var/log/apache2/access.log combined
+  ServerSignature On
 
-	ProxyRequests Off
-	<Proxy *>
-		Order allow,deny
-		Allow from all
-	  Allow from <%= whitelist.values.join(' ') %>
-	</Proxy>
+  ProxyRequests Off
+  <Proxy *>
+    Order allow,deny
+    Allow from all
+    Allow from <%= whitelist.values.join(' ') %>
+  </Proxy>
 
-	UseCanonicalName Off
-	UseCanonicalPhysicalPort Off
+  UseCanonicalName Off
+  UseCanonicalPhysicalPort Off
 
-	RewriteEngine On
-	RewriteLog /var/log/apache2/rewrite.log
-	RewriteLogLevel 9
-	RewriteRule "^(.*)" "http://%{HTTP_HOST}$1" [P]
+  RewriteEngine On
+  RewriteLog /var/log/apache2/rewrite.log
+  RewriteLogLevel 9
+  RewriteRule "^(.*)" "http://%{HTTP_HOST}$1" [P]
 
-	<Location />
-		Order deny,allow
-		AuthType Basic
-		AuthName "wmf-analytics"
-		AuthUserFile /srv/.htpasswd
-		require valid-user
-		Deny from all
-		Allow from <%= whitelist.values.join(' ') %>
-		Satisfy any
-	</Location>
+  <Location />
+    Order deny,allow
+    AuthType Basic
+    AuthName "wmf-analytics"
+    AuthUserFile /srv/.htpasswd
+    require valid-user
+    Deny from all
+    Allow from <%= whitelist.values.join(' ') %>
+    Satisfy any
+  </Location>
 </VirtualHost>
