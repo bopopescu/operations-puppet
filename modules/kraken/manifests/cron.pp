@@ -6,11 +6,14 @@
 # TODO: Move this out of Kraken module?
 #
 # == Parameters:
+# $logfile    - If set, output will be stored into this file with tee.  You should make sure $user has permission to write and create $logfile.
+#
 # The usual cron parameters.
 # See: http://docs.puppetlabs.com/references/latest/type.html#cron 
 #
 define kraken::cron (
 	$command,
+	$logfile     = undef,
 	$user        = undef,
 	$environment = undef,
 	$hour        = undef,
@@ -20,9 +23,12 @@ define kraken::cron (
 	$weekday     = undef,
 	$ensure      = 'present')
 {
-	require kraken::cronic
+	include kraken::cronic
 
-	$cronic_command = "/usr/local/bin/cronic $command"
+	$cronic_command = $logfile ? {
+		undef   => "/usr/local/bin/cronic $command",
+		default => "/usr/local/bin/cronic $command 2>&1 | /usr/bin/tee -a $logfile",
+	}
 
 	# install a cron job wrapped in cronic
 	cron { "$name":
@@ -35,6 +41,7 @@ define kraken::cron (
 		monthday    => $monthday,
 		environment => $environment,
 		ensure      => $ensure,
+		require     => Class["kraken::cronic"],
 	}
 }
 
