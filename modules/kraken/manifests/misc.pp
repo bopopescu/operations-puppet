@@ -157,7 +157,7 @@ define kraken::misc::backup::hdfs(
 
 	# Create a cron job that periodically backs up
 	# the $source_file or the output of $command into HDFS.
-	cron { "${name}_hdfs_backup":
+	kraken::cron { "${name}_hdfs_backup":
 		command  => $backup_command,
 		user     => $backup_user,
 		hour     => $hour,

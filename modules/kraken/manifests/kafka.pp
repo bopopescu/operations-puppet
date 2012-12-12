@@ -91,8 +91,9 @@ define kraken::kafka::consumer::hadoop(
 	}
 	$logfile = "/var/log/kraken/kafka_hadoop_consumer_${name}.log"
 
-	cron { "kafka_hadoop_consumer_${name}":
-		command  => "$command  2>&1 | /usr/bin/tee -a $logfile",
+	kraken::cron { "kafka_hadoop_consumer_${name}":
+		command  => $command,
+		logfile  => $logfile,
 		user     => $user,
 		hour     => $hour,
 		minute   => $minute,
