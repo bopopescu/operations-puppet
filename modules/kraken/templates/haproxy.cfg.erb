@@ -30,7 +30,7 @@ userlist wmf-analytics
   user louisdang      password  $6$k6$j/f8G9CmFjrwWiflr8O6NXpgadA/kA5FSGe0noZNu.JcMfmpeoSGyglYBpfn/7U6Uz10o.REWqouoyxqZ6FuW1
 
 frontend kraken
-  bind 0.0.0.0:80
+  bind 0.0.0.0:<%= port %>
   
   # Auth ACLs
   acl auth_ok           http_auth(wmf-analytics)
@@ -45,11 +45,9 @@ frontend kraken
   acl host_storm        hdr_beg(host)    -i storm.analytics.
 
   # Whitelisted Network/IP ACLs
-  acl src_analyticsA    src 10.64.21.0/24
-  acl src_analyticsB    src 10.64.36.0/24
-  acl src_wmf_office    src 216.38.130.0/24
-  acl src_diederik      src 70.28.63.126
-  acl src_dsc           src 71.198.62.242
+<% whitelist.each do |key, value| -%>
+  acl src_<%= key %>    src <%= value %>
+<% end -%>
 
   # Kraken Apt repository
   acl host_analytics1001 hdr_beg(host)   -i analytics1001.
