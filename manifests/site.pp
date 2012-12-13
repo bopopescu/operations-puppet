@@ -640,7 +640,11 @@ node /db6[0]\.pmtpa\.wmnet/ {
 }
 
 node /db6[1]\.pmtpa\.wmnet/ {
-	include role::coredb::s1
+	include role::db::core,
+		mysql::mysqluser,
+		mysql::datadirs,
+		mysql::conf,
+		mysql::packages
 }
 
 node /db6([2-9])\.pmtpa\.wmnet/ {
@@ -905,8 +909,7 @@ node "gallium.wikimedia.org" {
 		,'ALL = (postgres) NOPASSWD: /usr/bin/psql'
 	]}
 
-	include base,
-		standard,
+	include standard,
 		misc::contint::test,
 		misc::contint::test::packages,
 		misc::contint::analytics::packages,
@@ -2559,7 +2562,7 @@ node "williams.wikimedia.org" {
 	install_certificate{ "star.wikimedia.org": }
 }
 
-node /((wtp1|kuo|lardner|mexia|tola)\.pmtpa\.wmnet)|((celsus|constable)\.wikimedia\.org)/ {
+node /(wtp1|kuo|lardner|mexia|tola)\.pmtpa\.wmnet/ {
 	$cluster = "parsoid"
 	$nagios_group = "${cluster}_$::site"
 
@@ -2573,6 +2576,20 @@ node /((wtp1|kuo|lardner|mexia|tola)\.pmtpa\.wmnet)|((celsus|constable)\.wikimed
 
 	class { "lvs::realserver": realserver_ips => [ "10.2.1.28" ] }
 
+}
+
+node /(celsus|constable)\.wikimedia\.org/ {
+	$cluster = "parsoidcache"
+	$nagios_group = "${cluster}_$::site"
+
+	if $hostname == "constable" {
+		$ganglia_aggregator = "true"
+	}
+
+	include standard,
+		admins::roots,
+		misc::parsoid::cache,
+		misc::parsoid
 }
 
 node "wtp1001.eqiad.wmnet" {
