@@ -110,12 +110,13 @@ class role::analytics::kafka::consumer {
 		hour            => "6",
 	}
 
-	$request_log_topics = "en-wikipedia,wikipedia-mobile,wikipedia-zero"
 	# TODO: Choose a better name than 'kraken'
+	# consume each webrequest log hourly
 	kraken::kafka::consumer::hadoop { "kraken":
-		topics          => $request_log_topics,
+		topics          => "^webrequest",
+		regex           => true,
 		consumer_group  => "kconsumer0",
-		hdfs_output_dir => "/wmf/raw",
+		hdfs_output_dir => "/wmf/raw/webrequest",
 		minute          => "30",
 		hour            => "*/1",
 	}

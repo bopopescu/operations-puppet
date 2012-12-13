@@ -15,8 +15,11 @@ pipe 10 /usr/local/bin/packet-loss 10 >> /var/log/udp2log/kraken/packet-loss.log
 
 # Produce logs into Kafka:
 
-# pipe English language Wikipedia logs into Kafka Topic en-wikipedia
-pipe 1 /usr/bin/udp-filter -d en.wikipedia.org -p /wiki/ | <%= kafka_producer("en-wikipedia") %>
+# pipe 1/100th of all web request logs into Kafka topic webrequest-all.100
+pipe 100 <%= kafka_producer("webrequest-all.100") %>
 
-# banner logs for Jeff and fundraising
-pipe 1 /usr/bin/udp-filter -p Special:RecordImpression\?banner=,Special:RecordImpression\?result= | <%= kafka_producer("fr-banner") %>
+# pipe all mobile Wikipedia logs into Kafka topic webrequest-wikipedia-mobile
+pipe 1 /usr/bin/udp-filter -d m.wikipedia.org | <%= kafka_producer("webrequest-wikipedia-mobile") %>
+
+# banner logs for Jeff and fundraising into topic webrequest-fr-banner
+pipe 1 /usr/bin/udp-filter -p Special:RecordImpression\?banner=,Special:RecordImpression\?result= | <%= kafka_producer("webrequest-fr-banner") %>
