@@ -56,7 +56,6 @@ class icinga::monitor::configuration::variables {
 			  "${icinga::monitor::configuration::variables::icinga_config_dir}/checkcommands.cfg",
 			  "${icinga::monitor::configuration::variables::icinga_config_dir}/contactgroups.cfg",
 			  "${icinga::monitor::configuration::variables::icinga_config_dir}/contacts.cfg",
-			  "${icinga::monitor::configuration::variables::icinga_config_dir}/migration.cfg",
 			  "${icinga::monitor::configuration::variables::icinga_config_dir}/misccommands.cfg",
 			  "${icinga::monitor::configuration::variables::icinga_config_dir}/resource.cfg",
 			  "${icinga::monitor::configuration::variables::icinga_config_dir}/timeperiods.cfg",
@@ -168,12 +167,6 @@ class icinga::monitor::configuration::files {
 
 		"/etc/icinga/contacts.cfg":
 			source => "puppet:///private/nagios/contacts_fake.cfg",
-			owner => root,
-			group => root,
-			mode => 0644;
-
-		"/etc/icinga/migration.cfg":
-			source => "puppet:///files/nagios/migration.cfg",
 			owner => root,
 			group => root,
 			mode => 0644;

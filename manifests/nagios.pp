@@ -199,7 +199,6 @@ class nagios::monitor {
 			  "${nagios_config_dir}/checkcommands.cfg",
 			  "${nagios_config_dir}/contactgroups.cfg",
 			  "${nagios_config_dir}/contacts.cfg",
-			  "${nagios_config_dir}/migration.cfg",
 			  "${nagios_config_dir}/misccommands.cfg",
 			  "${nagios_config_dir}/resource.cfg",
 			  "${nagios_config_dir}/timeperiods.cfg",
@@ -413,13 +412,6 @@ class nagios::monitor {
 
 	file { "/etc/nagios/contacts.cfg":
 		source => "puppet:///private/nagios/contacts.cfg",
-		owner => root,
-		group => root,
-		mode => 0644;
-	}
-
-	file { "/etc/nagios/migration.cfg":
-		source => "puppet:///files/nagios/migration.cfg",
 		owner => root,
 		group => root,
 		mode => 0644;
