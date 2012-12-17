@@ -12,7 +12,7 @@ class kraken::kafka {
 		ensure => "directory",
 		mode   => 0775,
 		owner  => "kafka",
-		group  => "hadoop",
+		group  => "kafka",
 	}
 
 	# ensure that Kafka log file is writeable
@@ -20,7 +20,7 @@ class kraken::kafka {
 		ensure  => "file",
 		mode    => 0664,
 		owner   => "kafka",
-		group   => "hadoop",
+		group   => "kafka",
 		require => File[$log_directory]
 	}
 
