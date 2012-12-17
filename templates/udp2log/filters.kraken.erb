@@ -22,7 +22,7 @@ pipe 100 <%= kafka_producer("webrequest-all.100") %>
 pipe 1 /usr/bin/udp-filter -d m.wikipedia.org | <%= kafka_producer("webrequest-wikipedia-mobile") %>
 
 # pipe blog.wikimedia.org request logs into Kafka topic webrequest-blog
-pipe 1 /usr/bin/udp-filter -d block.wikimedia.org | <%= kafka_producer("webrequest-blog") %>
+pipe 1 /usr/bin/udp-filter -d blog.wikimedia.org | <%= kafka_producer("webrequest-blog") %>
 
 
 
