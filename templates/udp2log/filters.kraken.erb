@@ -21,5 +21,12 @@ pipe 100 <%= kafka_producer("webrequest-all.100") %>
 # pipe all mobile Wikipedia logs into Kafka topic webrequest-wikipedia-mobile
 pipe 1 /usr/bin/udp-filter -d m.wikipedia.org | <%= kafka_producer("webrequest-wikipedia-mobile") %>
 
+# pipe blog.wikimedia.org request logs into Kafka topic webrequest-blog
+pipe 1 /usr/bin/udp-filter -d block.wikimedia.org | <%= kafka_producer("webrequest-blog") %>
+
+
+
+
+# Disabling this; Jeff is not using it.
 # banner logs for Jeff and fundraising into topic webrequest-fr-banner
-pipe 1 /usr/bin/udp-filter -p Special:RecordImpression\?banner=,Special:RecordImpression\?result= | <%= kafka_producer("webrequest-fr-banner") %>
+# pipe 1 /usr/bin/udp-filter -p Special:RecordImpression\?banner=,Special:RecordImpression\?result= | <%= kafka_producer("webrequest-fr-banner") %>
