@@ -70,6 +70,7 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 	misc::udp2log::instance { "event":
 		port                => "8422",
 		log_directory       => "/var/log/udp2log/event",
+		monitor_packet_loss => false,
 	}
 }
 
@@ -81,6 +82,8 @@ class role::analytics::udp2log::kraken inherits role::analytics::udp2log {
 	misc::udp2log::instance { "kraken":
 		port                => "8420",
 		multicast           => true,
+		# can't monitor packet loss, event stream does not have
+		# seq number in the same format as regular request stream.
 		log_directory       => "/var/log/udp2log/kraken",
 	}
 }
@@ -221,8 +224,8 @@ class role::analytics::udp2log inherits role::analytics {
 
 	# Set defaults for udp2log instances
 	Misc::Udp2log::Instance { 
-		monitor_packet_loss => false,
-		monitor_processes   => false,
+		monitor_packet_loss => true,
+		monitor_processes   => true,
 		monitor_log_age     => false,
 		require             => [Class["kraken::kafka::client"], Class["misc::udp2log"], Exec["udp2log_add_to_group_kafka"]],
 	}
