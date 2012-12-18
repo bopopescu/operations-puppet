@@ -78,7 +78,7 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 # Reads from the udp2log web request log firehose
 # and produces selected streams into Kafka
 class role::analytics::udp2log::webrequest inherits role::analytics::udp2log {
-	$producer_count = 2
+	$producer_count = 4
 
 	misc::udp2log::instance { "webrequest":
 		port                => "8420",

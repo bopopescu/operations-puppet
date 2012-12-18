@@ -236,19 +236,12 @@ node /^analytics100[3-9].eqiad.wmnet/ inherits analytics_basenode {
 	include role::analytics::storm::worker
 
 	case $hostname {
-		/^analytics100[35]/: {
+		/^analytics100[3456]/: {
 			# Starts a multicast listening udp2log instance
 			# to read from the request log firehose.
 			# Many filters produce into Kafka.s
 			include role::analytics::udp2log::webrequest
 		}
-		"analytics1004": {
-			# Starts a multicast listening udp2log instance
-			# to read from the request log firehose
-			# and filter out zero logs into Kafka
-			include role::analytics::udp2log::zero
-		}
-	}
 }
 
 # analytics1010 is Hadoop Master (i.e NameNode, JobTracker, and ResourceManager)
