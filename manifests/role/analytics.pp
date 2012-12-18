@@ -88,9 +88,8 @@ class role::analytics::kafka::consumer {
 		hour            => "6",
 	}
 
-	# TODO: Choose a better name than 'kraken'
 	# consume each webrequest log hourly
-	kraken::kafka::consumer::hadoop { "kraken":
+	kraken::kafka::consumer::hadoop { "webrequest":
 		topics          => "^webrequest",
 		regex           => true,
 		consumer_group  => "kconsumer0",
