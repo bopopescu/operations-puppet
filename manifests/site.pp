@@ -957,13 +957,16 @@ node "formey.wikimedia.org" {
 node "gallium.wikimedia.org" {
 	$cluster = "misc"
 	$gid=500
-	sudo_user { [ "demon", "hashar", "krinkle", "reedy", "dsc" ]: privileges => [
+	sudo_user { [ "demon", "krinkle", "reedy", "dsc" ]: privileges => [
 		 'ALL = (jenkins) NOPASSWD: ALL'
 		,'ALL = NOPASSWD: /etc/init.d/jenkins'
 		,'ALL = (testswarm) NOPASSWD: ALL'
 		,'ALL = NOPASSWD: /etc/init.d/postgresql-8.4'
 		,'ALL = (postgres) NOPASSWD: /usr/bin/psql'
 	]}
+
+	# full root for Jenkins admin (RT-4101)
+	sudo_user { "hashar": privileges => ['ALL = NOPASSWD: ALL'] }
 
 	include standard,
 		misc::contint::test,
@@ -2416,7 +2419,13 @@ node "stat1.wikimedia.org" {
 		# RT 3584
 		accounts::spetrea,
 		# RT 3653
-		accounts::swalling
+		accounts::swalling,
+		# RT 4106
+		accounts::abartov,
+		accounts::ironholds,
+		accounts::jdlrobson,
+		accounts::jgonera
+		
 
 	sudo_user { "otto": privileges => ['ALL = NOPASSWD: ALL'] }
 }
@@ -2537,13 +2546,15 @@ node "vanadium.eqiad.wmnet" {
 		accounts::dsc,
 		accounts::diederik,
 		accounts::spage,
+		misc::statistics::db::mysql,
+		redis::ganglia,
 		nrpe
 
 	class { "solr": schema => "puppet:///modules/solr/schema-ttmserver.xml" }
 
-	sudo_user { "otto": privileges => ['ALL = NOPASSWD: ALL'] }
-	sudo_user { "olivneh": privileges => ['ALL = NOPASSWD: ALL'] }
-	sudo_user { "spage": privileges => ['ALL = NOPASSWD: ALL'] }
+	sudo_user { [ "otto", "olivneh", "spage" ]:
+		privileges => ['ALL = (ALL) NOPASSWD: ALL']
+	}
 }
 
 node "virt1000.wikimedia.org" {
@@ -2671,6 +2682,14 @@ node  "yongle.wikimedia.org" {
 		accounts::catrope
 }
 
+node "yttrium.eqiad.wmnet" {
+	system_role { "solr-geodata": description => "Solr server for GeoData"}
+
+	include standard
+
+	class { "solr": schema => "puppet:///modules/solr/schema-geodata.xml" }
+}
+
 node "yvon.wikimedia.org" {
 	include base,
 		ganglia,
@@ -2683,14 +2702,6 @@ node "zhen.wikimedia.org" {
 		groups::wikidev,
 		accounts::preilly,
 		mobile::vumi
-}
-
-node "yttrium.eqiad.wmnet" {
-	system_role { "solr-geodata": description => "Solr server for GeoData"}
-
-	include standard
-
-	class { "solr": schema => "puppet:///modules/solr/schema-geodata.xml" }
 }
 
 node "zirconium.wikimedia.org" {

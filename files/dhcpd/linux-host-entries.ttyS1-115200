@@ -1256,9 +1256,8 @@ host mc1001 {
 	fixed-address mc1001.eqiad.wmnet;
 }
 
-# currently still unimaged 12/13/12
 host mc1002 {
-	hardware ethernet 00:1b:21:6d:27:63;
+	hardware ethernet 00:1b:21:70:8d:4f;
 	fixed-address mc1002.eqiad.wmnet;
 }
 
@@ -3133,6 +3132,21 @@ host snapshot1004 {
 host sodium {
 	hardware ethernet 78:2b:cb:08:aa:e1;
 	fixed-address sodium.wikimedia.org;
+}
+
+host solr1001 {
+	hardware ethernet 90:B1:1C:23:23:BF;
+	fixed-address solr1001.eqiad.wmnet;
+}
+
+host solr1002 {
+	hardware ethernet 90:B1:1C:23:20:68;
+	fixed-address solr1002.eqiad.wmnet;
+}
+
+host solr1003 {
+	hardware ethernet 90:B1:1C:23:36:1D;
+	fixed-address solr1003.eqiad.wmnet;
 }
 
 host sq51 {
