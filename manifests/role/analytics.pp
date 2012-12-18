@@ -74,19 +74,16 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 	}
 }
 
-# == Class role::analytics::udp2log::kraken
+# == Class role::analytics::udp2log::webrequest
 # Reads from the udp2log web request log firehose
 # and produces selected streams into Kafka
-# TODO:  This needs a better name than "kraken".
-class role::analytics::udp2log::kraken inherits role::analytics::udp2log {
+class role::analytics::udp2log::webrequest inherits role::analytics::udp2log {
 	$producer_count = 2
 
-	misc::udp2log::instance { "kraken":
+	misc::udp2log::instance { "webrequest":
 		port                => "8420",
 		multicast           => true,
-		# can't monitor packet loss, event stream does not have
-		# seq number in the same format as regular request stream.
-		log_directory       => "/var/log/udp2log/kraken",
+		log_directory       => "/var/log/udp2log/webrequest",
 	}
 }
 

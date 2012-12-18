@@ -240,7 +240,7 @@ node /^analytics100[3-9].eqiad.wmnet/ inherits analytics_basenode {
 			# Starts a multicast listening udp2log instance
 			# to read from the request log firehose.
 			# Many filters produce into Kafka.s
-			include role::analytics::udp2log::kraken
+			include role::analytics::udp2log::webrequest
 		}
 		"analytics1004": {
 			# Starts a multicast listening udp2log instance
