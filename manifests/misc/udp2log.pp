@@ -107,8 +107,7 @@ define misc::udp2log::instance(
 	$packet_loss_log     = undef,
 	$monitor_packet_loss = true,
 	$monitor_processes   = true,
-	$monitor_log_age     = true,
-	$template_variables  = undef)
+	$monitor_log_age     = true)
 {
 	# This define requires that the udp2log class has
 	# been included.  The udp2log class is parameterized,
