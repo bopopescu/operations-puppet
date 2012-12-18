@@ -231,12 +231,12 @@ node "analytics1002.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::kafka::consumer
 }
 
-# analytics1003 - analytics1009 are ETL worker
+# analytics1003 - analytics1009 are ETL workers
 node /^analytics100[3-9].eqiad.wmnet/ inherits analytics_basenode {
 	include role::analytics::storm::worker
 
 	case $hostname {
-		"/^analytics100[35]/": {
+		/^analytics100[35]/: {
 			# Starts a multicast listening udp2log instance
 			# to read from the request log firehose.
 			# Many filters produce into Kafka.s

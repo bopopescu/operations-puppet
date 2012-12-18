@@ -2,15 +2,15 @@
 
 <%
 # quick and easy method for DRYing piping into kafka producer.
-def kafka_producer(topic, sequence_mod = nil)
-    mod_filter = sequence_mod ?  "/usr/bin/awk '{if ($2 % #{sequence_mod} == 0) print $0; }' | " : ""
-  "#{mod_filter}/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic} > /dev/null"
+def kafka_producer(topic)
+  "/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic} > /dev/null"
 end
 
-# @e're splitting the webrequest stream into
+# We're splitting the webrequest stream into
 # a number of streams across a few different machines.
 # Hopefully this will let us avoid packet loss.
 webrequest_producer_count = scope.lookupvar("role::analytics::udp2log::kraken::producer_count")
+mod_filter_command = webrequest_producer_count ? "/usr/bin/awk '{if ($2 % #{sequence_mod} == 0) print $0; }' | " : ""
 -%>
 
 # Note:  packet-loss is not debianize or puppetized.
@@ -22,17 +22,17 @@ pipe 10 /usr/local/bin/packet-loss 10 >> /var/log/udp2log/kraken/packet-loss.log
 # Produce logs into Kafka:
 
 # pipe 1/100th of all web request logs into Kafka topic webrequest-all.100
-pipe 100 <%= kafka_producer("webrequest-all.100", webrequest_producer_count) %>
+pipe 100 <%= mod_filter_command %><%= kafka_producer("webrequest-all.100") %>
 
 # pipe all mobile Wikipedia logs into Kafka topic webrequest-wikipedia-mobile
-pipe 1 /usr/bin/udp-filter -d m.wikipedia.org | <%= kafka_producer("webrequest-wikipedia-mobile", webrequest_producer_count) %>
+pipe 1 <%= mod_filter_command %>/usr/bin/udp-filter -d m.wikipedia.org | <%= kafka_producer("webrequest-wikipedia-mobile") %>
 
 # pipe blog.wikimedia.org request logs into Kafka topic webrequest-blog
-pipe 1 /usr/bin/udp-filter -d blog.wikimedia.org | <%= kafka_producer("webrequest-blog", webrequest_producer_count) %>
+pipe 1 <%= mod_filter_command %>/usr/bin/udp-filter -d blog.wikimedia.org | <%= kafka_producer("webrequest-blog") %>
 
 
 
 
 # Disabling this; Jeff is not using it.
 # banner logs for Jeff and fundraising into topic webrequest-fr-banner
-# pipe 1 /usr/bin/udp-filter -p Special:RecordImpression\?banner=,Special:RecordImpression\?result= | <%= kafka_producer("webrequest-fr-banner", webrequest_producer_count) %>
+# pipe 1 <%= mod_filter_command %>/usr/bin/udp-filter -p Special:RecordImpression\?banner=,Special:RecordImpression\?result= | <%= kafka_producer("webrequest-fr-banner") %>
