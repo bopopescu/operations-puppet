@@ -79,6 +79,8 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 # and produces selected streams into Kafka
 # TODO:  This needs a better name than "kraken".
 class role::analytics::udp2log::kraken inherits role::analytics::udp2log {
+	$producer_count = 2
+
 	misc::udp2log::instance { "kraken":
 		port                => "8420",
 		multicast           => true,
