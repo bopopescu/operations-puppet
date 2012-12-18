@@ -10,7 +10,8 @@ end
 # a number of streams across a few different machines.
 # Hopefully this will let us avoid packet loss.
 webrequest_producer_count = scope.lookupvar("role::analytics::udp2log::kraken::producer_count")
-mod_filter_command = webrequest_producer_count ? "/usr/bin/awk '{if ($2 % #{webrequest_producer_count} == 0) print $0; }' | " : ""
+webrequest_producer_id    = scope.lookupvar("role::analytics::udp2log::kraken::producer_id")
+mod_filter_command = "/usr/bin/awk '{if ($2 % #{webrequest_producer_count} == #{webrequest_producer_id}) print $0; }' | "
 -%>
 
 # Note:  packet-loss is not debianize or puppetized.

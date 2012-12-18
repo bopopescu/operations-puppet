@@ -232,7 +232,36 @@ node "analytics1002.eqiad.wmnet" inherits analytics_basenode {
 }
 
 # analytics1003 - analytics1009 are ETL workers
-node /^analytics100[3-9].eqiad.wmnet/ inherits analytics_basenode {
+node "analytics1003.eqiad.wment" inherits analytics_basenode {
+	include role::analytics::storm::worker
+	# Starts a multicast listening udp2log instance
+	# to read from the request log firehose.
+	# Many filters produce into Kafka.s
+	class role::analytics::udp2log::webrequest { producer_id => 0 }
+}
+node "analytics1004.eqiad.wment" inherits analytics_basenode {
+	include role::analytics::storm::worker
+	# Starts a multicast listening udp2log instance
+	# to read from the request log firehose.
+	# Many filters produce into Kafka.s
+	class role::analytics::udp2log::webrequest { producer_id => 1 }
+}
+node "analytics1005.eqiad.wment" inherits analytics_basenode {
+	include role::analytics::storm::worker
+	# Starts a multicast listening udp2log instance
+	# to read from the request log firehose.
+	# Many filters produce into Kafka.s
+	class role::analytics::udp2log::webrequest { producer_id => 2 }
+}
+node "analytics1006.eqiad.wment" inherits analytics_basenode {
+	include role::analytics::storm::worker
+	# Starts a multicast listening udp2log instance
+	# to read from the request log firehose.
+	# Many filters produce into Kafka.s
+	class role::analytics::udp2log::webrequest { producer_id => 3 }
+}
+
+node /^analytics100[7-9].eqiad.wmnet/ inherits analytics_basenode {
 	include role::analytics::storm::worker
 
 	case $hostname {
