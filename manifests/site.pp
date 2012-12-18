@@ -233,7 +233,7 @@ node "analytics1002.eqiad.wmnet" inherits analytics_basenode {
 
 
 # analytics1003 - analytics1009 are ETL workers
-node "analytics1003.eqiad.wment" inherits analytics_basenode {
+node "analytics1003.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::worker
 
 	# Starts a multicast listening udp2log instance
@@ -252,7 +252,7 @@ node "analytics1003.eqiad.wment" inherits analytics_basenode {
 		require => Class["role::analytics::udp2log"],
 	}
 }
-node "analytics1004.eqiad.wment" inherits analytics_basenode {
+node "analytics1004.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::worker
 
 	# Starts a multicast listening udp2log instance
@@ -271,7 +271,7 @@ node "analytics1004.eqiad.wment" inherits analytics_basenode {
 		require => Class["role::analytics::udp2log"],
 	}
 }
-node "analytics1005.eqiad.wment" inherits analytics_basenode {
+node "analytics1005.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::worker
 
 	# Starts a multicast listening udp2log instance
@@ -290,7 +290,7 @@ node "analytics1005.eqiad.wment" inherits analytics_basenode {
 		require => Class["role::analytics::udp2log"],
 	}
 }
-node "analytics1006.eqiad.wment" inherits analytics_basenode {
+node "analytics1006.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::worker
 
 	# Starts a multicast listening udp2log instance
