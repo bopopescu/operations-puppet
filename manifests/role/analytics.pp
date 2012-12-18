@@ -75,18 +75,6 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 }
 
 
-# == Class role::analytics::udp2log::zero
-# Reads from the udp2log web request log firehose
-# and produces selected wikipedia zero stream into Kafka
-# TODO:  This needs a better name than "zero".
-class role::analytics::udp2log::zero inherits role::analytics::udp2log {
-	misc::udp2log::instance { "zero":
-		port                => "8420",
-		multicast           => true,
-		log_directory       => "/var/log/udp2log/zero",
-	}
-}
-
 # == role::analytics::kafka::consumer
 # Installs cron jobs to consume from Kafka into hadoop
 class role::analytics::kafka::consumer {
