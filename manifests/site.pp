@@ -231,47 +231,87 @@ node "analytics1002.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::kafka::consumer
 }
 
+
 # analytics1003 - analytics1009 are ETL workers
 node "analytics1003.eqiad.wment" inherits analytics_basenode {
 	include role::analytics::storm::worker
+
 	# Starts a multicast listening udp2log instance
 	# to read from the request log firehose.
 	# Many filters produce into Kafka.s
-	class { "role::analytics::udp2log::webrequest": producer_id => 0 }
+	include role::analytics::udp2log
+	misc::udp2log::instance { "webrequest":
+		port                => "8420",
+		multicast           => true,
+		log_directory       => "/var/log/udp2log/webrequest",
+		monitor_log_age     => false,
+		template_variables  => {
+			'producer_count' => 4,
+			'producer_id'    => 0,
+		},
+		require => Class["role::analytics::udp2log"],
+	}
 }
 node "analytics1004.eqiad.wment" inherits analytics_basenode {
 	include role::analytics::storm::worker
+
 	# Starts a multicast listening udp2log instance
 	# to read from the request log firehose.
 	# Many filters produce into Kafka.s
-	class { "role::analytics::udp2log::webrequest": producer_id => 1 }
+	include role::analytics::udp2log
+	misc::udp2log::instance { "webrequest":
+		port                => "8420",
+		multicast           => true,
+		log_directory       => "/var/log/udp2log/webrequest",
+		monitor_log_age     => false,
+		template_variables  => {
+			'producer_count' => 4,
+			'producer_id'    => 1,
+		},
+		require => Class["role::analytics::udp2log"],
+	}
 }
 node "analytics1005.eqiad.wment" inherits analytics_basenode {
 	include role::analytics::storm::worker
+
 	# Starts a multicast listening udp2log instance
 	# to read from the request log firehose.
 	# Many filters produce into Kafka.s
-	class { "role::analytics::udp2log::webrequest": producer_id => 2 }
+	include role::analytics::udp2log
+	misc::udp2log::instance { "webrequest":
+		port                => "8420",
+		multicast           => true,
+		log_directory       => "/var/log/udp2log/webrequest",
+		monitor_log_age     => false,
+		template_variables  => {
+			'producer_count' => 4,
+			'producer_id'    => 2,
+		},
+		require => Class["role::analytics::udp2log"],
+	}
 }
 node "analytics1006.eqiad.wment" inherits analytics_basenode {
 	include role::analytics::storm::worker
+
 	# Starts a multicast listening udp2log instance
 	# to read from the request log firehose.
 	# Many filters produce into Kafka.s
-	class { "role::analytics::udp2log::webrequest": producer_id => 3 }
+	include role::analytics::udp2log
+	misc::udp2log::instance { "webrequest":
+		port                => "8420",
+		multicast           => true,
+		log_directory       => "/var/log/udp2log/webrequest",
+		monitor_log_age     => false,
+		template_variables  => {
+			'producer_count' => 4,
+			'producer_id'    => 3,
+		},
+		require => Class["role::analytics::udp2log"],
+	}
 }
 
 node /^analytics100[7-9].eqiad.wmnet/ inherits analytics_basenode {
 	include role::analytics::storm::worker
-
-	case $hostname {
-		/^analytics100[3456]/: {
-			# Starts a multicast listening udp2log instance
-			# to read from the request log firehose.
-			# Many filters produce into Kafka.s
-			include role::analytics::udp2log::webrequest
-		}
-	}
 }
 
 # analytics1010 is Hadoop Master (i.e NameNode, JobTracker, and ResourceManager)
