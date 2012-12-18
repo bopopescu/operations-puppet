@@ -242,6 +242,7 @@ node /^analytics100[3-9].eqiad.wmnet/ inherits analytics_basenode {
 			# Many filters produce into Kafka.s
 			include role::analytics::udp2log::webrequest
 		}
+	}
 }
 
 # analytics1010 is Hadoop Master (i.e NameNode, JobTracker, and ResourceManager)
