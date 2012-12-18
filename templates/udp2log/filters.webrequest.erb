@@ -6,8 +6,8 @@ def kafka_producer(topic)
   "/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic} > /dev/null"
 end
 
-webrequest_producer_count = template_variables['webrequest_producer_count']
-webrequest_producer_id    = template_variables['webrequest_producer_id']
+webrequest_producer_count = template_variables['producer_count']
+webrequest_producer_id    = template_variables['producer_id']
 
 # We're splitting the webrequest stream into
 # a number of streams across a few different machines.
