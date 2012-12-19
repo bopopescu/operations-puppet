@@ -220,6 +220,11 @@ define kraken::misc::backup::hdfs::mysql(
 # usually does, or that we will not need
 # in production when we are finished with testing.
 class kraken::misc::temp {
+	# include kraken::private class.
+	# this is manually put in place on analytics1001.
+	# it is not in git.
+	include kraken::private
+	
 	if $hostname != 'analytics1001' {
 		file { "/etc/profile.d/http_proxy.sh":
 			mode    => 0755,
