@@ -16,6 +16,10 @@ class kraken::hue {
 		require               => [Class["kraken::hadoop::config"], Class["kraken::oozie::server"], Class["kraken::hive::server"]],
 	}
 
+	# include this temporary class until Cloudera releases
+	# an new version of hue with this fix.
+	include kraken::hue::ldap_patch
+
 	include kraken::hue::database::backup
 }
 
@@ -38,5 +42,23 @@ class kraken::hue::database::backup {
 		backup_filename => "hue_desktop.db",
 		minute          => 0,
 		hour            => 8,
+	}
+}
+
+# == Class kraken::hue::ldap_patch
+# 
+# NOTE: This is only here temporarily, until Cloudera merges in this
+# JIRA: https://issues.cloudera.org/browse/HUE-978
+# 
+#
+# Hue useradmin Ldap group syncing doesn't work as is.
+# Use puppet to install the patched version of the file.
+class kraken::hue::ldap_patch {
+	file { "/usr/share/hue/apps/useradmin/src/useradmin/ldap_access.py":
+		source  => "puppet:///kraken/hue_ldap_access.py",
+		owner   => 'root',
+		group   => 'root',
+		mode    => 0644,
+		require => Class['cdh4::hue'],
 	}
 }
