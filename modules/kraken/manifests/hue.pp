@@ -7,13 +7,17 @@ class kraken::hue {
 	# hue server
 	class { "cdh4::hue":
 		# TODO:  Change secret_key and put it in private puppet repo.
-		secret_key            => "MQBvbk9fk9u1hSr7S13auZyYbRAPK0BbSr6k0NLokTNswv1wNU4v90nUhZE3",
-		smtp_host             => $kraken::smtp_host,
-		smtp_from_email       => "hue@$fqdn",
-		ldap_url              => "ldaps://virt0.wikimedia.org ldaps://virt1000.wikimedia.org",
-		ldap_base_dn          => "dc=wikimedia,dc=org",
-		ldap_username_pattern => "uid=<username>,ou=people,dc=wikimedia,dc=org",
-		require               => [Class["kraken::hadoop::config"], Class["kraken::oozie::server"], Class["kraken::hive::server"]],
+		secret_key             => "MQBvbk9fk9u1hSr7S13auZyYbRAPK0BbSr6k0NLokTNswv1wNU4v90nUhZE3",
+		smtp_host              => $kraken::smtp_host,
+		smtp_from_email        => "hue@$fqdn",
+		ldap_url               => "ldaps://virt0.wikimedia.org ldaps://virt1000.wikimedia.org",
+		ldap_base_dn           => "dc=wikimedia,dc=org",
+		ldap_username_pattern  => "uid=<username>,ou=people,dc=wikimedia,dc=org",
+		ldap_user_filter       => "objectclass=person",
+		ldap_user_name_attr    => "uid",
+		ldap_group_filter      => "objectclass=posixgroup",
+		ldap_group_member_attr => "member",
+		require                => [Class["kraken::hadoop::config"], Class["kraken::oozie::server"], Class["kraken::hive::server"]],
 	}
 
 	# include this temporary class until Cloudera releases
