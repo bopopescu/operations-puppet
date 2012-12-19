@@ -61,10 +61,10 @@ class kraken::hue::database::backup {
 # Use puppet to install the patched version of the file.
 class kraken::hue::ldap_patch {
 	file { "/usr/share/hue/apps/useradmin/src/useradmin/ldap_access.py":
-		source  => "puppet:///kraken/hue_ldap_access.py",
+		source  => "puppet:///modules/kraken/hue_ldap_access.py",
 		owner   => 'root',
 		group   => 'root',
 		mode    => 0644,
-		require => Class['cdh4::hue'],
+		notify  => Service['hue']
 	}
 }
