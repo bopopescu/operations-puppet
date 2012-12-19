@@ -7,10 +7,12 @@ class kraken::hue {
 	# hue server
 	class { "cdh4::hue":
 		# TODO:  Change secret_key and put it in private puppet repo.
-		secret_key             => "MQBvbk9fk9u1hSr7S13auZyYbRAPK0BbSr6k0NLokTNswv1wNU4v90nUhZE3",
+		secret_key             => $kraken::private::hue_secret_key,
 		smtp_host              => $kraken::smtp_host,
 		smtp_from_email        => "hue@$fqdn",
 		ldap_url               => "ldaps://virt0.wikimedia.org ldaps://virt1000.wikimedia.org",
+		ldap_bind_dn           => "cn=proxyagent,ou=profile,dc=wikimedia,dc=org",
+		ldap_bind_password     => $kraken::private::ldap_bind_password,
 		ldap_base_dn           => "dc=wikimedia,dc=org",
 		ldap_username_pattern  => "uid=<username>,ou=people,dc=wikimedia,dc=org",
 		ldap_user_filter       => "objectclass=person",
