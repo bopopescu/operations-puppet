@@ -18,7 +18,7 @@ class kraken::misc::web {
 	}
 
 	file { "/var/www/monitor/index.php":
-		source => "puppet://modules/kraken/monitor_index.php",
+		source => "puppet:///modules/kraken/monitor_index.php",
 	}
 }
 
