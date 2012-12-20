@@ -249,58 +249,25 @@ node "analytics1003.eqiad.wmnet" inherits analytics_basenode {
 node "analytics1004.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::worker
 
-	# Starts a multicast listening udp2log instance
-	# to read from the request log firehose.
-	# Many filters produce into Kafka.s
-	include role::analytics::udp2log
-	misc::udp2log::instance { "webrequest":
-		port                => "8420",
-		multicast           => true,
-		log_directory       => "/var/log/udp2log/webrequest",
-		monitor_log_age     => false,
-		template_variables  => {
-			'producer_count' => 4,
-			'producer_id'    => 1,
-		},
-		require => Class["role::analytics::udp2log"],
+	class { "role::analytics::udp2log::webrequest":
+		producer_id    => 1,
+		producer_count => 4,
 	}
 }
 node "analytics1005.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::worker
 
-	# Starts a multicast listening udp2log instance
-	# to read from the request log firehose.
-	# Many filters produce into Kafka.s
-	include role::analytics::udp2log
-	misc::udp2log::instance { "webrequest":
-		port                => "8420",
-		multicast           => true,
-		log_directory       => "/var/log/udp2log/webrequest",
-		monitor_log_age     => false,
-		template_variables  => {
-			'producer_count' => 4,
-			'producer_id'    => 2,
-		},
-		require => Class["role::analytics::udp2log"],
+	class { "role::analytics::udp2log::webrequest":
+		producer_id    => 2,
+		producer_count => 4,
 	}
 }
 node "analytics1006.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::worker
 
-	# Starts a multicast listening udp2log instance
-	# to read from the request log firehose.
-	# Many filters produce into Kafka.s
-	include role::analytics::udp2log
-	misc::udp2log::instance { "webrequest":
-		port                => "8420",
-		multicast           => true,
-		log_directory       => "/var/log/udp2log/webrequest",
-		monitor_log_age     => false,
-		template_variables  => {
-			'producer_count' => 4,
-			'producer_id'    => 3,
-		},
-		require => Class["role::analytics::udp2log"],
+	class { "role::analytics::udp2log::webrequest":
+		producer_id    => 3,
+		producer_count => 4,
 	}
 }
 
