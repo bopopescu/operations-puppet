@@ -8,7 +8,7 @@
 # This uses the bin/kafka-produce script from the Kraken repository.
 def kafka_producer(topic, jmx_port='')
 #  "/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic} > /dev/null"
-  "/opt/kraken/bin/kafka-produce #{topic} #{jmx_port}"
+  "/opt/kraken/bin/kafka-produce #{topic} #{jmx_port} > /dev/null"
 end
 
 # define product codes.
@@ -21,4 +21,4 @@ unknown_product_code = { :name => 'unknown', :jmx_port => 9940 }
 # Filter for generic events (i.e. those without a predetermined product code)
 # and produce into Kafka topic 'event-unknown'.
 # NOTE: For now, all event traffic is going into event-unknown
-pipe 1 <%= kafka_producer("event-#{unknown_product_code[:name]}", unknown_product_code[:jmx_port]) %>
+pipe 1 <%= kafka_producer("event-#{unknown_product_code[:name]}", unknown_product_code[:jmx_port]) %> > /dev/null
