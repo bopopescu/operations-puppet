@@ -10,19 +10,19 @@ $legend      = $_REQUEST['legend'] ? htmlspecialchars($_REQUEST['legend'])   : "
 
 $ganglia_images = array(
 	"Kafka Producer Events"               => array(
-		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Kafka+Producer+Events&vl=&x=&n=&hreg[]=analytics100%5B3456%5D&mreg[]=kafka_producer_AsyncProducerStats.%2AAsyncProducerEvents&gtype=stack&glegend=$legend&aggregate=1",
+		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Kafka+Producer+Events&vl=&x=&n=&hreg%5B%5D=analytics10%5Cd%5Cd&mreg[]=kafka_producer_AsyncProducerStats.%2AAsyncProducerEvents&gtype=stack&glegend=$legend&aggregate=1",
 		'href' => "http://ganglia.wikimedia.org/latest/graph_all_periods.php?title=Kafka+Producer+Events&vl=&x=&n=&hreg%5B%5D=analytics100%5B3456%5D&mreg%5B%5D=kafka_producer_AsyncProducerStats.*AsyncProducerEvents&gtype=stack&glegend=show&aggregate=1",
 	),
 	"Kafka Producer Dropped Events"       => array(
-		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Kafka+Producer+Drops&vl=&x=&n=&hreg[]=analytics100%5B3456%5D&mreg[]=kafka_producer_AsyncProducerStats.%2AAsyncProducerDroppedEvents&gtype=stack&glegend=$legend&aggregate=1",
+		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Kafka+Producer+Drops&vl=&x=&n=&hreg%5B%5D=analytics10%5Cd%5Cd&mreg[]=kafka_producer_AsyncProducerStats.%2AAsyncProducerDroppedEvents&gtype=stack&glegend=$legend&aggregate=1",
 		'href' => "http://ganglia.wikimedia.org/latest/graph_all_periods.php?title=Kafka+Producer+Drops&vl=&x=&n=&hreg%5B%5D=analytics100%5B3456%5D&mreg%5B%5D=kafka_producer_AsyncProducerStats.*AsyncProducerDroppedEvents&gtype=stack&glegend=show&aggregate=1",
 	),
 	"Kafka Produce Requests Per Second"   => array(
-		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Kafka+Producer+Requests+Per+Second&vl=&x=&n=&hreg[]=analytics100%5B3456%5D&mreg[]=kafka_producer_KafkaProducerStats.%2AProduceRequestsPerSecond&gtype=stack&glegend=$legend&aggregate=1",
+		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Kafka+Producer+Requests+Per+Second&vl=&x=&n=&hreg%5B%5D=analytics10%5Cd%5Cd&mreg[]=kafka_producer_KafkaProducerStats.%2AProduceRequestsPerSecond&gtype=stack&glegend=$legend&aggregate=1",
 		'href' => "http://ganglia.wikimedia.org/latest/graph_all_periods.php?title=Kafka+Producer+Requests+Per+Second&vl=&x=&n=&hreg%5B%5D=analytics100%5B3456%5D&mreg%5B%5D=kafka_producer_KafkaProducerStats.*ProduceRequestsPerSecond&gtype=stack&glegend=show&aggregate=1",
 	),
 	"Kafka Producer Num Produce Requests" => array(
-		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Kafka+Producer+Num+Produce+Requests+&vl=&x=&n=&hreg[]=analytics100%5B3456%5D&mreg[]=kafka_producer_KafkaProducerStats.%2ANumProduceRequests&gtype=stack&glegend=$legend&aggregate=1",
+		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Kafka+Producer+Num+Produce+Requests+&vl=&x=&n=&hreg%5B%5D=analytics10%5Cd%5Cd&mreg[]=kafka_producer_KafkaProducerStats.%2ANumProduceRequests&gtype=stack&glegend=$legend&aggregate=1",
 		'href' => "http://ganglia.wikimedia.org/latest/graph_all_periods.php?title=Kafka+Producer+Num+Produce+Requests+&vl=&x=&n=&hreg%5B%5D=analytics100%5B3456%5D&mreg%5B%5D=kafka_producer_KafkaProducerStats.*NumProduceRequests&gtype=stack&glegend=show&aggregate=1",
 	),
 	"Kafka Broker Bytes In"               => array(
@@ -34,7 +34,7 @@ $ganglia_images = array(
 		'href' => "http://ganglia.wikimedia.org/latest/graph_all_periods.php?title=Kafka+MessagesIn&vl=&x=&n=0&hreg%5B%5D=analytics102%5B12%5D&mreg%5B%5D=kafka_server_BrokerTopicStat.MessagesIn&gtype=stack&glegend=show&aggregate=1",
 	),
 	"udp2log Webrequest Packet Loss"      => array(
-		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Analytics+Webrequest+Packet+Loss&vl=&x=&n=&hreg[]=analytics100%5B3456%5D.eqiad.wmnet&mreg[]=packet_loss_average&gtype=line&glegend=$legend&aggregate=1",
+		'src'  => "http://ganglia.wikimedia.org/latest/graph.php?r=$period&z=xlarge&title=Analytics+Webrequest+Packet+Loss&vl=&x=&n=&hreg%5B%5D=analytics10%5Cd%5Cd.eqiad.wmnet&mreg[]=packet_loss_average&gtype=line&glegend=$legend&aggregate=1",
 		'href' => "http://ganglia.wikimedia.org/latest/graph_all_periods.php?title=Analytics+Webrequest+Packet+Loss&vl=&x=&n=&hreg%5B%5D=analytics100%5B3456%5D.eqiad.wmnet&mreg%5B%5D=packet_loss_average&gtype=line&glegend=show&aggregate=1",
 	),
 );
