@@ -48,13 +48,35 @@ class kraken::monitoring::kafka::server inherits kraken::monitoring::jmxtrans {
 }
 
 
-# This requires that the udp2log filters.webrequest.erb is configured to
-# publish to the JMX ports below.
-class kraken::monitoring::kafka::producer::webrequest inherits kraken::monitoring::jmxtrans {
+class kraken::monitoring::kafka::producer inherits kraken::monitoring::jmxtrans {
 	# Query each of the Kafka Producers for these predefined queries
-	
 	$kafka_producer_stats_attr = [ "AvgProduceRequestsMs", "MaxProduceRequestMs", "NumProduceRequests", "ProduceRequestsPerSecond" ]
 	$async_producer_stats_attr = [ "AsyncProducerDroppedEvents", "AsyncProducerEvents" ]
+}
+
+
+class kraken::monitoring::kafka::producer::event inherits kraken::monitoring::kafka::producer {
+	# webrequest-all.100 kafka producer metrics
+	jmxtrans::metrics { "kafka-producer-event-unknown-$hostname":
+		jmx     => "$fqdn:9940",
+		queries => [
+			{
+				"obj"          => "kafka:type=kafka.KafkaProducerStats",
+				"resultAlias"  => "kafka_producer_KafkaProducerStats-event-unknown",
+				"attr"         => $kafka_producer_stats_attr
+			},
+			{
+				"obj"          => "kafka.producer.Producer:type=AsyncProducerStats",
+				"resultAlias"  => "kafka_producer_AsyncProducerStats-event-unknown",
+				"attr"         => $async_producer_stats_attr
+			}
+		]
+	}
+}
+
+# This requires that the udp2log filters.webrequest.erb is configured to
+# publish to the JMX ports below.
+class kraken::monitoring::kafka::producer::webrequest inherits kraken::monitoring::kafka::producer {
 
 	# query each Kafka udp2log Webrequest Producer
 

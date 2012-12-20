@@ -3,28 +3,37 @@
 # udp2log filters for the /event data stream generated
 # from varnish cache servers.
 <%
+
+# Quick and easy method for DRYing piping into kafka producer.
+# This uses the bin/kafka-produce script from the Kraken repository.
+def kafka_producer(topic, jmx_port='')
+#  "/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic} > /dev/null"
+  "/opt/kraken/bin/kafka-produce #{topic} #{jmx_port}"
+end
+
 # define product codes.
-product_codes = [
-  'web',
-  'debug',
-  'kraken',
-  'limn',
-  'mw',
-  'i18n-uls',
-  'wlm',
+unknown_product_code = { :name => 'unknown', :jmx_port => 9940 }
+
+# for now just define an empty array.  We aren't actually using these.
+product_codes = [  
+  # { :name => 'web',      :jmx_port => 9941 },
+  # { :name => 'debug',    :jmx_port => 9942 },
+  # { :name => 'kraken',   :jmx_port => 9943 },
+  # { :name => 'limn',     :jmx_port => 9944 },
+  # { :name => 'mw',       :jmx_port => 9945 },
+  # { :name => 'i18n-uls', :jmx_port => 9946 },
+  # { :name => 'wlm',      :jmx_port => 9947 },
 ]
 
-# quick and easy method for DRYing piping into kafka producer.
-def kafka_producer(topic)
-  "/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic} > /dev/null"
-end
+
+
 -%>
 
 # Produce events into Kafka.
 
 # Filter for generic events (i.e. those without a predetermined product code)
 # and produce into Kafka topic 'event-unknown'.
-pipe 1 /bin/egrep -v '^/event(\.gif)?/(<%= product_codes.join('|') %>)\s' | <%= kafka_producer("event-unknown") %>
+pipe 1 /bin/egrep -v '^/event(\.gif)?/(<%= product_codes.join('|') %>)\s' | <%= kafka_producer("event-#{unknown_product_code[:name]}", unknown_product_code[:jmx_port]) %>
 # NOTE: This perl regex also works, but uses negative lookhead to match lines.  The above grep -v is simpler :p
 # /bin/grep -P '^(/event(\.gif)?/(?!<%= product_codes.join('|') %>))|/event(\.gif)?\s'
 
@@ -37,6 +46,6 @@ pipe 1 /bin/egrep -v '^/event(\.gif)?/(<%= product_codes.join('|') %>)\s' | <%= 
 product_codes.each do |product_code|
 -%>
 # filter and produce into Kafka for <%= product_code %> events
-pipe 1 /bin/egrep '^/event(\.gif)?/<%= product_code %>' | <%= kafka_producer("event-#{product_code}") %>
+pipe 1 /bin/egrep '^/event(\.gif)?/<%= product_code[:name] %>' | <%= kafka_producer("event-#{product_code[:name]}", product_code[:jmx_port]) %>
 
 <% end -%>

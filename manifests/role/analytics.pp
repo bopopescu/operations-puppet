@@ -77,7 +77,7 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 	}
 
 	# use jmxtrans to push Kafka Producer stats to Ganglia
-	include kraken::monitoring::kafka::producer::webrequest
+	include kraken::monitoring::kafka::producer::event
 }
 
 # == Class role::analytics::udp2log::event
