@@ -1,7 +1,7 @@
 
-# == Class kraken::misc::web::index
+# == Class kraken::misc::web
 #
-class kraken::misc::web::index {
+class kraken::misc::web {
 	require kraken::hadoop::config, kraken::storm
 	
 	$frontend_hostname = "analytics1027.eqiad.wmnet"
@@ -11,6 +11,14 @@ class kraken::misc::web::index {
 	
 	file { "/var/www/index.php":
 		content => template("kraken/index.php.erb"),
+	}
+
+	file { "/var/www/monitor":
+		ensure => "directory",
+	}
+
+	file { "/var/www/monitor/index.php":
+		source => "puppet://modules/kraken/monitor_index.php",
 	}
 }
 

@@ -20,7 +20,7 @@
 # Sets up a proxy from the public web interface in the Analytics Cluster
 class role::analytics::public inherits role::analytics {
 	include kraken::proxy
-	include kraken::misc::web::index
+	include kraken::misc::web
 }
 
 # == Class role::analytics::frontend
@@ -29,7 +29,7 @@ class role::analytics::public inherits role::analytics {
 class role::analytics::frontend inherits role::analytics {
 	# include the kraken index.php file.
 	# TODO:  Puppetize webserver classes.
-	include kraken::misc::web::index
+	include kraken::misc::web
 
 	# Oozie server
 	include kraken::oozie::server
@@ -71,7 +71,13 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 		port                => "8422",
 		log_directory       => "/var/log/udp2log/event",
 		monitor_packet_loss => false,
+		# event.filters.erb uses a Kafka producer
+		# wrapper script in the Kraken repository.
+		require => Class["kraken::repository"],
 	}
+
+	# use jmxtrans to push Kafka Producer stats to Ganglia
+	include kraken::monitoring::kafka::producer::webrequest
 }
 
 # == Class role::analytics::udp2log::event
