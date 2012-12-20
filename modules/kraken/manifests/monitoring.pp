@@ -52,32 +52,77 @@ class kraken::monitoring::kafka::server inherits kraken::monitoring::jmxtrans {
 # publish to the JMX ports below.
 class kraken::monitoring::kafka::producer::webrequest inherits kraken::monitoring::jmxtrans {
 	# Query each of the Kafka Producers for these predefined queries
-	$producer_queries = [
-		{
-			"obj"        => "kafka:type=kafka.KafkaProducerStats",
-			"attr"       => [ "AvgProduceRequestsMs", "MaxProduceRequestMs", "NumProduceRequests", "ProduceRequestsPerSecond" ]
-		},
-		{
-			"obj"        => "kafka.producer.Producer:type=AsyncProducerStats",
-			"attr"       => [ "AsyncProducerDroppedEvents", "AsyncProducerEvents" ]
-		}
-	]
+	
+	$kafka_producer_stats_attr = [ "AvgProduceRequestsMs", "MaxProduceRequestMs", "NumProduceRequests", "ProduceRequestsPerSecond" ]
+	$async_producer_stats_attr = [ "AsyncProducerDroppedEvents", "AsyncProducerEvents" ]
 
 	# query each Kafka udp2log Webrequest Producer
+
+	# webrequest-all.100 kafka producer metrics
 	jmxtrans::metrics { "kafka-producer-webrequest-all.100-$hostname":
 		jmx     => "$fqdn:9950",
-		queries => $producer_queries,
+		queries => [
+			{
+				"obj"          => "kafka:type=kafka.KafkaProducerStats",
+				"resultAlias"  => "kafka_producer_KafkaProducerStats-webrequest-all.100",
+				"attr"         => $kafka_producer_stats_attr
+			},
+			{
+				"obj"          => "kafka.producer.Producer:type=AsyncProducerStats",
+				"resultAlias"  => "kafka_producer_AsyncProducerStats-webrequest-all.100",
+				"attr"         => $async_producer_stats_attr
+			}
+		]
 	}
+
+	# webrequest-wikipedia-mobile kafka producer metrics
 	jmxtrans::metrics { "kafka-producer-webrequest-wikipedia-mobile-$hostname":
 		jmx     => "$fqdn:9951",
-		queries => $producer_queries,
+		queries => [
+			{
+				"obj"          => "kafka:type=kafka.KafkaProducerStats",
+				"resultAlias"  => "kafka_producer_KafkaProducerStats-webrequest-wikipedia-mobile",
+				"attr"         => $kafka_producer_stats_attr
+			},
+			{
+				"obj"          => "kafka.producer.Producer:type=AsyncProducerStats",
+				"resultAlias"  => "kafka_producer_AsyncProducerStats-webrequest-wikipedia-mobile",
+				"attr"         => $async_producer_stats_attr
+			}
+		]
 	}
+
+	# webrequest-blog kafka producer metrics
 	jmxtrans::metrics { "kafka-producer-webrequest-blog-$hostname":
 		jmx     => "$fqdn:9952",
-		queries => $producer_queries,
+		queries => [
+			{
+				"obj"          => "kafka:type=kafka.KafkaProducerStats",
+				"resultAlias"  => "kafka_producer_KafkaProducerStats-webrequest-blog",
+				"attr"         => $kafka_producer_stats_attr
+			},
+			{
+				"obj"          => "kafka.producer.Producer:type=AsyncProducerStats",
+				"resultAlias"  => "kafka_producer_AsyncProducerStats-webrequest-blog",
+				"attr"         => $async_producer_stats_attr
+			}
+		]
 	}
+
+	# webrequest-zero kafka producer metrics
 	jmxtrans::metrics { "kafka-producer-webrequest-zero-$hostname":
 		jmx     => "$fqdn:9953",
-		queries => $producer_queries,
+		queries => [
+			{
+				"obj"          => "kafka:type=kafka.KafkaProducerStats",
+				"resultAlias"  => "kafka_producer_KafkaProducerStats-webrequest-zero",
+				"attr"         => $kafka_producer_stats_attr
+			},
+			{
+				"obj"          => "kafka.producer.Producer:type=AsyncProducerStats",
+				"resultAlias"  => "kafka_producer_AsyncProducerStats-webrequest-zero",
+				"attr"         => $async_producer_stats_attr
+			}
+		]
 	}
 }
