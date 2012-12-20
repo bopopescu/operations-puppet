@@ -33,19 +33,23 @@ product_codes = [
 
 # Filter for generic events (i.e. those without a predetermined product code)
 # and produce into Kafka topic 'event-unknown'.
-pipe 1 /bin/egrep -v '^/event(\.gif)?/(<%= product_codes.join('|') %>)\s' | <%= kafka_producer("event-#{unknown_product_code[:name]}", unknown_product_code[:jmx_port]) %>
+# NOTE: For now, all event traffic is going into event-unknown
+pipe 1 | <%= kafka_producer("event-#{unknown_product_code[:name]}", unknown_product_code[:jmx_port]) %>
+
+
+# pipe 1 /bin/egrep -v '^/event(\.gif)?/(<%= product_codes.join('|') %>)\s' | <%= kafka_producer("event-#{unknown_product_code[:name]}", unknown_product_code[:jmx_port]) %>
 # NOTE: This perl regex also works, but uses negative lookhead to match lines.  The above grep -v is simpler :p
 # /bin/grep -P '^(/event(\.gif)?/(?!<%= product_codes.join('|') %>))|/event(\.gif)?\s'
 
 # Filter for predetermined event product codes defined here:
 # http://www.mediawiki.org/wiki/Analytics/Product_Codes
 
-<%
-# Iterate over through product codes
-# and generate a filter for each.
-product_codes.each do |product_code|
--%>
-# filter and produce into Kafka for <%= product_code %> events
-pipe 1 /bin/egrep '^/event(\.gif)?/<%= product_code[:name] %>' | <%= kafka_producer("event-#{product_code[:name]}", product_code[:jmx_port]) %>
-
-<% end -%>
+# <%
+# # Iterate over through product codes
+# # and generate a filter for each.
+# # product_codes.each do |product_code|
+# -%>
+# # filter and produce into Kafka for <%= product_code %> events
+# pipe 1 /bin/egrep '^/event(\.gif)?/<%= product_code[:name] %>' | <%= kafka_producer("event-#{product_code[:name]}", product_code[:jmx_port]) %>
+# 
+# <% end -%>
