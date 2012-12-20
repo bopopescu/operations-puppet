@@ -64,19 +64,19 @@ class kraken::monitoring::kafka::producer::webrequest inherits kraken::monitorin
 	]
 
 	# query each Kafka udp2log Webrequest Producer
-	jmxtrans::metrics { 
+	jmxtrans::metrics { "kafka-producer-webrequest-all.100-$hostname":
 		jmx     => "$fqdn:9950",
 		queries => $producer_queries,
 	}
-	jmxtrans::metrics { 
+	jmxtrans::metrics { "kafka-producer-webrequest-wikipedia-mobile-$hostname":
 		jmx     => "$fqdn:9951",
 		queries => $producer_queries,
 	}
-	jmxtrans::metrics { 
+	jmxtrans::metrics { "kafka-producer-webrequest-blog-$hostname":
 		jmx     => "$fqdn:9952",
 		queries => $producer_queries,
 	}
-	jmxtrans::metrics { 
+	jmxtrans::metrics { "kafka-producer-webrequest-zero-$hostname":
 		jmx     => "$fqdn:9953",
 		queries => $producer_queries,
 	}
