@@ -217,14 +217,10 @@ node "analytics1001.wikimedia.org" inherits analytics_basenode {
 	# Analytics node with a public IP.
 	include role::analytics::public
 
-	# analytics1001 is being sent the /event log data stream.
-	# Use udp2log to produce the stream into Kafka
-	misc::udp2log::instance { "event":
-		port                => "8422",
-		log_directory       => "/var/log/udp2log/event",
-		monitor_packet_loss => false,
-		monitor_log_age     => false,
-	}
+	# /event log stream udp2log instance.
+	# This udp2log instance has filters
+	# to produce into Kafka.
+	include role::analytics::udp2log::event
 }
 
 # analytics1002 is Storm Master (i.e. Storm Nimbus server)
