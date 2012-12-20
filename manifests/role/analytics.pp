@@ -74,6 +74,30 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 	}
 }
 
+# == Class role::analytics::udp2log::event
+# Reads from the /event log stream coming from
+# Varnish servers and produces the messages to Kafka.
+class role::analytics::udp2log::webrequest($producer_id, $producer_count) inherits role::analytics::udp2log {
+	# Starts a multicast listening udp2log instance
+	# to read from the request log firehose.
+	# Many filters produce into Kafkas
+	misc::udp2log::instance { "webrequest":
+		port                => "8420",
+		multicast           => true,
+		log_directory       => "/var/log/udp2log/webrequest",
+		template_variables  => {
+			'producer_count' => $producer_count,
+			'producer_id'    => $producer_id,
+		},
+		# webrequest.filters.erb uses a Kafka producer
+		# wrapper script in the Kraken repository.
+		require => Class["kraken::repository"],
+	}
+
+	# use jmxtrans to push Kafka Producer stats to Ganglia
+	include kraken::monitoring::kafka::producer::webrequest
+}
+
 
 # == role::analytics::kafka::consumer
 # Installs cron jobs to consume from Kafka into hadoop

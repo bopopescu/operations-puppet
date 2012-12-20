@@ -34,7 +34,7 @@ class kraken::kafka {
 class kraken::kafka::server inherits kraken::kafka {
 	# kafka broker server
 	include kafka::server
-	include kraken::monitoring::kafka
+	include kraken::monitoring::kafka::server
 }
 
 class kraken::kafka::client inherits kraken::kafka {
