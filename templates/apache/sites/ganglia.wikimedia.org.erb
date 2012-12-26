@@ -4,7 +4,7 @@
 	DocumentRoot /var/www
 	ServerAdmin root@wikimedia.org
 
-	<Directory "/var/www/">
+	<Directory "/var/www">
 	Options FollowSymLinks
 	AllowOverride None
 	Order allow,deny
@@ -28,7 +28,7 @@
 	SSLCertificateFile <%= ganglia_ssl_cert %>
 	SSLCertificateKeyFile <%= ganglia_ssl_key %>
 
-	<Directory "/var/www/">
+	<Directory "/var/www">
 	Options FollowSymLinks
 	AllowOverride None
 	Order allow,deny

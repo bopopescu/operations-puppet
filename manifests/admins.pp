@@ -847,6 +847,46 @@ class accounts {
 		}
 	}
 
+	class mflaschen inherits baseaccount {
+		$username = "mflaschen"
+		$realname = "Matthew Flaschen"
+		$uid = 625
+		$gid = 500
+
+		unixaccount { $realname: username => $username, uid => $uid, gid => $gid, enabled => $enabled }
+
+		if $enabled == "true" and $manage_home {
+			Ssh_authorized_key { require => Unixaccount[$realname] }
+
+			ssh_authorized_key { "matthew@matthew-t520":
+				ensure	=> present,
+				user	=> $username,
+				type	=> "ssh-rsa",
+				key	=> "AAAAB3NzaC1yc2EAAAADAQABAAABAQDFG6c++eZ7Rf9b1XWqmHhURA/dvpyIPdfA/gm5a0Kxbi8mDjqE0rG2svHsRhuFQolDtTqLnVgFUpEPgxOHG2DFXiVQWp5A00OEDikMk0XWTlysXpPl34tYkiQbSLQsQk3wz6zGeD8Wgp+0QPikpQKsnDSKLTNI1o7wIwFNgy2jcgfjSlMOqOvllj9N12CUsF/cD5uJn7IQ5vkIDRP39qXQo3XnsRUm3+Jy0H6Z5mYuWC2IUBr+7VOixPV2HZ42NJDkQzHs8whOYJxWNgzaYQKSvmGnjzScHvLXAD0lJtVBA2dr3FyqqY6a4FofUAuW0nnRwcckYM2K3upMhhS60jHN"
+			}
+		}
+	}
+
+	class mholmquist inherits baseaccount {
+		$username = "mholmquist"
+		$realname = "Mark Holmquist"
+		$uid = 626
+		$gid = 500
+
+		unixaccount { $realname: username => $username, uid => $uid, gid => $gid, enabled => $enabled }
+
+		if $enabled == "true" and $manage_home {
+			Ssh_authorized_key { require => Unixaccount[$realname] }
+
+			ssh_authorized_key { "administrator@WMF-ThinkPad-T420s":
+				ensure	=> present,
+				user	=> $username,
+				type	=> "ssh-rsa",
+				key	=> "AAAAB3NzaC1yc2EAAAADAQABAAABAQDIAim5ZuEvBLdg2XabmNI5OHHQgBzi7HJ/AHZj0AeZCdfFg/wwB1TiarcDXRITf2ZVVn2caTuayKeA5dzDWOz1ouZycJ9L4rr2cgs3pz0TJfyP63usqevnwYpHFiFlYHqyR37+JaUrWknHTcslAxeiL3zAHrRLjqI2H8zyajWJ7AWdBLMSKKan9EoFpZ4oKzTYr7A4fGqj70yXw2c4R2qJNuXxmG4CbeVL1bjyTd+a8OT1Ixx3zuMtVCHL1QZDeCtBaMpF62cKKkUM88btoKh1ESSmzQTWu7ZJP/LA1nnTukRt4l4kWv33zt+iAa5KffxCppx77fRSbOlkyk0dqjrj"
+			}
+		}
+	}
+
 	class midom inherits baseaccount {
 		$username = "midom"
 		$realname = "Domas Mituzas"
@@ -2315,7 +2355,7 @@ class accounts {
 
 			ssh_authorized_key {
 				"abartov@ABartov-XPS":
-				ensure	=> absent,
+				ensure	=> present,
 				user	=> $username,
 				type	=> "ssh-rsa",
 				key	=> "AAAAB3NzaC1yc2EAAAADAQABAAABAQDBFQ01XCX+xrAU7eKmu9Lrc7g3Ut6zYJx+q2JT3ebkRENcRhRvwrhh95qaJl3TvDne0WZ5sFre9XPxyrLKnCOszvUNUcg1x3htVJvavtiD4DdFtm8P711Cm2B8BhW+fUMT/MyvgmA+4VD2HRhMn9EXajJkrud9xWGouAMqUtkhcTblzJEclkPn4oXWxT6a0pXpr8eNxreO71Vf0948MlWuCnIv82A5OBPmWBX84e6eD24ZYYCko4uutBm+UEj+H0F0m8bHXc2wpt2ksJHgZZKM23fhFw6Glz0hjNRVy4bWvfG9eRc6lnkZdZQZXAl73N3GvjBbViG6YK+NTBiKe4wF";
@@ -2336,7 +2376,7 @@ class accounts {
 
 			ssh_authorized_key {
 				"okeyes@wikimedia.org":
-				ensure	=> absent,
+				ensure	=> present,
 				user	=> $username,
 				type	=> "ssh-rsa",
 				key	=> "AAAAB3NzaC1yc2EAAAABJQAAAIBqzD79g6nyNeJwvBGQdhC2mILwhaoJ9yaf/ysk9LOzrfjIvo3zSpWwr3JT/qLh9/5cDGNOFqXPlbUL4V0lyMlKhDRTrHtsJJLoMUrmvsUo5aLG0Aum5TJ25jJ3v/av5wSGX5tOtQJgemPh0K4pD5iR3PSGUcFEHUOdhFwdrWT38Q==",
@@ -2357,7 +2397,7 @@ class accounts {
 
 			ssh_authorized_key {
 				"jdlrobson@gmail.com":
-				ensure	=> absent,
+				ensure	=> present,
 				user	=> $username,
 				type	=> "ssh-rsa",
 				key	=> "AAAAB3NzaC1yc2EAAAADAQABAAABAQDD0Dxmydx5Ep7f892alwpB7YZ2684vWPBfRFubxwGjaG9gazYImKpAm2yeuCmB5lUcFqhLoVzqJfp3yx1GMK6XHPqCqYZ4FaJ2huAURDLYen/9/o1D+uZh4/033nbWBKbUoMPPLR/5dkCw1z1RKAecais0AtAcxhX9sZvoPf9Pu7DfAVgub/4AdpBYzKO3uwIwIdrxI2QyBKCHTG6yGG6D3lh5AGSrga3rmss2JhIp/TpdYrrzsAAaDsnaeu3q6OzE5OwGJzkdoZAcDT5rDsCXUUAwx3WyZtPNJzXaFpX6tvw6IK9cNCcy+oaIFRsz9XNHLvbke0MN0ctyZo2QQ4wh",
@@ -2378,7 +2418,7 @@ class accounts {
 
 			ssh_authorized_key {
 				"jgonera@wikimedia.org":
-				ensure	=> absent,
+				ensure	=> present,
 				user	=> $username,
 				type	=> "ssh-rsa",
 				key	=> "AAAAB3NzaC1yc2EAAAADAQABAAABAQC/W+LDuE1zEbrLhkADukE2jILZuecapTqBDBzcohlU9z01z8mFmc9bYck0prBL7I/cLdM65QVcDZIXekNV9A6h746DeYfNhgSNfIVlwauKpvr83gRLuFGfZsIuORGzD19NKbMYxuMJobCP5KP0Xzqvk//8IcersJTooYXXg/bbfOKHi6mpr+YKqJgyXuhF4weQu23ty4HBhOFpg9gZ5oXvAShdudWsB7aFGMPqg+B61n8+j33HxRV4Q4d/JdGNnaYt/G6klhhTHzX1vnGpGCWvDWXJXAM+Q9zdWxH1lAKL3sSR9fMKQ7z5yUK9Nc3QUb7yJuHkeUhuMIysL2HNWvFV",
@@ -2467,6 +2507,8 @@ class admins::mortals {
 	include accounts::khorn
 	include accounts::krinkle
 	include accounts::maxsem
+	include accounts::mflaschen
+	include accounts::mholmquist
 	include accounts::mlitn
 	include accounts::neilk  # revoked access per RT 2345
 	include accounts::nikerabbit

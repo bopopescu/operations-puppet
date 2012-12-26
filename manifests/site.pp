@@ -211,7 +211,6 @@ node analytics_basenode {
 	}
 }
 
-
 node "analytics1001.wikimedia.org" inherits analytics_basenode {
 	# analytics1001 is currently the only
 	# Analytics node with a public IP.
@@ -221,7 +220,6 @@ node "analytics1001.wikimedia.org" inherits analytics_basenode {
 	# This udp2log instance has filters
 	# to produce into Kafka.
 	include role::analytics::udp2log::event
-}
 
 # analytics1002 is Storm Master (i.e. Storm Nimbus server)
 node "analytics1002.eqiad.wmnet" inherits analytics_basenode {
@@ -653,11 +651,7 @@ node /db6[0]\.pmtpa\.wmnet/ {
 }
 
 node /db6[1]\.pmtpa\.wmnet/ {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
+	include role::coredb::s1
 }
 
 node /db6([2-9])\.pmtpa\.wmnet/ {
@@ -1120,7 +1114,8 @@ node "kaulen.wikimedia.org" {
 		accounts::robla,
 		misc::download-mediawiki,
 		misc::bugzilla::server,
-		misc::bugzilla::crons
+		misc::bugzilla::crons,
+		misc::bugzilla::communitymetrics
 
 	install_certificate{ "star.wikimedia.org": }
 
@@ -1453,6 +1448,29 @@ node /mc(1[0-9]|[0-9])\.pmtpa\.wmnet/ {
 	if $hostname =~ /^mc[12]$/ {
 		$ganglia_aggregator = "true"
 	}
+
+	# replication mappings may end up all over the place
+	# once servers die and are replaced, so making this
+	# explicit for now.
+	$redis_replication = {
+		'slave' => false,
+		'mc1' => 'mc1001',
+		'mc2' => 'mc1002',
+		'mc3' => 'mc1003',
+		'mc4' => 'mc1004',
+		'mc5' => 'mc1005',
+		'mc6' => 'mc1006',
+		'mc7' => 'mc1007',
+		'mc8' => 'mc1008',
+		'mc9' => 'mc1009',
+		'mc10' => 'mc1010',
+		'mc11' => 'mc1011',
+		'mc12' => 'mc1012',
+		'mc13' => 'mc1013',
+		'mc14' => 'mc1014',
+		'mc15' => 'mc1015',
+		'mc16' => 'mc1016',
+	}
 	include role::memcached
 
 	file { "/a":
@@ -1464,6 +1482,45 @@ node /mc(1[0-9]|[0-9])\.pmtpa\.wmnet/ {
 	}
 	include redis::ganglia
 }
+
+node /mc(10[01][0-9])\.eqiad\.wmnet/ {
+	$cluster = "memcached"
+	if $hostname =~ /^mc100[12]$/ {
+		$ganglia_aggregator = "true"
+	}
+
+	$redis_replication = {
+		'slave' => 'pmtpa.wmnet',
+		'mc1001' => 'mc1',
+		'mc1002' => 'mc2',
+		'mc1003' => 'mc3',
+		'mc1004' => 'mc4',
+		'mc1005' => 'mc5',
+		'mc1006' => 'mc6',
+		'mc1007' => 'mc7',
+		'mc1008' => 'mc8',
+		'mc1009' => 'mc9',
+		'mc1010' => 'mc10',
+		'mc1011' => 'mc11',
+		'mc1012' => 'mc12',
+		'mc1013' => 'mc13',
+		'mc1014' => 'mc14',
+		'mc1015' => 'mc15',
+		'mc1016' => 'mc16',
+	}
+
+	include role::memcached
+
+	file { "/a":
+		ensure => directory;
+	}
+
+	class { "redis":
+		maxmemory => "500Mb",
+	}
+	include redis::ganglia
+}
+
 
 node "mchenry.wikimedia.org" {
 	$gid = 500
@@ -1553,20 +1610,6 @@ node /^ms-fe[1-4]\.pmtpa\.wmnet$/ {
 	include role::swift::pmtpa-prod::proxy
 }
 
-node /^ms-fe100[1-4]\.eqiad\.wmnet$/ {
-	if $hostname =~ /^ms-fe100[12]$/ {
-		$ganglia_aggregator = "true"
-	}
-	# disabling cluster reportingc stats until the cluster is up
-	#if $hostname =~ /^ms-fe1001$/ {
-	#	include role::swift::eqiad-prod::ganglia_reporter
-	#}
-
-	class { "lvs::realserver": realserver_ips => [ "10.2.2.27" ] }
-
-	include role::swift::eqiad-prod::proxy
-}
-
 node /^ms-be(1|2|4|13)\.pmtpa\.wmnet$/ {
 	$all_drives = [ '/dev/sdc', '/dev/sdd', '/dev/sde',
 		'/dev/sdf', '/dev/sdg', '/dev/sdh', '/dev/sdi', '/dev/sdj', '/dev/sdk',
@@ -1617,24 +1660,30 @@ node /^ms-be1([1-2]|[4-9])\.pmtpa\.wmnet$/ {
 	swift::create_filesystem{ $all_drives: partition_nr => "1" }
 }
 
+node /^ms-fe100[1-4]\.eqiad\.wmnet$/ {
+	$cluster = "ceph"
+
+	if $hostname =~ /^ms-fe100[12]$/ {
+		$ganglia_aggregator = "true"
+	}
+	class { "lvs::realserver": realserver_ips => [ "10.2.2.27" ] }
+
+	include standard
+}
+
 node /^ms-be10[01][0-9]\.eqiad\.wmnet$/ {
-	# the ms-be hosts with ssds have two more disks
-	$all_drives = [ '/dev/sdc', '/dev/sdd', '/dev/sde',
-		'/dev/sdf', '/dev/sdg', '/dev/sdh', '/dev/sdi', '/dev/sdj', '/dev/sdk',
-		'/dev/sdl', '/dev/sdm', '/dev/sdn' ]
+	$cluster = "ceph"
 
-	include role::swift::eqiad-prod::storage
-
-	swift::create_filesystem{ $all_drives: partition_nr => "1" }
+	include standard
 }
 
 node /^ms-be300[1-4]\.esams\.wikimedia\.org$/ {
 	$cluster = "ceph"
-	
+
 	if $::hostname =~ /^ms-be300[12]$/ {
 		$ganglia_aggregator = "true"
 	}
-	
+
 	include standard
 }
 
@@ -1701,13 +1750,13 @@ node /mw11(49]|5[0-2])\.eqiad\.wmnet/ {
 }
 
 # mw 1153-1160 are imagescalers (precise)
-#node /mw11(5[3-9]|60)\.eqaid\.wmnet/ {
-#	if $hostname =~ /^mw115[34]$/ {
-#		$ganglia_aggregator = "true"
-#	}
-#
-#	include	role::applicationserver::imagescaler
-#}
+node /mw11(5[3-9]|60)\.eqaid\.wmnet/ {
+	if $hostname =~ /^mw115[34]$/ {
+		$ganglia_aggregator = "true"
+	}
+
+	include	role::applicationserver::imagescaler
+}
 
 node "neon.wikimedia.org" {
 	$domain_search = "wikimedia.org pmtpa.wmnet eqiad.wmnet esams.wikimedia.org"
@@ -2382,7 +2431,7 @@ node "stat1.wikimedia.org" {
 		accounts::ironholds,
 		accounts::jdlrobson,
 		accounts::jgonera
-		
+
 
 	sudo_user { "otto": privileges => ['ALL = NOPASSWD: ALL'] }
 }
@@ -2639,7 +2688,7 @@ node  "yongle.wikimedia.org" {
 		accounts::catrope
 }
 
-node "yttrium.eqiad.wmnet" {
+node /^(yttrium|solr(100)?[1-3])\.(eqiad|pmtpa)\.wmnet/ {
 	system_role { "solr-geodata": description => "Solr server for GeoData"}
 
 	include standard

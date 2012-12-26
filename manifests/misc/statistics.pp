@@ -95,7 +95,7 @@ class misc::statistics::mediawiki {
 
 	git::clone { "statistics_mediawiki":
 		directory => $statistics_mediawiki_directory,
-		origin    => "https://gerrit.wikimedia.org/r/p/test/mediawiki/core.git",
+		origin    => "https://gerrit.wikimedia.org/r/p/mediawiki/core.git",
 		ensure    => 'latest',
 		owner     => 'mwdeploy',
 		group     => 'wikidev',
@@ -252,6 +252,35 @@ class misc::statistics::eventlogging {
 	]: ensure => latest; }
 
 	class { "redis": maxmemory => "512Mb" }
+
+	file {
+		["/var/log/eventlogging", "/var/log/eventlogging/archive"]:
+			owner => "mwdeploy",
+			group => "wikidev",
+			mode => 0664,
+			ensure => "directory";
+		"/etc/logrotate.d/eventlogging":
+			source => "puppet:///files/logrotate/eventlogging",
+			mode => 0444;
+	}
+
+	# Create an rsync module that will allow us to copy files from
+	# /varl.og/eventlogging to statistic servers.
+	# This uses modules/rsync to
+	# set up an rsync daemon service
+	include rsync::server
+
+	# Set up an rsync module
+	# (in /etc/rsync.conf) for /var/log/eventlogging.
+	# There is an rsync_job on stat1 that copies
+	# files in /var/log/eventlogging/arvhive.*.gz to stat1.
+	rsync::server::module { "eventlogging":
+		path        => "/var/log/eventlogging",
+		read_only   => "yes",
+		list        => "yes",
+		# allow only statistics servers (stat1, stat1001)
+		hosts_allow => $misc::statistics::base::servers,
+	}
 }
 
 # == Class misc::statistics::gerrit_stats
@@ -370,7 +399,7 @@ class misc::statistics::rsync::jobs {
 	# Too bad I can't do this with recurse => true.
 	# See: https://projects.puppetlabs.com/issues/86
 	# for a much too long discussion on why I can't.
-	file { ["/a/squid", "/a/squid/archive", "/a/aft", "/a/aft/archive"]:
+	file { ["/a/squid", "/a/squid/archive", "/a/aft", "/a/aft/archive", "/a/eventlogging"]:
 		ensure  => "directory",
 		owner   => "stats",
 		group   => "wikidev",
@@ -411,6 +440,12 @@ class misc::statistics::rsync::jobs {
 	misc::statistics::rsync_job { "edits":
 		source      => "locke.wikimedia.org::udp2log/archive/edits*.gz",
 		destination => "/a/squid/archive/edits",
+	}
+
+	# eventlogging logs from vanadium
+	misc::statistics::rsync_job { "eventlogging":
+		source      => "vanadium.eqiad.wmnet::eventlogging/archive/*.gz",
+		destination => "/a/eventlogging/archive",
 	}
 }
 
