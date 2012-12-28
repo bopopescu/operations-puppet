@@ -15,10 +15,13 @@ class kraken::kafka {
 		group  => "kafka",
 	}
 
-	# ensure that Kafka log file is writeable
+	# ensure that Kafka log file is writeable.
+	# TODO:  FIX: For some reason, even though udp2log is in
+	# the kafka group, it still coudn't write to the file
+	# even though it is group writeable.  Just make it 666 for now.
 	file { $log_file:
 		ensure  => "file",
-		mode    => 0664,
+		mode    => 0666,
 		owner   => "kafka",
 		group   => "kafka",
 		require => File[$log_directory]
