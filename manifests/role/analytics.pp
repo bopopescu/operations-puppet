@@ -126,7 +126,7 @@ class role::analytics::kafka::consumer {
 	# except for wikipedia-mobile.  That is currently
 	# being consumed every 15 minutes
 	kraken::kafka::consumer::hadoop { "webrequest":
-		topics          => "^(webrequest(?!-wikipedia-mobile))",
+		topics          => "'^(webrequest(?!-wikipedia-mobile))'",
 		regex           => true,
 		consumer_group  => "kconsumer0",
 		hdfs_output_dir => $webrequest_log_hdfs_path,
