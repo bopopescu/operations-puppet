@@ -27,7 +27,7 @@ define kraken::cron (
 
 	$cronic_command = $logfile ? {
 		undef   => "/usr/local/bin/cronic $command",
-		default => "/usr/local/bin/cronic $command 2>&1 | /usr/bin/tee -a $logfile",
+		default => "/usr/local/bin/cronic $command | /usr/bin/tee -a $logfile",
 	}
 
 	# install a cron job wrapped in cronic
