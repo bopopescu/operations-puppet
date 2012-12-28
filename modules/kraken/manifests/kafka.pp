@@ -86,7 +86,13 @@ define kraken::kafka::consumer::hadoop(
 	require kraken::zookeeper::config
 	require kraken::kafka::consumer::hadoop::package
 
-	$consume_command = "/opt/kraken/bin/kafka-hadoop-consume --topic=$topics --group=$consumer_group --output=$hdfs_output_dir --limit=$limit"
+	# Since this command will be wrapped in cronic,
+	# Redirect stderr to stdout.  The KafkaConsumer
+	# generates a lot of logs on stderr, and we
+	# only want to get them emailed out if there
+	# is a bad exit code.
+	# (See define kraken::cron in kraken/cron.pp.)
+	$consume_command = "/opt/kraken/bin/kafka-hadoop-consume --topic=$topics --group=$consumer_group --output=$hdfs_output_dir --limit=$limit --redirect-stderr"
 	# append --regex if we should use a regex topic match
 	$command = $regex ? {
 		true  => "$consume_command --regex",
