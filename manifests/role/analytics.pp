@@ -108,24 +108,39 @@ class role::analytics::udp2log::webrequest($producer_id, $producer_count) inheri
 # == role::analytics::kafka::consumer
 # Installs cron jobs to consume from Kafka into hadoop
 class role::analytics::kafka::consumer {
+	$raw_log_hdfs_path        = "/wmf/raw"
+	$event_log_hdfs_path      = "$raw_log_hdfs_path/event"
+	$webrequest_log_hdfs_path = "$raw_log_hdfs_path/webrequest"
+
 	# consume event logs daily.
 	kraken::kafka::consumer::hadoop { "event":
 		topics          => "^event",
 		regex           => true,
 		consumer_group  => "kconsumer0",
-		hdfs_output_dir => "/wmf/raw/event",
+		hdfs_output_dir => $event_log_hdfs_path,
 		minute          => "0",
 		hour            => "6",
 	}
 
-	# consume each webrequest log hourly
+	# Consume each webrequest log hourly
+	# except for wikipedia-mobile.  That is currently
+	# being consumed every 15 minutes
 	kraken::kafka::consumer::hadoop { "webrequest":
-		topics          => "^webrequest",
+		topics          => "^(webrequest(?!-wikipedia-mobile))",
 		regex           => true,
 		consumer_group  => "kconsumer0",
-		hdfs_output_dir => "/wmf/raw/webrequest",
+		hdfs_output_dir => $webrequest_log_hdfs_path,
 		minute          => "30",
 		hour            => "*/1",
+	}
+
+	# Consume wikipedia-mobile logs every 15 minutes
+	kraken::kafka::consumer::hadoop { "webrequest-wikipedia-mobile":
+		topics          => "webrequest-wikipedia-mobile",
+		regex           => false,
+		consumer_group  => "kconsumer0",
+		hdfs_output_dir => $webrequest_log_hdfs_path,
+		minute          => "*/15",
 	}
 }
 
