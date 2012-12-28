@@ -23,6 +23,9 @@ mod_filter_command = "/usr/bin/awk '{if ($2 % #{webrequest_producer_count} == #{
 # udp2log packet loss monitoring
 pipe 10 /usr/local/bin/packet-loss 10 >> /var/log/udp2log/webrequest/packet-loss.log
 
+# sampled log saved to local disk for debugging purposes
+file 10000 /var/lib/hadoop/data/e/udp2log/sampled-10000.log
+
 # Produce logs into Kafka:
 
 # pipe 1/100th of all web request logs into Kafka topic webrequest-all.100
