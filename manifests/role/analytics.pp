@@ -70,6 +70,7 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 	misc::udp2log::instance { "event":
 		port                => "8422",
 		log_directory       => "/var/log/udp2log/event",
+		logrotate           => false,
 		monitor_packet_loss => false,
 		# event.filters.erb uses a Kafka producer
 		# wrapper script in the Kraken repository.
@@ -91,6 +92,7 @@ class role::analytics::udp2log::webrequest($producer_id, $producer_count) inheri
 		port                => "8420",
 		multicast           => true,
 		log_directory       => "/var/log/udp2log/webrequest",
+		logrotate           => false,
 		template_variables  => {
 			'producer_count' => $producer_count,
 			'producer_id'    => $producer_id,
