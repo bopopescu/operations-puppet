@@ -32,6 +32,7 @@ class kraken::proxy::haproxy {
 	$whitelist         = $kraken::proxy::whitelist
 
 	$namenode_hostname = $kraken::hadoop::config::namenode_hostname
+	$datanode_hostname = "analytics1011.eqiad.wmnet" # can pick any datanode here.
 	$frontend_hostname = "analytics1027.eqiad.wmnet"
 	$hue_hostname      = $frontend_hostname
 	$oozie_hostname    = $frontend_hostname

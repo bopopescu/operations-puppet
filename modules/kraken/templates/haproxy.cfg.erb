@@ -39,34 +39,46 @@ frontend kraken
   # HTTP Host based ACLs
   acl host_analytics    hdr_beg(host)    -i analytics.
   acl host_namenode     hdr_beg(host)    -i namenode.analytics.
+  acl host_datanode     hdr_beg(host)    -i datanode.analytics
   acl host_jobs         hdr_beg(host)    -i jobs.analytics.
   acl host_history      hdr_beg(host)    -i history.analytics.
   acl host_hue          hdr_beg(host)    -i hue.analytics.
   acl host_oozie        hdr_beg(host)    -i oozie.analytics.
   acl host_storm        hdr_beg(host)    -i storm.analytics.
 
+
   # Whitelisted Network/IP ACLs
 <% whitelist.each do |key, value| -%>
   acl src_<%= key %>    src <%= value %>
 <% end -%>
 
-  # Kraken Apt repository
   acl host_analytics1001 hdr_beg(host)   -i analytics1001.
+
+  # Kraken Apt repository
   acl path_apt           path_beg        -i /apt
+
+  # datanode streamfile public path.
+  # this allows anyone who knows the URLs
+  # to access files in HDFS in the /wmf/public
+  # directory without needing to enter HTTP auth
+  # credentials.
+  acl path_hdfs_public path_beg     -i /streamFile/wmf/public
 
   # Allow public access to the Kraken Apt repository
   http-request allow if host_analytics1001 path_apt
 
-  # Only allow proxying if the request
-  # is coming from a whitelisted network or IP, 
-  # the HTTP auth test passes, or if
-  # the request is to analytics.wikimedia.org.
-  http-request auth unless auth_ok or host_analytics or src_analyticsA or src_analyticsB or src_wmf_office or src_diederik or src_dsc
+  # Only allow proxying if:
+  # - the request is to a datanode url and the url path is to the /wmf/public directory
+  # - the request is coming from a whitelisted network or IP,
+  # - the HTTP auth test passes
+  # - the request is to analytics.wikimedia.org.
+  http-request auth unless auth_ok or host_analytics or path_hdfs_public or src_analyticsA or src_analyticsB or src_wmf_office or src_diederik or src_dsc
 
   # Use appropriate server backend based
   # on matched HTTP Host ACL
   use_backend   analytics if host_analytics
   use_backend   namenode  if host_namenode
+  use_backend   datanode  if host_datanode
   use_backend   jobs      if host_jobs
   use_backend   history   if host_history
   use_backend   hue       if host_hue
@@ -84,6 +96,9 @@ backend analytics
 
 backend namenode
   server namenode <%= namenode_hostname %>:50070
+
+backend datanode
+  server datanode <%= datanode_hostname %>:50075
 
 backend jobs
   server job_server <%= namenode_hostname %>:8088
