@@ -254,7 +254,7 @@ class kraken::misc::temp {
 	file { "/etc/profile.d/analytics.sh":
 		content => '
 alias pupup="pushd .; cd /etc/puppet.analytics && sudo git pull; popd"
-alias puptest="sudo puppetd --test --verbose --server analytics1001.wikimedia.org --vardir /var/lib/puppet.analytics --ssldir /var/lib/puppet.analytics/ssl --confdir=/etc/puppet.analytics"
+alias puptest="sudo puppetd --test --verbose --server analytics1001.wikimedia.org --vardir /var/lib/puppet.analytics --ssldir /var/lib/puppet.analytics/ssl --confdir=/etc/puppet.analytics --rundir=/var/run/puppet.analytics"
 alias pupsign="sudo puppetca --vardir /var/lib/puppet.analytics --ssldir /var/lib/puppet.analytics/ssl --confdir=/etc/puppet.analytics sign "
 export HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce',
 		mode => 0755,
