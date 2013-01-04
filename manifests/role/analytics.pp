@@ -122,11 +122,12 @@ class role::analytics::kafka::consumer {
 		hdfs_output_dir => $event_log_hdfs_path,
 		minute          => "0",
 		hour            => "6",
+		frequency       => "0",  # daily
 	}
 
 	# Consume each webrequest log hourly
 	# except for wikipedia-mobile.  That is currently
-	# being consumed every 15 minutes
+	# being consumed hourly
 	kraken::kafka::consumer::hadoop { "webrequest":
 		topics          => "'^(webrequest(?!-wikipedia-mobile))'",
 		regex           => true,
@@ -134,6 +135,7 @@ class role::analytics::kafka::consumer {
 		hdfs_output_dir => $webrequest_log_hdfs_path,
 		minute          => "30",
 		hour            => "*/1",
+		frequency       => "60",   # hourly
 	}
 
 	# Consume wikipedia-mobile logs every 15 minutes
@@ -143,6 +145,7 @@ class role::analytics::kafka::consumer {
 		consumer_group  => "kconsumer0",
 		hdfs_output_dir => $webrequest_log_hdfs_path,
 		minute          => "*/15",
+		frequency       => "15",   # every 15 minutes
 	}
 }
 

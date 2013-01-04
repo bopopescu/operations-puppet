@@ -64,6 +64,7 @@ class kraken::kafka::consumer::hadoop::package {
 # $limit             - Number of messages to consume.  Default: -1.  -1 means messages will be consumed until the end of the Kafka buffer.
 # $regex             - true or false.  If true, $topics should be a regex.
 # $user              - Cron job will be installed in this user's crontab
+# $frequency         - how often this cron job runs in minutes.  Use 0 if daily.  This is passed to the kafka-hadoop-consume script.  Default: 15.
 #
 # $hour,$minute,$month,$monthday,$weekday - Same parameters as the cron puppet resource type.
 #
@@ -74,6 +75,7 @@ define kraken::kafka::consumer::hadoop(
 	$limit           = "-1",
 	$regex           = false,
 	$user            = "hdfs",
+	$frequency       = "15",
 	$hour            = undef,
 	$minute          = undef,
 	$month           = undef,
@@ -92,7 +94,7 @@ define kraken::kafka::consumer::hadoop(
 	# only want to get them emailed out if there
 	# is a bad exit code.
 	# (See define kraken::cron in kraken/cron.pp.)
-	$consume_command = "/opt/kraken/bin/kafka-hadoop-consume --topic=$topics --group=$consumer_group --output=$hdfs_output_dir --limit=$limit --redirect-stderr"
+	$consume_command = "/opt/kraken/bin/kafka-hadoop-consume --topic=$topics --group=$consumer_group --output=$hdfs_output_dir --limit=$limit --frequency=$frequency --redirect-stderr"
 	# append --regex if we should use a regex topic match
 	$command = $regex ? {
 		true  => "$consume_command --regex",
