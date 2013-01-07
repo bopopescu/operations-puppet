@@ -577,7 +577,7 @@ node "db40.pmtpa.wmnet" {
 	system_role { "lame::not::puppetized": description => "Parser Cache database server" }
 }
 
-node /pc[1-9]\.pmtpa\.wmnet/ {
+node /pc([1-3]\.pmtpa|100[1-3]\.eqiad)\.wmnet/ {
 	include role::db::core,
 		mysql::mysqluser,
 		mysql::datadirs,
@@ -652,10 +652,14 @@ node /db6[0]\.pmtpa\.wmnet/ {
 }
 
 node /db6[1]\.pmtpa\.wmnet/ {
-	include role::coredb::s1
+  include role::coredb::es2
 }
 
-node /db6([2-9])\.pmtpa\.wmnet/ {
+node /db6[2]\.pmtpa\.wmnet/ {
+  include role::coredb::researchdb
+}
+
+node /db6([3-9])\.pmtpa\.wmnet/ {
 	include role::db::core,
 		mysql::mysqluser,
 		mysql::datadirs,
@@ -769,7 +773,7 @@ node "emery.wikimedia.org" inherits "base_analytics_logging_node" {
 	}
 }
 
-node "ersch.pmtpa.wmnet" {
+node /(ersch|tarin)\.pmtpa\.wmnet/ {
 	include standard,
 		role::poolcounter
 }
@@ -1072,8 +1076,10 @@ node "hume.wikimedia.org" {
 		misc::maintenance::translationnotifications,
 		misc::maintenance::wikidata,
 		misc::maintenance::tor_exit_node,
+		misc::maintenance::echo_mail_batch,
 		misc::maintenance::update_flaggedrev_stats,
 		misc::maintenance::update_special_pages,
+		misc::maintenance::parsercachepurging,
 		admins::roots,
 		admins::mortals,
 		admins::restricted,
@@ -1454,7 +1460,7 @@ node /mc(1[0-9]|[0-9])\.pmtpa\.wmnet/ {
 	# once servers die and are replaced, so making this
 	# explicit for now.
 	$redis_replication = {
-		'slave' => false,
+		'site' => false,
 		'mc1' => 'mc1001',
 		'mc2' => 'mc1002',
 		'mc3' => 'mc1003',
@@ -1491,7 +1497,7 @@ node /mc(10[01][0-9])\.eqiad\.wmnet/ {
 	}
 
 	$redis_replication = {
-		'slave' => 'pmtpa.wmnet',
+		'site' => 'pmtpa.wmnet',
 		'mc1001' => 'mc1',
 		'mc1002' => 'mc2',
 		'mc1003' => 'mc3',
@@ -2506,11 +2512,6 @@ node /^snapshot([1-4]\.pmtpa|100[1-4]\.eqiad)\.wmnet/ {
 		groups::wikidev
 }
 
-node "tarin.wikimedia.org" {
-	include standard,
-		role::poolcounter
-}
-
 node "thistle.pmtpa.wmnet" {
 	$ganglia_aggregator = "true"
 	include role::db::core
@@ -2544,7 +2545,6 @@ node /^tmh[12]\.pmtpa\.wmnet$/ {
 node "vanadium.eqiad.wmnet" {
 	$gid=500
 	system_role { "misc::log-collector": description => "log collector" }
-	system_role { "solr": description => "ttm solr backend"}
 
 	include standard,
 		groups::wikidev,
@@ -2552,14 +2552,15 @@ node "vanadium.eqiad.wmnet" {
 		accounts::datasets,
 		accounts::dsc,
 		accounts::diederik,
+		accounts::mflaschen,
 		accounts::spage,
 		misc::statistics::db::mysql,
+		misc::statistics::db::mongo,
 		redis::ganglia,
-		nrpe
+		nrpe,
+		role::solr::ttm
 
-	class { "solr": schema => "puppet:///modules/solr/schema-ttmserver.xml" }
-
-	sudo_user { [ "otto", "olivneh", "spage" ]:
+	sudo_user { [ "otto", "olivneh", "spage", "mflaschen" ]:
 		privileges => ['ALL = (ALL) NOPASSWD: ALL']
 	}
 }
@@ -2689,12 +2690,9 @@ node  "yongle.wikimedia.org" {
 		accounts::catrope
 }
 
-node /^(yttrium|solr(100)?[1-3])\.(eqiad|pmtpa)\.wmnet/ {
-	system_role { "solr-geodata": description => "Solr server for GeoData"}
-
-	include standard
-
-	class { "solr": schema => "puppet:///modules/solr/schema-geodata.xml" }
+node /^solr(100)?[1-3]\.(eqiad|pmtpa)\.wmnet/ {
+	include standard,
+		role::solr::geodata
 }
 
 node "yvon.wikimedia.org" {

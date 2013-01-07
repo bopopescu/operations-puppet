@@ -399,7 +399,7 @@ class role::cache {
 				director_type => "random",
 				vcl_config => {
 					'retry5xx' => 0,
-					'cache4xx' => "5m",
+					'cache4xx' => "1m",
 					'cluster_tier' => $cluster_tier,
 					'upstream_directors' => $upstream_directors
 				},
@@ -425,7 +425,7 @@ class role::cache {
 				director_type => "chash",
 				vcl_config => {
 					'retry5xx' => 0,
-					'cache4xx' => "5m",
+					'cache4xx' => "1m",
 					'cluster_tier' => $cluster_tier,
 				},
 				backend_options => {
@@ -544,7 +544,7 @@ class role::cache {
 			varnish::logging { "vanadium" : listener_address => $event_listener,
 				port => "8422",
 				instance_name => "",
-				cli_args => '-m RxURL:^/event\.gif -D',
+				cli_args => '-m RxURL:^/event\.gif\?. -D',
 				log_fmt => "%q %l %n %t %h",
 				monitor => false,
 			}
@@ -552,7 +552,7 @@ class role::cache {
 				listener_address => '208.80.154.154', # analytics1001
 				port => "8422",
 				instance_name => "",
-				cli_args => '-m RxURL:^/event\.gif -D',
+				cli_args => '-m RxURL:^/event\.gif\?. -D',
 				log_fmt => "%U	%q	%{Host}i	%t	%h	%{X-Forwarded-For}i	%{Referer}i	%{Accept-Language}i	%{Cookie}i	%{X-WAP-Profile}i	%{User-agent}i	%l	%n",
 				monitor => false,
 			}

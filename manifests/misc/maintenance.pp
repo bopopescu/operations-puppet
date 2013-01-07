@@ -122,6 +122,17 @@ class misc::maintenance::tor_exit_node {
 	}
 }
 
+class misc::maintenance::echo_mail_batch {
+	cron {
+		echo_mail_batch:
+			command => "/usr/local/bin/mwscript extensions/Echo/processEchoEmailBatch.php testwiki",
+			user => apache,
+			minute => 0,
+			hour => 0,
+			ensure => present;
+	}
+}
+
 class misc::maintenance::update_flaggedrev_stats{
 	file {
 		"/home/wikipedia/common/php/extensions/FlaggedRevs/maintenance/wikimedia-periodic-update.sh":
@@ -206,4 +217,20 @@ class misc::maintenance::wikidata {
 			source => "puppet:///files/logrotate/wikidata",
 			mode => 0444;
 	}
+}
+
+class misc::maintenance::parsercachepurging {
+
+	system_role { "misc::maintenance::parsercachepurging": description => "Misc - Maintenance Server: parser cache purging" }
+
+	cron { 'parser_cache_purging':
+		user => apache,
+		minute => 0,
+		hour => 1,
+		weekday => 0,
+		# Purge entries older than 30d * 86400s/d = 2592000s
+		command => '/usr/local/bin/mwscript purgeParserCache.php --wiki=aawiki --age=2592000 >/dev/null 2>&1',
+		ensure => present,
+	}
+
 }

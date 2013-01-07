@@ -1,5 +1,7 @@
 define create_pkcs12( $certname="$name", $cert_alias="", $password="", $user="root", $group="ssl-cert", $location="/etc/ssl/private" ) {
 
+	include passwords::certs
+
 	if ( $cert_alias == "" ) {
 		$certalias = $certname
 	} else {

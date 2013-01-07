@@ -4,7 +4,8 @@
 #
 # == Parameters:
 #
-# $schema:: Schema file for Solr (only one schema per instance supported)
+# $schema::             Schema file for Solr (only one schema per instance supported)
+# $replication_master:: Replication master, if this is current hostname, this server will be a master
 #
 # == Sample usage:
 #
@@ -68,7 +69,9 @@ class solr::service {
 }
 
 class solr ($schema = undef, $replication_master = undef) {
-  include solr::install, solr::service
+  include solr::install,
+    solr::service
+
   class { "solr::config":
     schema => $schema,
     replication_master => $replication_master,

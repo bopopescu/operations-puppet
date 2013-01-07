@@ -148,7 +148,11 @@ class nrpe::packagesnew {
 	}
 
 	package { [ "nagios-nrpe-server", "nagios-plugins", "nagios-plugins-basic", "nagios-plugins-extra", "nagios-plugins-standard" ]:
-		ensure => latest;
+		ensure => present;
+	}
+
+	package { [ "icinga-nrpe-server" ]:
+		ensure => absent;
 	}
 
 	file {
