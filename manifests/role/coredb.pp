@@ -1,7 +1,7 @@
 class role::coredb::config {
 	$topology = {
 		's1' => {
-			'hosts' => ['db32', 'db36', 'db38', 'db59', 'db60', 'db62', 'db63', 'db67',
+			'hosts' => ['db32', 'db36', 'db38', 'db59', 'db60', 'db63', 'db67',
 				'db1001', 'db1017', 'db1042', 'db1043', 'db1047', 'db1049', 'db1050'],
 			'primary_site' => "pmtpa",
 			'masters' => {'pmtpa' => "db63", 'eqiad' => "db1017"},
@@ -198,7 +198,8 @@ class role::coredb::common(
 	$long_timeouts = false,
 	$enable_unsafe_locks = false,
 	$large_slave_trans_retries = false,
-	$slow_query_digest = true
+	$slow_query_digest = true,
+	$mariadb = false,
 	) inherits role::coredb::config {
 
 	$cluster = "mysql"
@@ -221,7 +222,8 @@ class role::coredb::common(
 			long_timeouts => $long_timeouts,
 			enable_unsafe_locks => $enable_unsafe_locks,
 			large_slave_trans_retries => $large_slave_trans_retries,
-			slow_query_digest => $slow_query_digest
+			slow_query_digest => $slow_query_digest,
+			mariadb => $mariadb
 		}
 
 		class { "mysql::coredb::monitoring": crit => true }
@@ -240,7 +242,8 @@ class role::coredb::common(
 			long_timeouts => $long_timeouts,
 			enable_unsafe_locks => $enable_unsafe_locks,
 			large_slave_trans_retries => $large_slave_trans_retries,
-			slow_query_digest => $slow_query_digest
+			slow_query_digest => $slow_query_digest,
+			mariadb => $mariadb
 		}
 
 		class { "mysql::coredb::monitoring": crit => false }

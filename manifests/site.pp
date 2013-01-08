@@ -652,11 +652,19 @@ node /db6[0]\.pmtpa\.wmnet/ {
 }
 
 node /db6[1]\.pmtpa\.wmnet/ {
-  include role::coredb::es2
+  include role::db::core,
+    mysql::mysqluser,
+    mysql::datadirs,
+    mysql::conf,
+    mysql::packages
 }
 
 node /db6[2]\.pmtpa\.wmnet/ {
-  include role::coredb::researchdb
+  include role::db::core,
+    mysql::mysqluser,
+    mysql::datadirs,
+    mysql::conf,
+    mysql::packages
 }
 
 node /db6([3-9])\.pmtpa\.wmnet/ {
@@ -673,12 +681,16 @@ node "db78.pmtpa.wmnet" {
 }
 
 # eqiad dbs
-node /db10[0-9][0-9]\.eqiad\.wmnet/ {
+#node /db1036\.eqiad\.wmnet/ {
+#
+#}
+
+node /db10([012456789][0-9]|3[0123456789])\.eqiad\.wmnet/ {
 	if $hostname =~ /^db(1001|1017|1021)$/ {
 		$ganglia_aggregator = "true"
 	}
 
-	if $hostname == "db1043" {
+	if $hostname == "db1043" or $hostname == "db1036" {
 		$mariadb = true
 	}
 
@@ -1485,7 +1497,8 @@ node /mc(1[0-9]|[0-9])\.pmtpa\.wmnet/ {
 	}
 
 	class { "redis":
-		maxmemory => "500Mb",
+		maxmemory         => "500Mb",
+		redis_replication => $redis_replication,
 	}
 	include redis::ganglia
 }
@@ -1523,7 +1536,8 @@ node /mc(10[01][0-9])\.eqiad\.wmnet/ {
 	}
 
 	class { "redis":
-		maxmemory => "500Mb",
+		maxmemory         => "500Mb",
+		redis_replication => $redis_replication,
 	}
 	include redis::ganglia
 }
@@ -1627,7 +1641,7 @@ node /^ms-be(1|2|4|13)\.pmtpa\.wmnet$/ {
 	swift::create_filesystem{ $all_drives: partition_nr => "1" }
 }
 
-node /^ms-be(5|9)\.pmtpa\.wmnet$/ {
+node /^ms-be9\.pmtpa\.wmnet$/ {
 	# the ms-be hosts with ssds have two more disks
 	$all_drives = [ '/dev/sdc', '/dev/sdd', '/dev/sde',
 		'/dev/sdf', '/dev/sdg', '/dev/sdh', '/dev/sdi', '/dev/sdj', '/dev/sdk',
@@ -1638,7 +1652,7 @@ node /^ms-be(5|9)\.pmtpa\.wmnet$/ {
 	swift::create_filesystem{ $all_drives: partition_nr => "1" }
 }
 
-node /^ms-be(3|[6-8]|10)\.pmtpa\.wmnet$/ {
+node /^ms-be(3|[5-8]|10)\.pmtpa\.wmnet$/ {
 	# the ms-be hosts that are 720xds with ssds have two more disks
 	# but they show up as m and n, those get the OS
 	$all_drives = [ '/dev/sda', '/dev/sdb', '/dev/sdc', '/dev/sdd',
@@ -2549,10 +2563,13 @@ node "vanadium.eqiad.wmnet" {
 	include standard,
 		groups::wikidev,
 		admins::restricted,
+		accounts::aaron,
 		accounts::datasets,
 		accounts::dsc,
 		accounts::diederik,
 		accounts::mflaschen,
+		accounts::maryana,
+		accounts::rfaulkner,
 		accounts::spage,
 		misc::statistics::db::mysql,
 		misc::statistics::db::mongo,
@@ -2667,7 +2684,7 @@ node /(celsus|constable)\.wikimedia\.org/ {
 		misc::parsoid
 }
 
-node "wtp1001.eqiad.wmnet" {
+node /(caesium|xenon|wtp1001)\.eqiad\.wmnet/ {
 	$cluster = "parsoid"
 	$nagios_group = "${cluster}_$::site"
 
