@@ -83,7 +83,7 @@ class kraken::proxy::apache {
 	file { "/etc/apache2/sites-available/000-default":
 		content => template("kraken/apache-default.vhost.erb"),
 	}
-	file { "/etc/apache2/sites-enabled/proxy.vhost":
+	file { "/etc/apache2/sites-enabled/000-default":
 		ensure  => "/etc/apache2/sites-available/000-default",
 		notify  => Class[webserver::apache::service],
 	}
