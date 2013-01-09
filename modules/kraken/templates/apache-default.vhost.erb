@@ -1,0 +1,30 @@
+<VirtualHost *:81>
+  ServerAdmin webmaster@localhost
+
+  DocumentRoot /var/www
+  <Directory />
+    Options FollowSymLinks
+    AllowOverride None
+  </Directory>
+  <Directory /var/www/>
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride None
+    Order allow,deny
+    allow from all
+  </Directory>
+
+  # Special rule to allow direct read only HTTP access to
+  # file in HDFS in the /wmf/public directory.
+  # E.g.  http://analytics1001.wikimedia.org:81/wmf/public/<path/to/file>
+  RewriteEngine On
+  RewriteLog /var/log/apache2/rewrite.log
+  RewriteLogLevel 9
+  RewriteRule "^(/wmf/public/.*)$" "http://<%= datanode_hostname %>:50075/streamFile$1?nnaddr=<%= namenode_hostname %>:8020" [P,L]
+
+  ErrorLog ${APACHE_LOG_DIR}/error.log
+
+  # Possible values include: debug, info, notice, warn, error, crit,
+  # alert, emerg.
+  LogLevel warn
+
+</VirtualHost>

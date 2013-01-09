@@ -63,8 +63,10 @@ class kraken::proxy::apache {
 	include webserver::apache
 	webserver::apache::module { "rewrite": require => Class["webserver::apache"] }
 
-	$port      = 8085
-	$whitelist = $kraken::proxy::whitelist
+	$proxy_port        = 8085
+	$whitelist         = $kraken::proxy::whitelist
+	$namenode_hostname = $kraken::hadoop::config::namenode_hostname
+	$datanode_hostname = "analytics1011.eqiad.wmnet"  # can pick any datanode here.
 
 	# apache htpasswd file for HTTP auth
 	# from non whitelisted networks.
@@ -75,12 +77,24 @@ class kraken::proxy::apache {
 		mode    => 0644,
 	}
 
+	# puppetized default vhost for port 81.
+	# This also proxies requests to /wmf/public HDFS files
+	# to a datanode.
+	file { "/etc/apache2/sites-available/000-default":
+		content => template("kraken/apache-default.vhost.erb"),
+	}
+	file { "/etc/apache2/sites-enabled/proxy.vhost":
+		ensure  => "/etc/apache2/sites-available/000-default",
+		notify  => Class[webserver::apache::service],
+	}
+
 	file { "/etc/apache2/sites-available/proxy.vhost":
 		content => template("kraken/apache-proxy.vhost.erb"),
-		require => File["/srv/.htpasswd"],
+		require => File["/srv/.htpasswd"]
 	}
 	file { "/etc/apache2/sites-enabled/proxy.vhost":
 		ensure  => "/etc/apache2/sites-available/proxy.vhost",
 		notify  => Class[webserver::apache::service],
 	}
+
 }

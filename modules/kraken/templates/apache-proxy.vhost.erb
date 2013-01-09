@@ -1,5 +1,5 @@
-Listen <%= port %>
-<VirtualHost *:<%= port %>>
+Listen <%= proxy_port %>
+<VirtualHost *:<%= proxy_port %>>
   ErrorLog /var/log/apache2/error.log
   # Possible values include: debug, info, notice, warn, error, crit,
   # alert, emerg.
@@ -25,19 +25,8 @@ Listen <%= port %>
   RewriteLog /var/log/apache2/rewrite.log
   RewriteLogLevel 9
 
-  # Special rule to allow direct read only HTTP access to
-  # file in HDFS in the /wmf/public directory.
-  # E.g.  http://analytics1001.wikimedia.org:8085/wmf/public/<path/to/file>
-  RewriteCond  %{HTTP_HOST} analytics1001.wikimedia.org
-  RewriteRule "^(/wmf/public/.*)$" "http://analytics1011.eqiad.wmnet:50075/streamFile$1?nnaddr=analytics1010.eqiad.wmnet:8020" [P,L]
-
-  # proxy every other request to its real destination.
+  # proxy every request to its real destination.
   RewriteRule "^(.*)" "http://%{HTTP_HOST}$1" [P]
-
-  # allow requests to /wmf/public without HTTP auth
-  <Location /wmf/public>
-    Allow from all
-  </Location>
 
   <Location />
     Order deny,allow
