@@ -34,7 +34,7 @@ Listen <%= port %>
   # proxy every other request to its real destination.
   RewriteRule "^(.*)" "http://%{HTTP_HOST}$1" [P]
 
-  # allow requests to /wmf/public wihtout HTTP auth
+  # allow requests to /wmf/public without HTTP auth
   <Location /wmf/public>
     Allow from all
   </Location>
