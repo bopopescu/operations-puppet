@@ -51,7 +51,7 @@ class kraken::flume::install {
 		command => "/usr/bin/wget $flume_url && /bin/tar -xvf $flume_tarball",
 		cwd     => "$flume_download_path",
 		creates => "$flume_path",
-		require => File["flume_download_path"],
+		require => File["$flume_download_path"],
 	}
 
 	# symlnk flume into /usr/lib/flume-ng
