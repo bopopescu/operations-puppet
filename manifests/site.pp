@@ -249,9 +249,15 @@ node "analytics1006.eqiad.wmnet" inherits analytics_basenode {
 	}
 }
 
-node /^analytics100[7-9].eqiad.wmnet/ inherits analytics_basenode {
+node /^analytics100[7-8].eqiad.wmnet/ inherits analytics_basenode {
 	include role::analytics::storm::worker
 }
+
+node analytics1009.eqiad.wmnet inherits analytics_basenode {
+	include role::analytics::storm::worker
+	include kraken::flume
+}
+
 
 # analytics1010 is Hadoop Master (i.e NameNode, JobTracker, and ResourceManager)
 node "analytics1010.eqiad.wmnet" inherits analytics_basenode {
