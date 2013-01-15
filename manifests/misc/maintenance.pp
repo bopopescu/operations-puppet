@@ -207,6 +207,14 @@ class misc::maintenance::wikidata {
 			ensure => present;
 	}
 
+	cron {
+		wikibase-poll-huwiki:
+			command => "/usr/local/bin/mwscript extensions/Wikibase/lib/maintenance/pollForChanges.php --wiki huwiki --statefile=/home/wikipedia/common/wikibase-huwiki-poll.changeid --all 2>&1 >> /var/log/wikidata/poll.huwiki.log",
+			user => mwdeploy,
+			minute => "*/5",
+			ensure => present;
+	}
+
 	file {
 		"/var/log/wikidata":
 			owner => mwdeploy,
@@ -234,3 +242,31 @@ class misc::maintenance::parsercachepurging {
 	}
 
 }
+
+class misc::maintenance::geodata {
+	file {
+		"/usr/local/bin/update-geodata":
+			ensure => present,
+			source => "puppet:///files/misc/scripts/update-geodata",
+			mode => 0555;
+		"/usr/local/bin/clear-killlist":
+			ensure => present,
+			source => "puppet:///files/misc/scripts/clear-killlist",
+			mode => 0555;
+	}
+
+	cron {
+		"update-geodata":
+			command => "/usr/local/bin/update-geodata >/dev/null 2>&1",
+			user => apache,
+			minute => "*/30",
+			ensure => present;
+		"clear-killlist":
+			command => "/usr/local/bin/clear-killlist >/dev/null 2>&1",
+			user => apache,
+			hour => 8,
+			minute => 45,
+			ensure => present;
+	}
+}
+

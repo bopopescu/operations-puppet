@@ -10,17 +10,11 @@ are the defaults:
     deploy_redis.port: 6379
 '''
 
-try:
-    import redis
-    has_redis = True
-except ImportError:
-    has_redis = False
-
+import redis
 import time
 
+
 def __virtual__():
-    #if not has_redis:
-    #    return False
     return 'deploy_redis'
 
 
@@ -40,21 +34,38 @@ def returner(ret):
     '''
     Return data to a redis data store
     '''
-    if not ret['fun'].startswith('deploy.'):
+    function = ret['fun']
+    if not function.startswith('deploy.'):
         return False
+    ret_data = ret['return']
+    minion = ret['id']
     timestamp = time.time()
     serv = _get_serv()
-    ret_data = ret['return']
+    if function == "deploy.sync_all":
+        for repo, functions in ret_data["stats"]:
+            for function, data in functions:
+                _record_function(serv, function, timestamp, minion, data)
+    else:
+        _record_function(serv, function, timestamp, minion, ret_data)
+
+
+def _record_function(serv, function, timestamp, minion, ret_data):
+    dependencies = ret_data['dependencies']
+    # Record data for all dependent repositories
+    for dep_data in dependencies:
+        _record(serv, function, timestamp, minion, dep_data)
+    # Record data for this repo
+    _record(serv, function, timestamp, minion, ret_data)
+
+
+def _record(serv, function, timestamp, minion, ret_data):
     repo = ret_data['repo']
-    minion = ret['id']
-    # Ensure this repo exist in the set of repos
-    serv.sadd('deploy:repos', repo)
-    # Ensure this minion exists in the set of minions
-    serv.sadd('deploy:{0}:minions'.format(repo), minion)
-    if ret['fun'] == "deploy.fetch" or ret['fun'] == "deploy.sync_all":
+    if function == "deploy.fetch":
+        if ret_data['status'] == 0:
+            serv.hset('deploy:{0}:minions:{1}'.format(repo, minion), 'fetch_tag', ret_data['tag'])
         serv.hset('deploy:{0}:minions:{1}'.format(repo, minion), 'fetch_status', ret_data['status'])
         serv.hset('deploy:{0}:minions:{1}'.format(repo, minion), 'fetch_timestamp', timestamp)
-    if ret['fun'] == "deploy.checkout" or ret['fun'] == "deploy.sync_all":
+    if function == "deploy.checkout":
         if ret_data['status'] == 0:
             serv.hset('deploy:{0}:minions:{1}'.format(repo, minion), 'tag', ret_data['tag'])
         serv.hset('deploy:{0}:minions:{1}'.format(repo, minion), 'checkout_status', ret_data['status'])

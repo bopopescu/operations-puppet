@@ -92,7 +92,7 @@ class misc::contint::test {
 
 		$CI_PHP_packages = [ "php-apc", "php5-cli", "php5-curl", "php5-gd", "php5-intl", "php5-mysql", "php-pear", "php5-sqlite", "php5-tidy", "php5-pgsql" ]
 		$CI_DB_packages  = [ "mysql-server", "sqlite3", "postgresql" ]
-		$CI_DEV_packages = [ "imagemagick", "librsvg2-2", "librsvg2-bin", "pep8" ]
+		$CI_DEV_packages = [ "imagemagick", "librsvg2-2", "librsvg2-bin", "pep8", "luajit", "libluajit-5.1-dev", "g++", "libthai-dev" ]
 		$CI_DOC_packages = [ "asciidoc" ]
 
 		package { $CI_PHP_packages:
@@ -173,6 +173,23 @@ class misc::contint::test {
 				ensure => present,
 				source => "puppet:///files/misc/jenkins/gitconfig",
 				require => User['jenkins'];
+		}
+
+		# Setup tmpfs to write SQLite files to
+		file { '/var/lib/jenkins/tmpfs':
+			ensure => directory,
+			mode => 0755,
+			owner => jenkins,
+			group => jenkins,
+			require => [ User['jenkins'], Group['jenkins'] ];
+		}
+
+		mount { '/var/lib/jenkins/tmpfs':
+			ensure => mounted,
+			device => 'tmpfs',
+			fstype => 'tmpfs',
+			options => 'noatime,defaults,size=512M,mode=755,uid=jenkins,gid=jenkins',
+			require => [ User['jenkins'], Group['jenkins'], File['/var/lib/jenkins/tmpfs'] ];
 		}
 
 		# nagios monitoring

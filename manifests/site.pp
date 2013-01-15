@@ -99,23 +99,6 @@ class applicationserver_old {
 
 }
 
-class imagescaler::labs {
-	$cluster = "imagescaler"
-
-	if( $::realm == 'labs' ) {
-		include nfs::apache::labs
-	}
-
-	include standard,
-		imagescaler::cron,
-		imagescaler::packages,
-		imagescaler::files,
-		mediawiki::packages,
-		apaches::packages,
-		apaches::cron,
-		apaches::service
-}
-
 class protoproxy::ssl {
 	$cluster = "ssl"
 
@@ -349,24 +332,8 @@ node "bast1001.wikimedia.org" {
 		nfs::netapp::home::othersite
 }
 
-node "bellin.pmtpa.wmnet"{
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
-}
-
 node "beryllium.wikimedia.org" {
 	include newstandard
-}
-
-node "blondel.pmtpa.wmnet" {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
 }
 
 node "boron.wikimedia.org" {
@@ -519,200 +486,156 @@ node "dataset1001.wikimedia.org" {
 
 }
 
-node /^db[1-9]\.pmtpa\.wmnet$/ {
-	include role::db::core
+# pmtpa dbs
+node /db(32|36|38|59|60|63)\.pmtpa\.wmnet/ {
+  if $hostname == "db59" {
+    class { role::coredb::s1 : mariadb => true }
+  } else {
+    include role::coredb::s1
+  }
 }
 
-node "db10.pmtpa.wmnet" {
-	include role::db::core
-		#backup::mysql - no space for lvm snapshots
+node /db(52|53|54|57)\.pmtpa\.wmnet/ {
+  include role::coredb::s2
 }
 
-node /^db1[2-8]\.pmtpa\.wmnet$/ {
-	include role::db::core
-
-	# upgraded hosts
-	if $hostname =~ /^db1[2368]$/ {
-		include mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
-	}
+node /db(34|39|64|66)\.pmtpa\.wmnet/ {
+  include role::coredb::s3
 }
 
-node /^db2[1-8]\.pmtpa\.wmnet$/ {
-
-	include role::db::core
-
-	# upgraded hosts
-	if $hostname =~ /^db2[456]$/ {
-		include mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
-	}
+node /db(31|33|51|65)\.pmtpa\.wmnet/ {
+  if $hostname =~ /^db51/ {
+    $ganglia_aggregator = "true"
+  }
+  include role::coredb::s4
 }
 
-node "db29.pmtpa.wmnet" {
-	include base
+node /db(35|44|45|55)\.pmtpa\.wmnet/ {
+  include role::coredb::s5
 }
 
-node /^db3[0-9]\.pmtpa\.wmnet$/ {
-
-	include role::db::core
-
-	# upgraded hosts
-	if $hostname =~ /^db3[123456789]$/ {
-		include mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
-	}
+node /db(43|46|47|50)\.pmtpa\.wmnet/ {
+  if $hostname =~ /^db50/ {
+    $ganglia_aggregator = "true"
+  }
+  include role::coredb::s6
 }
 
-node "db40.pmtpa.wmnet" {
-	include role::db::core,
-		mysql::packages
-
-	system_role { "lame::not::puppetized": description => "Parser Cache database server" }
+node /db(37|56|58|68)\.pmtpa\.wmnet/ {
+  include role::coredb::s7
 }
 
-node /pc([1-3]\.pmtpa|100[1-3]\.eqiad)\.wmnet/ {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::pc::conf,
-		mysql::packages
+## m1 shard (still mostly not puppetized...)
+node /^(db(9|10)|blondel|bellin)\.pmtpa\.wmnet$/ {
+  ## do not have most of our current puppet classe
+  include role::db::core
 
-	system_role { "mysql::pc::conf": description => "parser cache mysql server" }
-}
-
-node /^db4[2]\.pmtpa\.wmnet$/ {
-	include role::db::core,
-		mysql::packages
-}
-
-# new pmtpa dbs
-# New and rebuilt DB's go here as they're rebuilt and moved fully to puppet
-# DO NOT add old prod db's to new classes unless you
-# know what you're doing!
-node "db11.pmtpa.wmnet" {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
-}
-
-node "db19.pmtpa.wmnet" { # dead
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf
-}
-
-node "db22.pmtpa.wmnet" {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
-}
-
-node /db4[3-9]\.pmtpa\.wmnet/ {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
-}
-
-node /db5[0-9]\.pmtpa\.wmnet/ {
-	if $hostname =~ /^db(50|51)$/ {
-		$ganglia_aggregator = "true"
-	}
-
-	if $hostname == "db59" {
-		$mariadb = true
-	}
-
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
-}
-
-node /db6[0]\.pmtpa\.wmnet/ {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
-}
-
-node /db6[1]\.pmtpa\.wmnet/ {
-  include role::db::core,
-    mysql::mysqluser,
+  if $hostname =~ /^(bellin|blondel)/ {
+    include mysql::mysqluser,
     mysql::datadirs,
     mysql::conf,
     mysql::packages
+  }
 }
 
-node /db6[2]\.pmtpa\.wmnet/ {
-  include role::db::core,
-    mysql::mysqluser,
-    mysql::datadirs,
-    mysql::conf,
-    mysql::packages
-}
-
-node /db6([3-9])\.pmtpa\.wmnet/ {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
+## m2 shard
+node /db4[89]\.pmtpa\.wmnet/ {
+  include role::coredb::m2
 }
 
 node "db78.pmtpa.wmnet" {
-	include role::fundraising::database::dump_slave
-	class { 'misc::fundraising::backup::archive_sync': hour => [4,12,20], minute => 5 }
+  include role::fundraising::database::dump_slave
+  class { 'misc::fundraising::backup::archive_sync': hour => [4,12,20], minute => 5 }
+}
+
+## researchdb
+node /db67\.pmtpa\.wmnet/ {
+  include role::coredb::researchdb
+}
+
+## not in use for various reasons
+node /db(42|6[129]|7[0-7])\.pmtpa\.wmnet/{
+
 }
 
 # eqiad dbs
-#node /db1036\.eqiad\.wmnet/ {
-#
-#}
-
-node /db10([012456789][0-9]|3[0123456789])\.eqiad\.wmnet/ {
-	if $hostname =~ /^db(1001|1017|1021)$/ {
+node /db10(01|17|42|43|49|50)\.eqiad\.wmnet/ {
+	if $hostname =~ /^db10(01|17)/ {
 		$ganglia_aggregator = "true"
 	}
 
-	if $hostname == "db1043" or $hostname == "db1036" {
-		$mariadb = true
+	if $hostname == "db1043" {
+		class { role::coredb::s1 : mariadb => true }
+	} else {
+		include role::coredb::s1
+	}
+}
+
+node /db10(02|09|18|34)\.eqiad\.wmnet/ {
+	include role::coredb::s2
+}
+
+node /db10(03|10|19|35)\.eqiad\.wmnet/ {
+	include role::coredb::s3
+}
+
+node /db10(04|11|20|38)\.eqiad\.wmnet/ {
+	include role::coredb::s4
+}
+
+node /db10(05|21|26|39)\.eqiad\.wmnet/ {
+	if $hostname =~ /^db1021/ {
+		$ganglia_aggregator = "true"
 	}
 
+	include role::coredb::s5
+}
+
+node /db10(06|22|27|40)\.eqiad\.wmnet/ {
+	include role::coredb::s6
+}
+
+node /db10(07|24|28|41)\.eqiad\.wmnet/ {
+	include role::coredb::s7
+}
+
+## m2 shard
+node /db104[68]\.eqiad\.wmnet/ {
+	include role::coredb::m2
+}
+
+## eqiad fundraising DBs
+node /db10(08|13|25)\.eqiad\.wmnet/ {
 	include mysql::mysqluser,
-		mysql::datadirs
+		mysql::datadirs,
+		mysql::packages,
+		mysql::conf
 
-	if $hostname == "db1008" {
+	  if $hostname == "db1008" {
 		include role::fundraising::database::master
-	}
-	elsif $hostname == "db1013" {
+	  }
+	  if $hostname == "db1013" {
 		include role::fundraising::database::slave
-	}
-	elsif $hostname == "db1025" {
+	  }
+	  if $hostname == "db1025" {
 		include role::fundraising::database::dump_slave
-	}
-	else {
-		include role::db::core
-	}
-	if $hostname != "db1047" {
-		include mysql::packages,
-			mysql::conf
-	}
+	  }
+}
+
+## researchdb (currently lucid)
+node /db1047\.eqiad\.wmnet/ {
+	include mysql::mysqluser,
+		mysql::datadirs,
+		role::db::core
+}
+
+## not currently in production and/or hardware issues
+node /db10(1[2456]|2[39]|3[012367]|4[45])\.eqiad\.wmnet/ {
+	  include role::db::core,
+		mysql::mysqluser,
+		mysql::datadirs,
+		mysql::conf,
+		mysql::packages
 }
 
 node "dobson.wikimedia.org" {
@@ -830,20 +753,20 @@ node /es[1-4]\.pmtpa\.wmnet/ {
 }
 
 # es2-3
-node /es([5-9]|10)\.pmtpa\.wmnet/ {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
+node /es[5-7]\.pmtpa\.wmnet/ {
+  include role::coredb::es2
 }
 
-node /es10(0[5-9]|10)\.eqiad\.wmnet/ {
-	include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
+node /es([89]|10)\.pmtpa\.wmnet/ {
+  include role::coredb::es3
+}
+
+node /es100[5-7]\.eqiad\.wmnet/ {
+	include role::coredb::es2
+}
+
+node /es10(0[89]|10)\.eqiad\.wmnet/ {
+	include role::coredb::es3
 }
 
 node "fenari.wikimedia.org" {
@@ -864,8 +787,8 @@ node "fenari.wikimedia.org" {
 		misc::bastionhost,
 		misc::deployment,
 		misc::noc-wikimedia,
-		mediawiki::extension-distributor,
-		misc::deployment::scripts,
+		mediawiki::former-extdist-removesoon,
+		misc::deployment::scap_scripts,
 		misc::ircecho,
 		misc::deployment::l10nupdate,
 		dns::account,
@@ -1081,7 +1004,7 @@ node "hume.wikimedia.org" {
 
 	include standard,
 		nfs::netapp::home,
-		misc::deployment::scripts,
+		misc::deployment::scap_scripts,
 		misc::maintenance::foundationwiki,
 		misc::maintenance::pagetriage,
 		misc::maintenance::refreshlinks,
@@ -1092,6 +1015,7 @@ node "hume.wikimedia.org" {
 		misc::maintenance::update_flaggedrev_stats,
 		misc::maintenance::update_special_pages,
 		misc::maintenance::parsercachepurging,
+		misc::maintenance::geodata,
 		admins::roots,
 		admins::mortals,
 		admins::restricted,
@@ -1134,7 +1058,8 @@ node "kaulen.wikimedia.org" {
 		misc::download-mediawiki,
 		misc::bugzilla::server,
 		misc::bugzilla::crons,
-		misc::bugzilla::communitymetrics
+		misc::bugzilla::communitymetrics,
+		misc::bugzilla::report
 
 	install_certificate{ "star.wikimedia.org": }
 
@@ -1789,8 +1714,6 @@ node "neon.wikimedia.org" {
 	include standard,
 		icinga::monitor,
 		misc::ircecho
-#		nagios::ganglia::monitor::enwiki,
-#		nagios::ganglia::ganglios,
 }
 
 node "nescio.esams.wikimedia.org" {
@@ -1951,6 +1874,16 @@ node /^payments[1-4]\.wikimedia\.org$/ {
 	class { "lvs::realserver": realserver_ips => [ "208.80.152.7" ] }
 
 	monitor_service { "https": description => "HTTPS", check_command => "check_ssl_cert!payments.wikimedia.org" }
+}
+
+node /pc([1-3]\.pmtpa|100[1-3]\.eqiad)\.wmnet/ {
+  include role::db::core,
+    mysql::mysqluser,
+    mysql::datadirs,
+    mysql::pc::conf,
+    mysql::packages
+
+  system_role { "mysql::pc::conf": description => "parser cache mysql server" }
 }
 
 node "pdf1.wikimedia.org" {
@@ -2538,7 +2471,7 @@ node "tin.eqiad.wmnet" {
 	include standard,
 		admins::roots,
 		admins::mortals,
-		role::deployment::deployment_servers
+		role::deployment::deployment_servers::production
 }
 
 node "tridge.wikimedia.org" {
@@ -2608,6 +2541,7 @@ node "virt0.wikimedia.org" {
 		role::ldap::client::labs,
 		role::nova::controller,
 		role::salt::masters::labs,
+		role::deployment::salt_masters::labs,
 		backup::client
 }
 
@@ -2670,11 +2604,15 @@ node /(wtp1|kuo|lardner|mexia|tola)\.pmtpa\.wmnet/ {
 
 }
 
-node /(celsus|constable)\.wikimedia\.org/ {
+node /(celsus|constable|cerium|titanium)\.wikimedia\.org/ {
 	$cluster = "parsoidcache"
 	$nagios_group = "${cluster}_$::site"
 
 	if $hostname == "constable" {
+		$ganglia_aggregator = "true"
+	}
+
+	if $hostname == "cerium" {
 		$ganglia_aggregator = "true"
 	}
 

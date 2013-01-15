@@ -44,6 +44,25 @@ class role::applicationserver {
 				geoip
 		}
 
+		if $::realm == 'labs' {
+			# MediaWiki configuration specific to labs instances ('beta' project)
+
+			# Umount /dev/vdb from /mnt ...
+			mount { '/mnt':
+				name => '/mnt',
+				ensure => absent,
+			}
+
+			# ... and mount it on /srv
+			mount { '/srv':
+				ensure => mounted,
+				device => '/dev/vdb',
+				fstype => 'auto',
+				options => 'defaults,nobootwait,comment=cloudconfig',
+				require => Mount['/mnt'],
+			}
+		}
+
 		if $lvs_pool != undef {
 			include lvs::configuration
 			class { "lvs::realserver": realserver_ips => $lvs::configuration::lvs_service_ips[$::realm][$lvs_pool][$::site] }
@@ -58,10 +77,6 @@ class role::applicationserver {
 			applicationserver::config::php
 
 		class { "applicationserver::config::apache": }
-
-		if( $::realm == 'labs' ) {
-			include	nfs::apache::labs
-		}
 
 		monitor_service { "appserver http":
 			description => "Apache HTTP",
@@ -88,6 +103,22 @@ class role::applicationserver {
 
 		include role::applicationserver::webserver
 	}
+	# Class for the beta project
+	# The Apaches instances act as webserver AND imagescalers. We cannot
+	# apply both roles cause puppet will complains about a duplicate class
+	# definition for role::applicationserver::common
+	class appserver::beta{
+		class { "role::applicationserver::common": group => "beta_appserver" }
+
+		include nfs::apache::labs
+		include role::applicationserver::webserver
+
+		# Load the class just like the role::applicationserver::imagescaler
+		# role.
+		include imagescaler::cron,
+			imagescaler::packages,
+			imagescaler::files
+	}
 	class appserver::api{
 		class { "role::applicationserver::common": group => "api_appserver", lvs_pool => "api" }
 
@@ -103,6 +134,8 @@ class role::applicationserver {
 
 		class { "role::applicationserver::webserver": maxclients => "18" }
 
+		# When adding class there, please also update the appserver::beta
+		# class which mix both webserver and imagescaler roles.
 		include	imagescaler::cron,
 			imagescaler::packages,
 			imagescaler::files

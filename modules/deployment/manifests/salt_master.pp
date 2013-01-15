@@ -1,4 +1,4 @@
-class deployment::salt_master($state_dir="/srv/salt", $runner_dir="/srv/runners", $pillar_dir="/srv/pillars", $module_dir="/srv/salt/_modules", $returner_dir="/srv/salt/_returners", $deployment_servers=[], $deployment_minion_regex=".*", $deployment_repo_urls={}, $deployment_repo_regex={}, $deployment_repo_locations={}, $deployment_repo_checkout_module_calls={}, $deployment_repo_checkout_submodules={}, $deployment_deploy_redis={}) {
+class deployment::salt_master($state_dir="/srv/salt", $runner_dir="/srv/runners", $pillar_dir="/srv/pillars", $module_dir="/srv/salt/_modules", $returner_dir="/srv/salt/_returners", $deployment_servers={}, $deployment_minion_regex=".*", $deployment_repo_urls={}, $deployment_repo_regex={}, $deployment_repo_locations={}, $deployment_repo_checkout_module_calls={}, $deployment_repo_checkout_submodules={}, $deployment_repo_dependencies = {}, $deployment_deploy_redis={}) {
   file {
     "${state_dir}/deploy":
       ensure => directory,
@@ -30,12 +30,13 @@ class deployment::salt_master($state_dir="/srv/salt", $runner_dir="/srv/runners"
       owner => root,
       group => root,
       require => [File["${pillar_dir}/deployment"]];
-    "${pillar_dir}/top.sls":
-      content => template("deployment/pillars/top.sls.erb"),
-      mode => 0444,
-      owner => root,
-      group => root,
-      require => [File["${pillar_dir}"]];
+    ## Disable management of top pillar for now
+    #"${pillar_dir}/top.sls":
+    #  content => template("deployment/pillars/top.sls.erb"),
+    #  mode => 0444,
+    #  owner => root,
+    #  group => root,
+    #  require => [File["${pillar_dir}"]];
     "${module_dir}/deploy.py":
       source => "puppet:///deployment/modules/deploy.py",
       mode => 0555,

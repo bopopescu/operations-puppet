@@ -22,7 +22,8 @@ class misc::deployment {
 	}
 }
 
-class misc::deployment::scripts {
+# Scripts common to both git-deploy and scap
+class misc::deployment::common_scripts {
 	require passwordscripts
 
 	# scap requires sync-common, which is in the wikimedia-task-appserver package
@@ -80,11 +81,6 @@ class misc::deployment::scripts {
 			mode => 0555,
 			require => Package[ 'php5-parsekit' ], # bug 37076
 			source => "puppet:///files/misc/scripts/lint.php";
-		"${scriptpath}/mw-update-l10n":
-			owner => root,
-			group => root,
-			mode => 0555,
-			source => "puppet:///files/misc/scripts/mw-update-l10n";
 		"${scriptpath}/mwscript":
 			owner => root,
 			group => root,
@@ -125,11 +121,6 @@ class misc::deployment::scripts {
 			group => root,
 			mode => 0555,
 			source => "puppet:///files/misc/scripts/reset-mysql-slave";
-		"${scriptpath}/scap":
-			owner => root,
-			group => root,
-			mode => 0555,
-			source => "puppet:///files/misc/scripts/scap";
 		"${scriptpath}/set-group-write":
 			owner => root,
 			group => root,
@@ -151,6 +142,54 @@ class misc::deployment::scripts {
 			mode => 0555,
 			ensure => link,
 			target => "${scriptpath}/sync-apache";
+		"${scriptpath}/udprec":
+			owner => root,
+			group => root,
+			mode => 0555,
+			source => "puppet:///files/misc/scripts/udprec";
+		"/usr/local/sbin/set-group-write2":
+			owner => root,
+			group => root,
+			mode => 0555,
+			source => "puppet:///files/misc/scripts/set-group-write2";
+
+		# Manpages
+		# Need to be generated manually using make in files/misc/scripts
+		"/usr/local/share/man/man1":
+			ensure => 'directory',
+			recurse => true,
+			owner => root,
+			group => root,
+			mode => 0444,
+			source => "puppet:///files/misc/scripts/man";
+	}
+}
+
+# Scripts for the new git-deploy deployment system
+class misc::deployment::scripts {
+	include misc::deployment::vars,
+		misc::deployment::common_scripts
+}
+
+# Scripts for the old rsync-based deployment system
+class misc::deployment::scap_scripts {
+	include misc::deployment::common_scripts
+
+	class { "misc::deployment::vars": system => "scap" }
+
+	$scriptpath = "/usr/local/bin"
+
+	file {
+		"${scriptpath}/mw-update-l10n":
+			owner => root,
+			group => root,
+			mode => 0555,
+			source => "puppet:///files/misc/scripts/mw-update-l10n";
+		"${scriptpath}/scap":
+			owner => root,
+			group => root,
+			mode => 0555,
+			source => "puppet:///files/misc/scripts/scap";
 		"${scriptpath}/sync-common-all":
 			owner => root,
 			group => root,
@@ -186,26 +225,6 @@ class misc::deployment::scripts {
 			group => root,
 			mode => 0555,
 			source => "puppet:///files/misc/scripts/sync-wikiversions";
-		"${scriptpath}/udprec":
-			owner => root,
-			group => root,
-			mode => 0555,
-			source => "puppet:///files/misc/scripts/udprec";
-		"/usr/local/sbin/set-group-write2":
-			owner => root,
-			group => root,
-			mode => 0555,
-			source => "puppet:///files/misc/scripts/set-group-write2";
-
-		# Manpages
-		# Need to be generated manually using make in files/misc/scripts
-		"/usr/local/share/man/man1":
-			ensure => 'directory',
-			recurse => true,
-			owner => root,
-			group => root,
-			mode => 0444,
-			source => "puppet:///files/misc/scripts/man";
 	}
 }
 
@@ -273,7 +292,7 @@ class misc::deployment::passwordscripts {
 }
 
 class misc::deployment::l10nupdate {
-	require misc::deployment::scripts
+	require misc::deployment::scap_scripts
 
 	$scriptpath = "/usr/local/bin"
 
@@ -329,3 +348,19 @@ class misc::deployment::l10nupdate {
 	}
 }
 
+class misc::deployment::vars ($system = "git-deploy") {
+	if $system == "git-deploy" {
+		$mw_common = "/srv/deployment/mediawiki/common"
+		$mw_common_source = $mw_common
+	} elsif $system == "scap" {
+		$mw_common = "/usr/local/apache/common-local"
+		$mw_common_source = "/home/wikipedia/common"
+	}
+	file {
+		"/usr/local/lib/mw-deployment-vars.sh":
+			owner => root,
+			group => root,
+			mode => 0444,
+			content => template("misc/mw-deployment-vars.erb");
+	}
+}
