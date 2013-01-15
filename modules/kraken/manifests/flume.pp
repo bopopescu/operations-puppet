@@ -92,6 +92,6 @@ class kraken::flume::source::udp {
 	# symlink the name to something without the version
 	file { "$flume_install_path/lib/flume-udp-source.jar":
 		ensure  => "${kraken::flume::install::flume_download_path}/$flume_udp_source_jar",
-		require => "flume_udp_source_install",
+		require => Exec["flume_udp_source_install"],
 	}
 }
