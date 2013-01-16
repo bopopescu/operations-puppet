@@ -132,6 +132,7 @@ class kraken::flume::source::udp {
 	exec { "flume_udp_source_install":
 		command => "/usr/bin/wget $flume_udp_source_url",
 		cwd     => $kraken::flume::install::flume_download_path,
+		creates => "$kraken::flume::install::flume_download_path/$flume_udp_source_jar",
 		require => Class["kraken::flume::install"],
 	}
 	# symlink the name to something without the version
