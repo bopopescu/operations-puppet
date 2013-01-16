@@ -99,7 +99,7 @@ class kraken::flume::install {
 	file { "/etc/init.d/flume-agent-ng": 
 		content => template("kraken/flume/flume-ng-agent.init.d"),
 		mode    => 0755,
-		requre  => [Exec["flume_install"], User["flume"]],
+		require  => [Exec["flume_install"], User["flume"]],
 	}
 
 	# symlink /etc/flume-ng/conf to /usr/lib/flume-ng/conf
