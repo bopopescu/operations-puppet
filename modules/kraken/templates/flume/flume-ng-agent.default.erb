@@ -1,0 +1,5 @@
+# Note: This file is managed by Puppet.
+
+# Set a custom agent name (default is agent) 
+#
+<%= @agent_name ? "FLUME_AGENT_NAME=#{agent_name}" : "# FLUME_AGENT_NAME=agent" %>

@@ -1,14 +1,22 @@
 
 # == Class kraken::flume
 # 
-class kraken::flume {
+class kraken::flume($agent_name = undef) {
 	include kraken::flume::install
 	include kraken::flume::source::udp
-	include kraken::flume::config
+	class { "kraken::flume::config":
+		agent_name => $agent_name,
+	}
 }
 
+class kraken::flume::agent {
+	service { "flume-ng-agent":
+		ensure => "running",
+		enable => true,
+	}
+}
 
-class kraken::flume::config {
+class kraken::flume::config($agent_name = undef) {
 	require kraken::flume::install
 	require kraken::flume::source::udp
 
@@ -18,6 +26,10 @@ class kraken::flume::config {
 
 	file { "/etc/flume-ng/conf/flume.conf":
 		content => template("kraken/flume.conf.erb"),
+	}
+
+	file { "/etc/deafult/flume-ng-agent":
+		content => template("kraken/flume/flume-ng-agent.default.erb"),
 	}
 }
 
@@ -65,6 +77,31 @@ class kraken::flume::install {
 		require => File[$flume_install_path],
 	}
 
+	# make sure flume group and user are present.
+	group { "flume":
+		ensure => "present",
+		system => true,
+		require => Exec["flume_install"],
+	}
+	user { "flume":
+		name       => "flume",
+		gid        => "flume",
+		comment    => "Flume User",
+		shell      => "/bin/false",
+		home       => "/var/run/flume-ng",
+		system     => true,
+		ensure     => "present",
+		managehome => false,
+		require    => [Group["flume"], Exec["flume_install"]],
+	}
+
+	# install the flume-agent-ng init.d script
+	file { "/etc/init.d/flume-agent-ng": 
+		content => template("kraken/flume/flume-ng-agent.init.d"),
+		mode    => 0755,
+		requre  => [Exec["flume_install"], User["flume"]],
+	}
+
 	# symlink /etc/flume-ng/conf to /usr/lib/flume-ng/conf
 	file { "/etc/flume-ng":
 		ensure => "directory",
@@ -73,6 +110,14 @@ class kraken::flume::install {
 	file { "/etc/flume-ng/conf":
 		ensure  => "$flume_path/conf",
 		require => File["/etc/flume-ng"],
+	}
+
+	# make sure /var/run/flume-ng and /var/log/flume-ng dirs exist
+	file { ["/var/run/flume-ng", "/var/log/flume-ng"]:
+		ensure => "directory",
+		owner  => "flume",
+		group  => "flume",
+		require => [User["flume"], Exec["flume_install"]],
 	}
 }
 
