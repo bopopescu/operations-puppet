@@ -255,7 +255,7 @@ node /^analytics100[7-8].eqiad.wmnet/ inherits analytics_basenode {
 
 node "analytics1009.eqiad.wmnet" inherits analytics_basenode {
 	include role::analytics::storm::worker
-	include kraken::flume
+	class { "kraken::flume": agent_name => "webrequest" }
 }
 
 
