@@ -35,7 +35,7 @@ class kraken::flume::install {
 	$flume_version = "1.3.1"
 	$flume_dir     = "apache-flume-${flume_version}-bin"
 	$flume_tarball = "${flume_dir}.tar.gz"
-	$flume_url = "http://mirrors.ibiblio.org/apache/flume/$flume_version/$flume_tarball"
+	$flume_url = "http://analytics1027.eqiad.wmnet/files/$flume_tarball"
 
 	$flume_download_path = "/opt/flume-ng"
 	$flume_path           = "$flume_download_path/$flume_dir"
@@ -83,14 +83,14 @@ class kraken::flume::source::udp {
 	# download our custom flume-udp-source .jar file
 	# (It was built against 1.4.0, but meh, this is all temporary!)
 	$flume_udp_source_jar = "flume-udp-source-1.4.0-SNAPSHOT.jar"
-	$flume_udp_source_url = "http://analytics1001.wikimedia.org:81/$flume_udp_source_jar"
+	$flume_udp_source_url = "http://analytics1027.eqiad.wmnet/files/$flume_udp_source_jar"
 	exec { "flume_udp_source_install":
 		command => "/usr/bin/wget $flume_udp_source_url",
 		cwd     => $kraken::flume::install::flume_download_path,
 		require => Class["kraken::flume::install"],
 	}
 	# symlink the name to something without the version
-	file { "$flume_install_path/lib/flume-udp-source.jar":
+	file { "${kraken::flume::instal::flume_install_path}/lib/flume-udp-source.jar":
 		ensure  => "${kraken::flume::install::flume_download_path}/$flume_udp_source_jar",
 		require => Exec["flume_udp_source_install"],
 	}
