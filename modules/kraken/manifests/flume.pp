@@ -97,7 +97,7 @@ class kraken::flume::install {
 	}
 
 	# install the flume-agent-ng init.d script
-	file { "/etc/init.d/flume-agent-ng": 
+	file { "/etc/init.d/flume-ng-agent": 
 		content => template("kraken/flume/flume-ng-agent.init.d"),
 		mode    => 0755,
 		require  => [Exec["flume_install"], User["flume"]],
