@@ -21,11 +21,11 @@ class kraken::flume::config($agent_name = undef) {
 	require kraken::flume::source::udp
 
 	file { "/etc/flume-ng/conf/flume-env.sh":
-		content => template("kraken/flume-env.sh.erb"),
+		content => template("kraken/flume/flume-env.sh.erb"),
 	}
 
 	file { "/etc/flume-ng/conf/flume.conf":
-		content => template("kraken/flume.conf.erb"),
+		content => template("kraken/flume/flume.conf.erb"),
 	}
 
 	file { "/etc/deafult/flume-ng-agent":
