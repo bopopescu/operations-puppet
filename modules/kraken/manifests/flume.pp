@@ -73,7 +73,7 @@ class kraken::flume::install {
 	}
 	# install /usr/bin/flume-ng to exec /usr/lib/flume-ng/bin/flume-ng
 	file { "/usr/bin/flume-ng":
-		content => template("kraken/flume/flume-ng.bin"),
+		content => template("kraken/flume/flume-ng.bin.erb"),
 		mode    => 0755,
 		require => File[$flume_install_path],
 	}
