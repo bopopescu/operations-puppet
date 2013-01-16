@@ -71,9 +71,10 @@ class kraken::flume::install {
 		ensure  => $flume_path,
 		require => Exec["flume_install"],
 	}
-	# symlink /usr/bin/flume-ng
+	# install /usr/bin/flume-ng to exec /usr/lib/flume-ng/bin/flume-ng
 	file { "/usr/bin/flume-ng":
-		ensure  => "$flume_install_path/bin/flume-ng",
+		content => template("kraken/flume/flume-ng.bin"),
+		mode    => 0755,
 		require => File[$flume_install_path],
 	}
 
