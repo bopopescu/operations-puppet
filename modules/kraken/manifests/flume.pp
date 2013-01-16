@@ -28,7 +28,7 @@ class kraken::flume::config($agent_name = undef) {
 		content => template("kraken/flume/flume.conf.erb"),
 	}
 
-	file { "/etc/deafult/flume-ng-agent":
+	file { "/etc/default/flume-ng-agent":
 		content => template("kraken/flume/flume-ng-agent.default.erb"),
 	}
 }
