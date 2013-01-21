@@ -203,11 +203,6 @@ node "analytics1001.wikimedia.org" inherits analytics_basenode {
 	# This udp2log instance has filters
 	# to produce into Kafka.
 	include role::analytics::udp2log::event
-
-	# Host blog flume agent from here for now.
-	# This will mostly likely change if/when we
-	# start using flume larger data consumption.
-	class { "kraken::flume": agent_name => "blog" }
 }
 
 # analytics1002 is Storm Master (i.e. Storm Nimbus server)
