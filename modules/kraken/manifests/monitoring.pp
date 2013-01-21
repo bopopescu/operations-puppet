@@ -74,6 +74,28 @@ class kraken::monitoring::kafka::producer::event inherits kraken::monitoring::ka
 	}
 }
 
+
+# This requires that the udp2log filters.blog.erb is configured to
+# publish to the JMX ports below.
+class kraken::monitoring::kafka::producer::blog inherits kraken::monitoring::kafka::producer {
+	# webrequest-blog kafka producer metrics
+	jmxtrans::metrics { "kafka-producer-webrequest-blog-$hostname":
+		jmx     => "$fqdn:9952",
+		queries => [
+			{
+				"obj"          => "kafka:type=kafka.KafkaProducerStats",
+				"resultAlias"  => "kafka_producer_KafkaProducerStats-webrequest-blog",
+				"attr"         => $kafka_producer_stats_attr
+			},
+			{
+				"obj"          => "kafka.producer.Producer:type=AsyncProducerStats",
+				"resultAlias"  => "kafka_producer_AsyncProducerStats-webrequest-blog",
+				"attr"         => $async_producer_stats_attr
+			}
+		]
+	}
+}
+
 # This requires that the udp2log filters.webrequest.erb is configured to
 # publish to the JMX ports below.
 class kraken::monitoring::kafka::producer::webrequest inherits kraken::monitoring::kafka::producer {
@@ -109,23 +131,6 @@ class kraken::monitoring::kafka::producer::webrequest inherits kraken::monitorin
 			{
 				"obj"          => "kafka.producer.Producer:type=AsyncProducerStats",
 				"resultAlias"  => "kafka_producer_AsyncProducerStats-webrequest-wikipedia-mobile",
-				"attr"         => $async_producer_stats_attr
-			}
-		]
-	}
-
-	# webrequest-blog kafka producer metrics
-	jmxtrans::metrics { "kafka-producer-webrequest-blog-$hostname":
-		jmx     => "$fqdn:9952",
-		queries => [
-			{
-				"obj"          => "kafka:type=kafka.KafkaProducerStats",
-				"resultAlias"  => "kafka_producer_KafkaProducerStats-webrequest-blog",
-				"attr"         => $kafka_producer_stats_attr
-			},
-			{
-				"obj"          => "kafka.producer.Producer:type=AsyncProducerStats",
-				"resultAlias"  => "kafka_producer_AsyncProducerStats-webrequest-blog",
 				"attr"         => $async_producer_stats_attr
 			}
 		]

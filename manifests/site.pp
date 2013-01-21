@@ -203,6 +203,9 @@ node "analytics1001.wikimedia.org" inherits analytics_basenode {
 	# This udp2log instance has filters
 	# to produce into Kafka.
 	include role::analytics::udp2log::event
+
+	# produce blog logs into Kafka as well.
+	include role::analytics::udp2log::blog
 }
 
 # analytics1002 is Storm Master (i.e. Storm Nimbus server)

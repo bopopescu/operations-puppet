@@ -82,6 +82,25 @@ class role::analytics::udp2log::event inherits role::analytics::udp2log {
 }
 
 # == Class role::analytics::udp2log::event
+# Reads from the blog udp2log log stream coming from
+# marmontel.wikimedia.org and produces the messages to Kafka.
+class role::analytics::udp2log::blog inherits role::analytics::udp2log {
+	# blog log stream udp2log instance.
+	misc::udp2log::instance { "blog":
+		port                => "8411",
+		log_directory       => "/var/log/udp2log/blog",
+		logrotate           => false,
+		monitor_packet_loss => false,
+		# event.filters.erb uses a Kafka producer
+		# wrapper script in the Kraken repository.
+		require => Class["kraken::repository"],
+	}
+
+	# use jmxtrans to push Kafka Producer stats to Ganglia
+	include kraken::monitoring::kafka::producer::blog
+}
+
+# == Class role::analytics::udp2log::event
 # Reads from the /event log stream coming from
 # Varnish servers and produces the messages to Kafka.
 class role::analytics::udp2log::webrequest($producer_id, $producer_count) inherits role::analytics::udp2log {

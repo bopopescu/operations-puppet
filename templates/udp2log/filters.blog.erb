@@ -1,0 +1,14 @@
+# Note: This file is managed by Puppet.
+
+<%
+# Quick and easy method for DRYing piping into kafka producer.
+# This uses the bin/kafka-produce script from the Kraken repository.
+def kafka_producer(topic, jmx_port='')
+#  "/usr/lib/kafka/bin/kafka-producer-shell.sh --props=/etc/kafka/producer.properties --topic=#{topic} > /dev/null"
+  "/opt/kraken/bin/kafka-produce #{topic} #{jmx_port} > /dev/null"
+end
+
+# Pipe blog udp2log logs (all logs from marmontel.wikimedia.org) into Kafka topic webrequest-blog
+pipe 1 <%= kafka_producer("webrequest-blog", 9952) %>
+
+
