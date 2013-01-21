@@ -7,6 +7,9 @@ class kraken::flume($agent_name = undef) {
 	class { "kraken::flume::config":
 		agent_name => $agent_name,
 	}
+	class { "kraken::flume::agent":
+		require => Class["kraken::flume::config"],
+	}
 }
 
 class kraken::flume::agent {
@@ -20,19 +23,23 @@ class kraken::flume::config($agent_name = undef) {
 	require kraken::flume::install
 	require kraken::flume::source::udp
 
+	$flume_conf_template = $agent_name ? {
+		undef   => "kraken/flume/flume.conf.erb",
+		default => "kraken/flume/flume-${agent_name}.conf.erb",
+	}
+
 	file { "/etc/flume-ng/conf/flume-env.sh":
 		content => template("kraken/flume/flume-env.sh.erb"),
 	}
 
 	file { "/etc/flume-ng/conf/flume.conf":
-		content => template("kraken/flume/flume.conf.erb"),
+		content => template($flume_conf_template),
 	}
 
 	file { "/etc/default/flume-ng-agent":
 		content => template("kraken/flume/flume-ng-agent.default.erb"),
 	}
 }
-
 
 # == Class kraken::flume::install
 # Temporarly using src tarball for flume 1.3.1 so that we can do
@@ -113,8 +120,9 @@ class kraken::flume::install {
 		require => File["/etc/flume-ng"],
 	}
 
-	# make sure /var/run/flume-ng and /var/log/flume-ng dirs exist
-	file { ["/var/run/flume-ng", "/var/log/flume-ng"]:
+	# make sure /var/run/flume-ng and /var/log/flume-ng
+	# and /var/lib/flume (for file channel) dirs exist
+	file { ["/var/run/flume-ng", "/var/log/flume-ng", "/var/lib/flume"]:
 		ensure => "directory",
 		owner  => "flume",
 		group  => "flume",

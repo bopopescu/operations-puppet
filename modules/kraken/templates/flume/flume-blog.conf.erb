@@ -1,0 +1,49 @@
+# Note: This file is managed by Puppet.
+
+# Define the sources, channels, and sinks for
+# the 'blog' agent.
+blog.channels             = file-channel
+blog.sources              = udp2log
+blog.sinks                = hdfs-sink
+
+
+# file-channel buffers events on disk
+blog.channels.file-channel.type          = file
+blog.channels.file-channel.checkpointDir = /var/lib/flume/file-channel/checkpoint
+blog.channels.file-channel.dataDirs      = /var/lib/flume/file-channel/data
+blog.channels.file-channel.transactionCapacity = 10000
+blog.channels.file-channel.capacity            = 100000000  # log lines are around 500 bytes, this makes this channel's capacity about 50GB.
+
+
+# UDPSource (custom)
+# See: https://issues.apache.org/jira/browse/FLUME-1838
+blog.sources.udp2log.channels  = file-channel
+blog.sources.udp2log.type      = org.apache.flume.source.udp.UDPSource
+blog.sources.udp2log.host      = 0.0.0.0
+blog.sources.udp2log.port      = 8411  # marmontel is beaming blog logs to this port
+# Timestamp interceptor extractor.
+# This extracts the timestamp out of the incoming content via regex.
+# The HDFS source will use this timestamp to bucket content into time separated directories.
+blog.sources.udp2log.interceptors = request-timestamp
+blog.sources.udp2log.interceptors.request-timestamp.type = regex_extractor
+blog.sources.udp2log.interceptors.request-timestamp.regex = ^.+\\s\\d+\\s(\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d)
+blog.sources.udp2log.interceptors.request-timestamp.serializers = s1
+blog.sources.udp2log.interceptors.request-timestamp.serializers.s1.type = org.apache.flume.interceptor.RegexExtractorInterceptorMillisSerializer
+blog.sources.udp2log.interceptors.request-timestamp.serializers.s1.name = timestamp
+blog.sources.udp2log.interceptors.request-timestamp.serializers.s1.pattern = yyyy-MM-dd'T'HH:mm:ss
+
+
+# HDFS sink
+blog.sinks.hdfs-sink.channel           = file-channel
+blog.sinks.hdfs-sink.type              = hdfs
+# TODO: find a final place for this
+blog.sinks.hdfs-sink.hdfs.path         = /user/otto/tmp/flume/blog/%Y-%m/%d/%H.%M.%S
+blog.sinks.hdfs-sink.hdfs.filePrefix   = webrequest-blog
+blog.sinks.hdfs-sink.hdfs.fileType     = DataStream
+blog.sinks.hdfs-sink.hdfs.round        = true
+blog.sinks.hdfs-sink.hdfs.roundValue   = 1
+blog.sinks.hdfs-sink.hdfs.roundUnit    = hour
+blog.sinks.hdfs-sink.hdfs.rollInterval = 3660 # 1:01, should only have one file per hour
+blog.sinks.hdfs-sink.hdfs.rollCount    = 0
+blog.sinks.hdfs-sink.hdfs.rollSize     = 0
+
