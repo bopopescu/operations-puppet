@@ -11,8 +11,8 @@ blog.sinks                = hdfs-sink
 blog.channels.file-channel.type          = file
 blog.channels.file-channel.checkpointDir = /var/lib/flume/file-channel/checkpoint
 blog.channels.file-channel.dataDirs      = /var/lib/flume/file-channel/data
-blog.channels.file-channel.transactionCapacity = 10000
-blog.channels.file-channel.capacity            = 100000000  # log lines are around 500 bytes, this makes this channel's capacity about 50GB.
+# log lines are around 500 bytes, this makes this channel's capacity about 50GB.
+blog.channels.file-channel.capacity            = 100000000  
 
 
 # UDPSource (custom)
