@@ -20,7 +20,8 @@ blog.channels.file-channel.capacity            = 100000000
 blog.sources.udp2log.channels  = file-channel
 blog.sources.udp2log.type      = org.apache.flume.source.udp.UDPSource
 blog.sources.udp2log.host      = 0.0.0.0
-blog.sources.udp2log.port      = 8411  # marmontel is beaming blog logs to this port
+# marmontel (blog host) is beaming blog logs to port 8411
+blog.sources.udp2log.port      = 8411
 # Timestamp interceptor extractor.
 # This extracts the timestamp out of the incoming content via regex.
 # The HDFS source will use this timestamp to bucket content into time separated directories.
@@ -43,7 +44,8 @@ blog.sinks.hdfs-sink.hdfs.fileType     = DataStream
 blog.sinks.hdfs-sink.hdfs.round        = true
 blog.sinks.hdfs-sink.hdfs.roundValue   = 1
 blog.sinks.hdfs-sink.hdfs.roundUnit    = hour
-blog.sinks.hdfs-sink.hdfs.rollInterval = 3660 # 1:01, should only have one file per hour
+ # 3660 == 1:01, should only have one file per hour
+blog.sinks.hdfs-sink.hdfs.rollInterval = 3660
 blog.sinks.hdfs-sink.hdfs.rollCount    = 0
 blog.sinks.hdfs-sink.hdfs.rollSize     = 0
 
