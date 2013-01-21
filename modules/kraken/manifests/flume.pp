@@ -28,6 +28,10 @@ class kraken::flume::config($agent_name = undef) {
 		default => "kraken/flume/flume-${agent_name}.conf.erb",
 	}
 
+	file { "/etc/flume-ng/conf/log4j.properties":
+		content => template("kraken/flume/log4j.properties.erb"),
+	}
+
 	file { "/etc/flume-ng/conf/flume-env.sh":
 		content => template("kraken/flume/flume-env.sh.erb"),
 	}
