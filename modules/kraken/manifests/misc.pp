@@ -23,6 +23,16 @@ class kraken::misc::web {
 }
 
 
+# == Class kraken::misc::packages
+# Packages we want on Kraken nodes.
+class kraken::misc::packages {
+	# Install libdclass-dev for Mobile Device
+	# User agent crunching.
+	package { ["libdclass-dev"]:
+		ensure => "installed",
+	}
+}
+
 # == Class kraken::misc::mysql_java
 # Installs libmysql-java Java mysql bindings.
 class kraken::misc::mysql_java {
@@ -216,9 +226,6 @@ define kraken::misc::backup::hdfs::mysql(
 		require         => Class["kraken::misc::mysql::server"],
 	}
 }
-
-
-
 
 
 # TODO: Remove this class once we are

@@ -8,10 +8,13 @@ class kraken {
 	include kraken::misc::temp
 	include cdh4::apt_source
 
+	include kraken::misc::packages
+
 	include kraken::misc::email::aliases
 
 	# kraken repository should be available on all kraken nodes
 	include kraken::repository
+	
 
 	# install common cdh4 packages and config
 	class { "cdh4":
