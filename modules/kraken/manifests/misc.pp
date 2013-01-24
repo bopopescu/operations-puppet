@@ -28,7 +28,7 @@ class kraken::misc::web {
 class kraken::misc::packages {
 	# Install libdclass-dev for Mobile Device
 	# User agent crunching.
-	package { ["libdclass-dev"]:
+	package { ["libdclass-dev", "pypy"]:
 		ensure => "installed",
 	}
 }
