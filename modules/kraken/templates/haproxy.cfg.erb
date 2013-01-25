@@ -33,12 +33,13 @@ userlist wmf-analytics
 
 frontend kraken
   bind 0.0.0.0:<%= port %>
+  timeout client 86400000
   
   # Auth ACLs
   acl auth_ok           http_auth(wmf-analytics)
 
   # Test for the WebSocket HTTP-upgrade header
-  acl is_websocket hdr(Upgrade) -i WebSocket
+  acl is_websocket      hdr(Upgrade) -i WebSocket
 
   # HTTP Host based ACLs
   acl host_analytics    hdr_beg(host)    -i analytics.
@@ -92,9 +93,9 @@ frontend kraken
   use_backend   oozie     if host_oozie
   use_backend   storm     if host_storm
   use_backend   graphite  if host_graphite
-  use_backend   riemann   if host_riemann
   use_backend   riemann_ws if host_riemann_ws
   use_backend   riemann_ws if is_websocket host_riemann
+  use_backend   riemann    if host_riemann
   
   default_backend localhost_81
 
@@ -135,7 +136,9 @@ backend riemann
   server riemann_server <%= riemann_hostname %>:<%= riemann_dash_port %>
 
 backend riemann_ws
-  timeout server 600s
+  timeout queue 5000
+  timeout server 86400000
+  timeout connect 86400000
   server riemann_ws_server <%= riemann_hostname %>:<%= riemann_ws_port %>
 
 backend localhost_81
