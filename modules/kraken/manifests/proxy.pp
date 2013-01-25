@@ -38,6 +38,11 @@ class kraken::proxy::haproxy {
 	$oozie_hostname    = $frontend_hostname
 	$storm_hostname    = $kraken::storm::nimbus_host
 	$storm_port        = $kraken::storm::ui_port
+	
+	$graphite_hostname  = "analytics1008.eqiad.wmnet"
+	$graphite_dash_port = "80"
+	$riemann_hostname   = "analytics1008.eqiad.wmnet"
+	$riemann_dash_port  = "8081"
 
 	package { "haproxy": ensure => "installed" }
 
