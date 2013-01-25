@@ -93,7 +93,8 @@ frontend kraken
   use_backend   storm     if host_storm
   use_backend   graphite  if host_graphite
   use_backend   riemann   if host_riemann
-  use_backend   riemann_ws if host_riemann_ws or (is_websocket host_riemann)
+  use_backend   riemann_ws if host_riemann_ws
+  use_backend   riemann_ws if is_websocket host_riemann
   
   default_backend localhost_81
 
