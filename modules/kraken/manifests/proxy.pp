@@ -43,6 +43,7 @@ class kraken::proxy::haproxy {
 	$graphite_dash_port = "80"
 	$riemann_hostname   = "analytics1008.eqiad.wmnet"
 	$riemann_dash_port  = "8081"
+	$riemann_ws_port    = "5556"
 
 	package { "haproxy": ensure => "installed" }
 
