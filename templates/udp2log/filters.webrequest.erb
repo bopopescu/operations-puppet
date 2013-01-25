@@ -28,9 +28,13 @@ file 10000 /var/lib/hadoop/data/e/udp2log/sampled-10000.log
 
 # Produce logs into Kafka:
 
-
 # pipe all mobile Wikipedia logs into Kafka topic webrequest-wikipedia-mobile
 pipe 1 <%= mod_filter_command %>/usr/bin/udp-filter -d m.wikipedia.org | <%= kafka_producer("webrequest-wikipedia-mobile", 9951) %>
+
+# Pipe any logs that have X-CS set into webrequest-x-cs.
+# Currently, X-CS is the last field in the line.
+pipe 1 <%= mod_filter_command %>/usr/bin/awk '$NF != "-"' >> /a/squid/zero-x-cs.log | <%= kafka_producer("webrequest-x-cs", 9953) %>
+
 
 
 

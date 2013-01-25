@@ -137,7 +137,7 @@ class kraken::monitoring::kafka::producer::webrequest inherits kraken::monitorin
 	}
 
 	# webrequest-zero kafka producer metrics
-	jmxtrans::metrics { "kafka-producer-webrequest-zero-$hostname":
+	jmxtrans::metrics { "kafka-producer-webrequest-x-cs-$hostname":
 		jmx     => "$fqdn:9953",
 		queries => [
 			{
