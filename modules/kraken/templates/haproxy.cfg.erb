@@ -45,6 +45,9 @@ frontend kraken
   acl host_hue          hdr_beg(host)    -i hue.analytics.
   acl host_oozie        hdr_beg(host)    -i oozie.analytics.
   acl host_storm        hdr_beg(host)    -i storm.analytics.
+  acl host_graphite     hdr_beg(host)    -i graphite.analytics.
+  acl host_riemann      hdr_beg(host)    -i riemann.analytics.
+  acl host_riemann_ws   hdr_beg(host)    -i riemann-ws.analytics.
 
 
   # Whitelisted Network/IP ACLs
@@ -84,6 +87,9 @@ frontend kraken
   use_backend   hue       if host_hue
   use_backend   oozie     if host_oozie
   use_backend   storm     if host_storm
+  use_backend   graphite  if host_graphite
+  use_backend   riemann   if host_riemann
+  use_backend   riemann_ws if host_riemann_ws
   
   default_backend localhost_81
 
@@ -114,6 +120,15 @@ backend oozie
 
 backend storm
   server storm_server <%= storm_hostname %>:<%= storm_port %>
+
+backend graphite
+  server graphite_server <%= graphite_hostname %>:<%= graphite_dash_port %>
+
+backend riemann
+  server riemann_server <%= riemann_hostname %>:<%= riemann_dash_port %>
+
+backend riemann_ws
+  server riemann_ws_server <%= riemann_hostname %>:<%= riemann_ws_port %>
 
 backend localhost_81
   server localhost 127.0.0.1:81
