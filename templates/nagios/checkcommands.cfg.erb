@@ -230,13 +230,13 @@ define command{
 # 'check_http_upload' command definition, querying a different URL
 define command{
         command_name    check_http_upload
-        command_line    $USER1$/check_http -H upload.wikimedia.org -I $HOSTADDRESS$ -u /pybaltestfile.txt
+        command_line    $USER1$/check_http -H upload.wikimedia.org -I $HOSTADDRESS$ -u /monitoring/backend
         }
 
 # 'check_https_upload' command definition, querying a different URL
 define command{
         command_name    check_https_upload
-        command_line    $USER1$/check_http -H upload.wikimedia.org -S -I $HOSTADDRESS$ -u /pybaltestfile.txt
+        command_line    $USER1$/check_http -H upload.wikimedia.org -S -I $HOSTADDRESS$ -u /monitoring/backend
         }
 
 # 'check_http_bits' command definition
@@ -254,7 +254,7 @@ define command{
 # 'check_http_upload' command definition, querying a different URL
 define command{
         command_name    check_http_upload_on_port
-        command_line    $USER1$/check_http -H upload.wikimedia.org -I $HOSTADDRESS$ -u /pybaltestfile.txt -p $ARG1$
+        command_line    $USER1$/check_http -H upload.wikimedia.org -I $HOSTADDRESS$ -u /monitoring/backend -p $ARG1$ -e 200
         }
 
 define command{
@@ -279,12 +279,12 @@ define command{
 
 define command{
         command_name    check_http_url_for_string_on_port
-        command_line    $USER1$/check_http -H $ARG1$ -I $HOSTADDRESS$ -p $ARG2$ -u $ARG3$ -s $ARG4$
+        command_line    $USER1$/check_http -H $ARG1$ -I $HOSTADDRESS$ -p $ARG2$ -s $ARG3$ -u $ARG4$
         }
 
 define command{
         command_name    check_http_url_on_port
-        command_line    $USER1$/check_http -H $ARG1$ -I $HOSTADDRESS$ -p $ARG2$ -u $ARG3$
+        command_line    $USER1$/check_http -H $ARG1$ -I $HOSTADDRESS$ -p $ARG2$ -e $ARG3$ -u $ARG4$
         }
 
 define command {
@@ -298,6 +298,11 @@ define command{
         }
 
 define command{
+        command_name    check_https_lvs
+        command_line    $USER1$/check_http -H $ARG1$ -S -I $HOSTADDRESS$ -u "$ARG2$"
+        }
+
+define command{
         command_name    check_http_lvs_on_port
         command_line    $USER1$/check_http -H $ARG1$ -p $ARG2$ -I $HOSTADDRESS$ -u "$ARG3"
         }
@@ -306,7 +311,7 @@ define command{
 # 'check_http_swift' command definition, querying a thumbnail that exists in swift
 define command{
         command_name    check_http_swift
-        command_line    $USER1$/check_http -H ms-fe.pmtpa.wmnet -I $HOSTADDRESS$ -u /v1/AUTH_43651b15-ed7a-40b6-b745-47666abf8dfe/monitoring/pybaltestfile.txt -p $ARG1$
+        command_line    $USER1$/check_http -I $HOSTADDRESS$ -u /monitoring/backend -p $ARG1$
         }
 
 define command{
@@ -560,6 +565,11 @@ define command{
 define command{
         command_name    nrpe_check_swift_object_auditor
         command_line    $USER1$/check_nrpe -H $HOSTADDRESS$ -c check_swift_object_auditor
+}
+
+define command{
+        command_name    nrpe_check_ircecho
+        command_line    $USER1$/check_nrpe -H $HOSTADDRESS$ -c check_ircecho
 }
 
 define command{

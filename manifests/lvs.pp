@@ -314,7 +314,7 @@ class lvs::configuration {
 			},
 			'apaches' => {
 				'pmtpa' => "10.2.1.1",
-				'eqiad' => "10.4.1.1",
+				'eqiad' => "10.2.2.1",
 			},
 			'rendering' => {
 				'pmtpa' => "10.2.1.21",
@@ -479,7 +479,7 @@ class lvs::configuration {
 			'depool-threshold' => ".5",
 			'monitors' => {
 				'ProxyFetch' => {
-					'url' => [ 'http://upload.wikimedia.org/pybaltestfile.txt' ],
+					'url' => [ 'http://upload.wikimedia.org/monitoring/backend' ],
 					},
 				'IdleConnection' => $idleconnection_monitor_options
 			},
@@ -569,7 +569,7 @@ class lvs::configuration {
 		"apaches" => {
 			'description' => "Main MediaWiki application server cluster, appservers.svc.pmtpa.wmnet",
 			'class' => "low-traffic",
-			'sites' => [ "pmtpa" ],
+			'sites' => [ "pmtpa", "eqiad" ],
 			'ip' => $service_ips['apaches'][$::site],
 			'bgp' => "yes",
 			'depool-threshold' => ".6",
@@ -584,7 +584,7 @@ class lvs::configuration {
 		"rendering" => {
 			'description' => "MediaWiki thumbnail rendering cluster, rendering.svc.pmtpa.wmnet",
 			'class' => "low-traffic",
-			'sites' => [ "pmtpa" ],
+			'sites' => [ "pmtpa", "eqiad" ],
 			'ip' => $service_ips['rendering'][$::site],
 			'bgp' => "yes",
 			'depool-threshold' => ".74",
@@ -599,7 +599,7 @@ class lvs::configuration {
 		"api" => {
 			'description' => "MediaWiki API cluster, api.svc.pmtpa.wmnet",
 			'class' => "low-traffic",
-			'sites' => [ "pmtpa" ],
+			'sites' => [ "pmtpa", "eqiad" ],
 			'ip' => $service_ips['api'][$::site],
 			'bgp' => "yes",
 			'depool-threshold' => ".6",
@@ -705,7 +705,7 @@ class lvs::configuration {
 			'depool-threshold' => ".5",
 			'monitors' => {
 				'ProxyFetch' => {
-					'url' => [ 'http://ms-fe.pmtpa.wmnet/v1/AUTH_43651b15-ed7a-40b6-b745-47666abf8dfe/monitoring/pybaltestfile.txt' ],
+					'url' => [ 'http://localhost/monitoring/backend' ],
 					},
 				'IdleConnection' => $idleconnection_monitor_options,
 			},
@@ -894,9 +894,13 @@ class lvs::monitor {
 	monitor_service_lvs_http { "m.wikimedia.org": ip_address => "208.80.154.236", check_command => "check_http_mobile" }
 
 	monitor_service_lvs_http { "appservers.svc.pmtpa.wmnet": ip_address => "10.2.1.1", check_command => "check_http_lvs!en.wikipedia.org!/wiki/Main_Page" }
+	monitor_service_lvs_http { "appservers.svc.eqiad.wmnet": ip_address => "10.2.2.1", check_command => "check_http_lvs!en.wikipedia.org!/wiki/Main_Page" }
 	monitor_service_lvs_http { "api.svc.pmtpa.wmnet": ip_address => "10.2.1.22", check_command => "check_http_lvs!en.wikipedia.org!/w/api.php?action=query&meta=siteinfo" }
+	monitor_service_lvs_http { "api.svc.eqiad.wmnet": ip_address => "10.2.2.22", check_command => "check_http_lvs!en.wikipedia.org!/w/api.php?action=query&meta=siteinfo" }
 	monitor_service_lvs_http { "rendering.svc.pmtpa.wmnet": ip_address => "10.2.1.21", check_command => "check_http_lvs!en.wikipedia.org!/wiki/Main_Page" }
-	monitor_service_lvs_http { "ms-fe.pmtpa.wmnet": ip_address => "10.2.1.27", check_command => "check_http_lvs!ms-fe.pmtpa.wmnet!/v1/AUTH_43651b15-ed7a-40b6-b745-47666abf8dfe/monitoring/pybaltestfile.txt" }
+	monitor_service_lvs_http { "rendering.svc.eqiad.wmnet": ip_address => "10.2.2.21", check_command => "check_http_lvs!en.wikipedia.org!/wiki/Main_Page" }
+	monitor_service_lvs_http { "ms-fe.pmtpa.wmnet": ip_address => "10.2.1.27", check_command => "check_http_lvs!ms-fe.pmtpa.wmnet!/monitoring/backend" }
+	monitor_service_lvs_http { "ms-fe.eqiad.wmnet": ip_address => "10.2.2.27", check_command => "check_http_lvs!ms-fe.eqiad.wmnet!/monitoring/backend" }
 	monitor_service_lvs_http { "parsoid.svc.pmtpa.wmnet": ip_address => "10.2.1.28", check_command => "check_http_on_port!8000" }
 	monitor_service_lvs_http { "parsoid.svc.eqiad.wmnet": ip_address => "10.2.2.28", check_command => "check_http_on_port!8000" }
 
@@ -987,7 +991,7 @@ class lvs::monitor {
 			uri => "bits.wikimedia.org!/skins-1.5/common/images/poweredby_mediawiki_88x31.png";
 		"upload-lb.pmtpa.wikimedia.org":
 			ip_address => $ip['ipv6']['pmtpa']['uploadlb6'],
-			uri => "upload.wikimedia.org!/pybaltestfile.txt";
+			uri => "upload.wikimedia.org!/monitoring/backend";
 		"wikidata-lb.pmtpa.wikimedia.org":
 			ip_address => $ip['ipv6']['pmtpa']['wikidatalb6'],
 			uri => "www.wikidata.org!/";
@@ -998,7 +1002,6 @@ class lvs::monitor {
 	}
 
 	# eqiad -lb addresses
-	# FIXME: add the rest
 	monitor_service_lvs_http {
 		"wikimedia-lb.eqiad.wikimedia.org":
 			ip_address => $ip['text']['eqiad']['wikimedialb'],
@@ -1044,7 +1047,7 @@ class lvs::monitor {
 			check_command => "check_http_lvs!bits.wikimedia.org!/skins-1.5/common/images/poweredby_mediawiki_88x31.png";
 		"upload-lb.eqiad.wikimedia.org":
 			ip_address => $ip['upload']['eqiad']['uploadlb'],
-			check_command => "check_http_lvs!upload.wikimedia.org!/pybaltestfile.txt";
+			check_command => "check_http_lvs!upload.wikimedia.org!/monitoring/backend";
 		"mobile-lb.eqiad.wikimedia.org":
 			ip_address => $ip['mobile']['eqiad']['mobilelb'],
 			check_command => "check_http_lvs!en.m.wikipedia.org!/wiki/Main_Page";
@@ -1101,7 +1104,7 @@ class lvs::monitor {
 			uri => "bits.wikimedia.org!/skins-1.5/common/images/poweredby_mediawiki_88x31.png";
 		"upload-lb.eqiad.wikimedia.org":
 			ip_address => $ip['upload']['eqiad']['uploadlb6'],
-			uri => "upload.wikimedia.org!/pybaltestfile.txt";
+			uri => "upload.wikimedia.org!/monitoring/backend";
 		"mobile-lb.eqiad.wikimedia.org":
 			ip_address => $ip['mobile']['eqiad']['mobilelb6'],
 			uri => "en.m.wikipedia.org!/wiki/Main_Page";
@@ -1121,12 +1124,53 @@ class lvs::monitor {
 			ip_address => $ip['text']['eqiad']['wikipedialb'],
 			check_command => "check_https_url!meta.wikimedia.org!/wiki/Main_Page",
 			critical => "false";
+		"wiktionary-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['wiktionarylb'],
+			check_command => "check_https_lvs!en.wikipedia.org!/wiki/Main_Page",
+			critical => "false";
+		"wikiquote-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['wikiquotelb'],
+			check_command => "check_https_lvs!en.wikipedia.org!/wiki/Main_Page",
+			critical => "false";
+		"wikibooks-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['wikibookslb'],
+			check_command => "check_https_lvs!en.wikipedia.org!/wiki/Main_Page",
+			critical => "false";
+		"wikisource-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['wikisourcelb'],
+			check_command => "check_https_lvs!en.wikipedia.org!/wiki/Main_Page",
+			critical => "false";
+		"wikinews-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['wikinewslb'],
+			check_command => "check_https_lvs!en.wikipedia.org!/wiki/Main_Page",
+			critical => "false";
+		"wikiversity-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['wikiversitylb'],
+			check_command => "check_https_lvs!en.wikipedia.org!/wiki/Main_Page",
+			critical => "false";
+		"mediawiki-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['mediawikilb'],
+			check_command => "check_https_lvs!en.wikipedia.org!/wiki/Main_Page",
+			critical => "false";
+		"foundation-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['foundationlb'],
+			check_command => "check_https_lvs!en.wikipedia.org!/wiki/Main_Page",
+			critical => "false";
 		"bits-lb.eqiad.wikimedia.org":
 			ip_address => $ip['bits']['eqiad']['bitslb'],
 			check_command => "check_https_url!bits.wikimedia.org!/skins-1.5/common/images/poweredby_mediawiki_88x31.png";
 		"upload-lb.eqiad.wikimedia.org":
 			ip_address => $ip['upload']['eqiad']['uploadlb'],
-			check_command => "check_https_url!upload.wikimedia.org!/pybaltestfile.txt";
+			check_command => "check_https_url!upload.wikimedia.org!/monitoring/backend";
+		"mobile-lb.eqiad.wikimedia.org":
+			ip_address => $ip['mobile']['eqiad']['mobilelb'],
+			check_command => "check_https_lvs!en.m.wikipedia.org!/wiki/Main_Page";
+		"wikidata-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['wikidatalb'],
+			check_command => "check_https_lvs!www.wikidata.org!/";
+		"wikivoyage-lb.eqiad.wikimedia.org":
+			ip_address => $ip['text']['eqiad']['wikivoyagelb'],
+			check_command => "check_https_lvs!en.wikivoyage.org!/wiki/Main_Page";
 	}
 
 	# esams -lb addresses
@@ -1153,7 +1197,8 @@ class lvs::monitor {
 	monitor_service_lvs_http { "bits.esams.wikimedia.org": ip_address => "91.198.174.233", check_command => "check_http_lvs!bits.wikimedia.org!/skins-1.5/common/images/poweredby_mediawiki_88x31.png" }
 	monitor_service_lvs_https { "bits.esams.wikimedia.org": ip_address => "91.198.174.233", check_command => "check_https_url!bits.wikimedia.org!/skins-1.5/common/images/poweredby_mediawiki_88x31.png", critical => "false" }
 
-	monitor_service_lvs_custom { "payments.wikimedia.org": ip_address => "208.80.152.213", port => 443, check_command => "check_https_url!payments.wikimedia.org!/index.php?title=Special:GlobalCollectGateway&uselang=en&ffname=cc-vm&contribution_tracking_id=1", retries => 20 }
+	# todo: we should probably monitor both eqiad/pmtpa
+	monitor_service_lvs_custom { "payments.wikimedia.org": ip_address => "208.80.155.5", port => 443, check_command => "check_https_url!payments.wikimedia.org!/index.php?title=Special:GlobalCollectGateway&uselang=en&ffname=cc-vm&contribution_tracking_id=1", retries => 20 }
 
 	monitor_service_lvs6_http_https {
 		"wikimedia-lb.esams.wikimedia.org":
@@ -1200,7 +1245,7 @@ class lvs::monitor {
 			uri => "bits.wikimedia.org!/skins-1.5/common/images/poweredby_mediawiki_88x31.png";
 		"upload-lb.esams.wikimedia.org":
 			ip_address => $ip['ipv6']['esams']['uploadlb6'],
-			uri => "upload.wikimedia.org!/pybaltestfile.txt";
+			uri => "upload.wikimedia.org!/monitoring/backend";
 	}
 
 	# Not really LVS but similar:

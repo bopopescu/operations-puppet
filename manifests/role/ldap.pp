@@ -13,6 +13,8 @@ class role::ldap::config::labs {
 	$ldapconfig = {
 		"servernames" => $servernames,
 		"basedn" => $basedn,
+		"groups_rdn" => "ou=groups",
+		"users_rdn" => "ou=people",
 		"domain" => "wikimedia",
 		"proxyagent" => "cn=proxyagent,ou=profile,${basedn}",
 		"proxypass" => $passwords::ldap::labs::proxypass,
@@ -26,6 +28,8 @@ class role::ldap::config::labs {
 		"wikildapdomain" => "labs",
 		"wikicontrollerapiurl" => "https://labsconsole.wikimedia.org/w/api.php",
 		"sudobasedn" => $sudobasedn,
+		"pagesize" => "2000",
+		"nss_min_uid" => "499",
 	}
 }
 
@@ -42,6 +46,8 @@ class role::ldap::config::production {
 	$ldapconfig = {
 		"servernames" => $servernames,
 		"basedn" => $basedn,
+		"groups_rdn" => "ou=groups",
+		"users_rdn" => "ou=people",
 		"domain" => "wikimedia",
 		"proxyagent" => "cn=proxyagent,ou=profile,${basedn}",
 		"proxypass" => $passwords::ldap::production::proxypass,
@@ -55,6 +61,8 @@ class role::ldap::config::production {
 		"wikildapdomain" => "labs",
 		"wikicontrollerapiurl" => "https://labsconsole.wikimedia.org/w/api.php",
 		"sudobasedn" => $sudobasedn,
+		"pagesize" => "2000",
+		"nss_min_uid" => "499",
 	}
 }
 
@@ -67,6 +75,8 @@ class role::ldap::config::corp {
 	$ldapconfig = {
 		"servernames" => $servernames,
 		"basedn" => $basedn,
+		"groups_rdn" => "ou=groups",
+		"users_rdn" => "ou=people",
 		"domain" => "corp",
 		"proxyagent" => "cn=proxyagent,ou=profile,${basedn}",
 		"proxypass" => $passwords::ldap::corp::proxypass,
@@ -78,6 +88,8 @@ class role::ldap::config::corp {
 		"tenant_id_attribute" => "cn",
 		"ca" => "wmf-ca.pem",
 		"sudobasedn" => $sudobasedn,
+		"pagesize" => "1000",
+		"nss_min_uid" => "499",
 	}
 }
 

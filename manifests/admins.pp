@@ -2310,6 +2310,13 @@ class accounts {
 					type   => "ssh-rsa",
 					key    => "AAAAB3NzaC1yc2EAAAADAQABAAABAQCle8Z4m/zR8MFkJ+4agjsWp/gFGXcvsweraTxrZwUxqU2q6NPcP3PzPUgUnOG6hF/KqfLt0eFor8DEHhoiaxrylKBQNx4cQkHRoCj2V9X5IOsLWV3jEIaaN+C4a9xT5WH10wiGSxDq8BvNWBEPESkC68TSjdfGtsdrvrtignbDM/GWhYFPYYYNbNJg3xAKWq/kdQuIvjDVBe9LVmPPl5VoeyahhEGdRzP46d7fpVXwXOCUlObxGW5lLqhS95acBVfIF5sIvHJms3rn8IQRnOm++l65EY+qMmpSqCzwUQDOoZ5pmpMU9O38sGz6Hw4+2p74cP0Vd9EJ6MmX8EA+yNxj";
 			}
+			ssh_authorized_key {
+				"user@user-Inspiron-3520":
+					ensure => present,
+					user   => $username,
+					type   => "ssh-rsa",
+					key    => "AAAAB3NzaC1yc2EAAAADAQABAAABAQCrncifKm+V2aAJz01GND6wJJ2nUaGy7Z+uV6yVT+QNqf2KaoANs93RL/e9YQce3WuMakOiJNBtV55bgZg96hdtLvnEtiNB/fpF2Ft8pspwozL0nNVG6GT/S461Xh1Uwbe8Q+6yBW2zdaG17rj0AvHB07AmLe/od8wd1qA1wlTU44400e6wgQ2W9BqVl70VI5n03xKZstsy1IlPEP/uxQQos7bhaU+VQKNrkO5oRWTSu7WX8d2L7dbL2SWmzIMOYbhLux55Cf70uwR4fvlGlDi9QenqiDce2Fzq2nklo5L8Maz7kCWHqGF4ux1XMlenIyVdDzS+hXvISMTHDvChqVLJ";
+			}
 		}
 	}
 
@@ -2438,25 +2445,47 @@ class accounts {
 	}
 
   # RT 2440
-  class cmcmahon inherits baseaccount {
-    $username = "cmcmahon"
-    $realname = "Chris McMahon"
-    $uid = 627
+	class cmcmahon inherits baseaccount {
+		$username = "cmcmahon"
+		$realname = "Chris McMahon"
+		$uid = 627
 
-    unixaccount { $realname: username => $username, uid => $uid, gid => $gid }
+		unixaccount { $realname: username => $username, uid => $uid, gid => $gid }
 
-    if $manage_home {
-      Ssh_authorized_key { require => Unixaccount[$realname]}
+		if $manage_home {
+			Ssh_authorized_key { require => Unixaccount[$realname]}
 
-      ssh_authorized_key {
-        "cmcmahon@ubuntu":
-        ensure  => present,
-        user  => $username,
-        type  => "ssh-rsa",
-        key => "AAAAB3NzaC1yc2EAAAADAQABAAABAQCxI9s+xp5hVPgYCFoiA7fVZWHp+tpsk8zO+iv0xpoeC1HKu5plsyQ+IrJyZQ3AlXU8TdAregeCZ160scrVJcCLwaU+3JC9dgRKOVnvrOMieK3HFsNBAXgOpLTRqXwXi37OQElEw/+WmnUW6BPtE5laQXwiNZ9HmdKUnuSB7k469gtX8Zp67/NyypOJR4gEoBC5OU9xD99lkKhJMW2o/eDIX//vzjtInQVgVBpfSSp4iNjeB9Z1gx5E28Xc8y7DRe8ShyRL/wQkagZ+cexmo33JkoJ6+vwV3Md9JkKYFkj0WCUrLBfXRAM7zagcnY7vJyW3xu81+HVQxcQAONUxAAKB",
-      }
-    }
-  }
+			ssh_authorized_key {
+				"cmcmahon@ubuntu":
+				ensure  => present,
+				user  => $username,
+				type  => "ssh-rsa",
+				key => "AAAAB3NzaC1yc2EAAAADAQABAAABAQCxI9s+xp5hVPgYCFoiA7fVZWHp+tpsk8zO+iv0xpoeC1HKu5plsyQ+IrJyZQ3AlXU8TdAregeCZ160scrVJcCLwaU+3JC9dgRKOVnvrOMieK3HFsNBAXgOpLTRqXwXi37OQElEw/+WmnUW6BPtE5laQXwiNZ9HmdKUnuSB7k469gtX8Zp67/NyypOJR4gEoBC5OU9xD99lkKhJMW2o/eDIX//vzjtInQVgVBpfSSp4iNjeB9Z1gx5E28Xc8y7DRe8ShyRL/wQkagZ+cexmo33JkoJ6+vwV3Md9JkKYFkj0WCUrLBfXRAM7zagcnY7vJyW3xu81+HVQxcQAONUxAAKB",
+			}
+		}
+	}
+
+  # RT 4387
+	class ram inherits baseaccount {
+		$username = "ram"
+		$realname = "Munagala Ramanath"
+		$uid = 628
+
+		unixaccount { $realname: username => $username, uid => $uid, gid => $gid }
+
+		if $manage_home {
+			Ssh_authorized_key { require => Unixaccount[$realname]}
+
+			ssh_authorized_key {
+				"ram@wikimedia.org":
+				ensure  => present,
+				user  => $username,
+				type  => "ssh-rsa",
+				key => "AAAAB3NzaC1yc2EAAAADAQABAAABAQC1crxU3ORFVUydISpXqcTWzUrhnvdkim3rUppL+N9OYb+kIDobFKlzWlPUx9FHvu9Rl4zc7jmJIV36qxC9mDgvIya4XS5dLEVbZ8fR1r+NH0jJU9MDpdUaFTx2svl5WQqig5cnNqi2oL17NGxF1kl9vga6SZzuIngiKvHvfp+tgrXXMPyyaC7+6OJTJjropRifO72XtbcKlNmYtOn8FWeB6Ge1S3S73LZsuTG41LRiumT2ljQT5K2CnFAREwaeuYGNWq7SRbymb7m0kys2OQ7KMeRAPpIjwLekK5+QTAdM3+W3AOFXGX9idYk7iSDWG/+pXNcFRQpgH0WDzsBeKWLv",
+			}
+		}
+	}
+
 
 	# FIXME: not an admin. This is more like a system account.
 	class l10nupdate inherits baseaccount {
@@ -2555,6 +2584,7 @@ class admins::mortals {
 	include accounts::rmoen
 	include accounts::robla
 	include accounts::spage
+	include accounts::sumanah #RT 3752
 	include accounts::zak # access revoked
 }
 
@@ -2578,8 +2608,9 @@ class admins::restricted {
 	include accounts::khorn
 	include accounts::mwalker
 	include accounts::otto
-	include accounts::rcole # access revoked
 	include accounts::rainman
+	include accounts::ram #rt4387
+	include accounts::rcole # access revoked
 	include accounts::tparscal
 }
 
@@ -2590,6 +2621,7 @@ class admins::analinterns {
 	include accounts::declerambaul
 	include accounts::diederik
 	include accounts::halfak
+	include accounts::spetrea
 	include accounts::shawn # disabled
 	include accounts::whym # disabled
 

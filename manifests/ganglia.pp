@@ -265,7 +265,8 @@ class ganglia {
 				default: {
 					$data_sources = {
 						"Decommissioned servers pmtpa" => "eiximenis.wikimedia.org",
-						"Video scalers" => "tmh1.pmtpa.wmnet tmh2.pmtpa.wmnet",
+						"Video scalers pmtpa" => "tmh1.pmtpa.wmnet tmh2.pmtpa.wmnet",
+						"Video scalers eqiad" => "tmh1001.eqiad.wmnet tmh1002.eqiad.wmnet",
 						"Image scalers pmtpa" => "srv220.pmtpa.wmnet srv219.pmtpa.wmnet",
 						"API application servers pmtpa" => "srv254.pmtpa.wmnet srv255.pmtpa.wmnet",
 						"Application servers pmtpa" => "srv258.pmtpa.wmnet srv259.pmtpa.wmnet",
@@ -274,7 +275,8 @@ class ganglia {
 						"API application servers eqiad" => "mw1114.eqiad.wmnet mw1115.eqiad.wmnet",
 						"Application servers eqaid" => "mw1017.eqiad.wmnet mw1018.eqiad.wmnet",
 						"Jobrunners eqiad " => "mw1001.eqiad.wmnet mw1002.eqiad.wmnet",
-						"Bits application servers" => "mw1151.eqiad.wmnet mw1152.eqiad.wmnet",
+						"Bits application servers pmtpa" => "srv248.pmtpa.wmnet srv249.pmtpa.wmnet",
+						"Bits application servers eqiad" => "mw1151.eqiad.wmnet mw1152.eqiad.wmnet",
 						"Search pmtpa" => "search13.pmtpa.wmnet search14.pmtpa.wmnet",
 						"MySQL" => "db50.pmtpa.wmnet db51.pmtpa.wmnet",
 						"PDF servers" => "pdf1.wikimedia.org pdf2.wikimedia.org",
@@ -309,6 +311,7 @@ class ganglia {
 						"Miscellaneous esams" => "hooft.esams.wikimedia.org",
 						"Analytics cluster eqiad" => "analytics1003.eqiad.wmnet analytics1011.eqiad.wmnet",
 						"Memcached pmtpa" => "mc1.pmtpa.wmnet mc2.pmtpa.wmnet",
+						"Memcached eqiad" => "mc1001.eqiad.wmnet mc1002.eqiad.wmnet",
 						"Upload caches esams" => "cp3003.esams.wikimedia.org cp3004.esams.wikimedia.org",
 						"Ceph cluster esams" => "ms-be3001.esams.wikimedia.org ms-be3002.esams.wikimedia.org",
 						"Parsoid pmtpa" => "wtp1.pmtpa.wmnet",

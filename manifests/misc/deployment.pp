@@ -184,47 +184,47 @@ class misc::deployment::scap_scripts {
 			owner => root,
 			group => root,
 			mode => 0555,
-			source => "puppet:///files/misc/scripts/mw-update-l10n";
+			source => "puppet:///files/scap/mw-update-l10n";
 		"${scriptpath}/scap":
 			owner => root,
 			group => root,
 			mode => 0555,
-			source => "puppet:///files/misc/scripts/scap";
+			source => "puppet:///files/scap/scap";
 		"${scriptpath}/sync-common-all":
 			owner => root,
 			group => root,
 			mode => 0555,
-			source => "puppet:///files/misc/scripts/sync-common-all";
+			source => "puppet:///files/scap/sync-common-all";
 		"${scriptpath}/sync-common-file":
 			owner => root,
 			group => root,
 			mode => 0555,
-			source => "puppet:///files/misc/scripts/sync-common-file";
+			source => "puppet:///files/scap/sync-common-file";
 		"${scriptpath}/sync-dblist":
 			owner => root,
 			group => root,
 			mode => 0555,
-			source => "puppet:///files/misc/scripts/sync-dblist";
+			source => "puppet:///files/scap/sync-dblist";
 		"${scriptpath}/sync-dir":
 			owner => root,
 			group => root,
 			mode => 0555,
-			source => "puppet:///files/misc/scripts/sync-dir";
+			source => "puppet:///files/scap/sync-dir";
 		"${scriptpath}/sync-docroot":
 			owner => root,
 			group => root,
 			mode => 0555,
-			source => "puppet:///files/misc/scripts/sync-docroot";
+			source => "puppet:///files/scap/sync-docroot";
 		"${scriptpath}/sync-file":
 			owner => root,
 			group => root,
 			mode => 0555,
-			source => "puppet:///files/misc/scripts/sync-file";
+			source => "puppet:///files/scap/sync-file";
 		"${scriptpath}/sync-wikiversions":
 			owner => root,
 			group => root,
 			mode => 0555,
-			source => "puppet:///files/misc/scripts/sync-wikiversions";
+			source => "puppet:///files/scap/sync-wikiversions";
 	}
 }
 
@@ -352,9 +352,13 @@ class misc::deployment::vars ($system = "git-deploy") {
 	if $system == "git-deploy" {
 		$mw_common = "/srv/deployment/mediawiki/common"
 		$mw_common_source = $mw_common
+		$dblist_common = "/srv/deployment/mediawiki/common/dblists"
+		$dblist_common_source = $dblist_common
 	} elsif $system == "scap" {
 		$mw_common = "/usr/local/apache/common-local"
 		$mw_common_source = "/home/wikipedia/common"
+		$dblist_common = $mw_common
+		$dblist_common_source = $mw_common_source
 	}
 	file {
 		"/usr/local/lib/mw-deployment-vars.sh":
@@ -363,4 +367,8 @@ class misc::deployment::vars ($system = "git-deploy") {
 			mode => 0444,
 			content => template("misc/mw-deployment-vars.erb");
 	}
+}
+
+class misc::deployment::scap_proxy {
+	class { 'generic::rsyncd': config => "scap" }
 }

@@ -152,6 +152,10 @@ class role::cache {
 					'cp1035.eqiad.wmnet',
 					'cp1036.eqiad.wmnet',
 				],
+				"esams-varnish" => [	# FIXME: rename after Squid decommissioning
+					'cp3009.esams.wikimedia.org',
+					'cp3010.esams.wikimedia.org',
+				],
 				"esams" => [
 					'knsq16.knams.wikimedia.org',
 					'knsq17.knams.wikimedia.org',
@@ -339,11 +343,15 @@ class role::cache {
 				"pmtpa" => {},
 				"eqiad" => { "backend" => $role::cache::configuration::active_nodes['upload'][$::site] },
 				# TODO: replace after removing Squid
-				"esams" => { "backend" => [ $::fqdn ] },
+				"esams" => { "backend" => $role::cache::configuration::active_nodes['upload']["${::site}-varnish"] },
 			}
 
 			$varnish_be_directors = {
-				"eqiad" => { "backend" => [ "10.2.1.24" ], "swift" => [ "10.2.1.27" ] },
+				"eqiad" => {
+					"backend" => [ "10.2.1.24" ],
+					"swift" => [ "10.2.1.27" ],
+					"image_scalers" => $lvs::configuration::lvs_service_ips[$::realm]['rendering'][$::mw_primary],
+				},
 				"esams" => {
 					"backend" => "208.80.154.235",
 				}
@@ -392,7 +400,7 @@ class role::cache {
 				},
 				storage => "-s main-sda3=persistent,/srv/sda3/varnish.persist,${storage_size_main}G -s main-sdb3=persistent,/srv/sdb3/varnish.persist,${storage_size_main}G -s bigobj-sda3=file,/srv/sda3/large-objects.persist,${storage_size_bigobj}G -s bigobj-sdb3=file,/srv/sdb3/large-objects.persist,${storage_size_bigobj}G",
 				backends => $::site ? {
-					'eqiad' => [ "10.2.1.24", "10.2.1.27" ],
+					'eqiad' => [ "10.2.1.24", "10.2.1.27", $lvs::configuration::lvs_service_ips[$::realm]['rendering'][$::mw_primary] ],
 					'esams' => ["208.80.154.235"],
 				},
 				directors => $varnish_be_directors[$::site],
@@ -465,12 +473,17 @@ class role::cache {
 
 		class { "lvs::realserver": realserver_ips => $lvs::configuration::lvs_service_ips[$::realm]['bits'][$::site] }
 
-		$bits_appservers = [ "srv248.pmtpa.wmnet", "srv249.pmtpa.wmnet", "mw60.pmtpa.wmnet", "mw61.pmtpa.wmnet" ]
+		$bits_appservers = {
+			'pmtpa' => [ "srv248.pmtpa.wmnet", "srv249.pmtpa.wmnet", "mw60.pmtpa.wmnet", "mw61.pmtpa.wmnet" ],
+			'eqiad' => [ "mw1149.eqiad.wmnet", "mw1150.eqiad.wmnet", "mw1151.eqiad.wmnet", "mw1152.eqiad.wmnet" ],
+		}
 		$test_wikipedia = $::realm ? {
 			"production" => [ "srv193.pmtpa.wmnet" ],
 			"labs" => [ '10.4.0.166' ],
 		}
-		$all_backends = [ "srv248.pmtpa.wmnet", "srv249.pmtpa.wmnet", "mw60.pmtpa.wmnet", "mw61.pmtpa.wmnet", "srv193.pmtpa.wmnet" ]
+		# FIXME: need 'flatten' here
+		$all_backends = [ "srv248.pmtpa.wmnet", "srv249.pmtpa.wmnet", "mw60.pmtpa.wmnet", "mw61.pmtpa.wmnet", "srv193.pmtpa.wmnet",
+		 	"mw1149.eqiad.wmnet", "mw1150.eqiad.wmnet", "mw1151.eqiad.wmnet", "mw1152.eqiad.wmnet" ]
 
 		if( $::realm == 'production' ) {
 			$varnish_backends = $::site ? {
@@ -490,8 +503,9 @@ class role::cache {
 		# FIXME: stupid hack to unbreak hashes-in-selectors in puppet 2.7
 		$multiple_backends = {
 			'pmtpa-eqiad' => {
-				"backend" => $bits_appservers,
-				"test_wikipedia" => $test_wikipedia
+				"backend" => $bits_appservers['eqiad'],
+				"eqiad_bits" => $bits_appservers['eqiad'],
+				"test_wikipedia" => $test_wikipedia,
 				},
 			'esams' => {
 				"backend" => $varnish_backends,
@@ -650,8 +664,8 @@ class role::cache {
 				/^cp104[12]$/ => "-s sda3=persistent,/srv/sda3/varnish.persist,100G -s sdb3=persistent,/srv/sdb3/varnish.persist,100G",
 				default => "-s file,/a/sda/varnish.persist,50% -s file,/a/sdb/varnish.persist,50%",
 			},
-			backends => [ "10.2.1.1" ],
-			directors => { "backend" => [ "10.2.1.1" ] },
+			backends => [ $lvs::configuration::lvs_service_ips[$::realm]['apaches'][$::mw_primary] ],
+			directors => { "backend" => [ $lvs::configuration::lvs_service_ips[$::realm]['apaches'][$::mw_primary] ] },
 			director_options => {
 				'retries' => 2,
 			},
@@ -663,8 +677,11 @@ class role::cache {
 				'connect_timeout' => "5s",
 				'first_byte_timeout' => "35s",
 				'between_bytes_timeout' => "4s",
-				'max_connections' => 1000,
+				'max_connections' => 600,
 				},
+			cluster_options => {
+				'api_backend' => $lvs::configuration::lvs_service_ips[$::realm]['api'][$::mw_primary],
+			},
 			xff_sources => $network::constants::all_networks
 		}
 

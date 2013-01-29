@@ -65,7 +65,7 @@ class mysql {
 	elsif $hostname =~ /^blondel|bellin$/ {
 		$db_cluster = "m1"
 	}
-	elsif $hostname =~ /^(db1008|db1013|db1025|db78)$/ {
+	elsif $hostname =~ /^(db1008|db1025|db78)$/ {
 		$db_cluster = "fundraisingdb"
 	}
 	elsif $hostname =~ /^db(48|49|1046|1048)$/ {
@@ -562,7 +562,7 @@ class mysql::coredb::ganglia{
 	}
 }
 
-class mysql::coredb::monitoring( $crit = false ) {
+class mysql::coredb::monitoring( $crit = false, $no_slave = false ) {
 
 		include passwords::nagios::mysql
 		$mysql_check_pass = $passwords::nagios::mysql::mysql_check_pass
@@ -588,12 +588,14 @@ class mysql::coredb::monitoring( $crit = false ) {
 	monitor_service { "mysql disk space": description => "MySQL disk space", check_command => "nrpe_check_disk_6_3", critical => true }
 	monitor_service { "mysqld": description => "mysqld processes", check_command => "nrpe_check_mysqld", critical => $crit }
 	monitor_service { "mysql recent restart": description => "MySQL Recent Restart", check_command => "nrpe_check_mysql_recent_restart", critical => $crit }
-	monitor_service { "full lvs snapshot": description => "Full LVS Snapshot", check_command => "nrpe_check_lvs", critical => false }
-	monitor_service { "mysql idle transaction": description => "MySQL Idle Transactions", check_command => "nrpe_check_mysql_idle_transactions", critical => false }
-	monitor_service { "mysql replication heartbeat": description => "MySQL Replication Heartbeat", check_command => "nrpe_check_mysql_slave_heartbeat", critical => false }
-	monitor_service { "mysql slave delay": description => "MySQL Slave Delay", check_command => "nrpe_check_mysql_slave_delay", critical => false }
-	monitor_service { "mysql slave running": description => "MySQL Slave Running", check_command => "nrpe_check_mysql_slave_running", critical => false }
 
+	if $no_slave == false {
+		monitor_service { "full lvs snapshot": description => "Full LVS Snapshot", check_command => "nrpe_check_lvs", critical => false }
+		monitor_service { "mysql idle transaction": description => "MySQL Idle Transactions", check_command => "nrpe_check_mysql_idle_transactions", critical => false }
+		monitor_service { "mysql replication heartbeat": description => "MySQL Replication Heartbeat", check_command => "nrpe_check_mysql_slave_heartbeat", critical => false }
+		monitor_service { "mysql slave delay": description => "MySQL Slave Delay", check_command => "nrpe_check_mysql_slave_delay", critical => false }
+		monitor_service { "mysql slave running": description => "MySQL Slave Running", check_command => "nrpe_check_mysql_slave_running", critical => false }
+	}
 }
 
 class mysql::client::default-charset-binary {
@@ -615,9 +617,21 @@ class mysql::client::default-charset-binary {
 # are not (yet?) meant for serious production installs.
 
 # Installs the mysql-client package
-class generic::mysql::packages::client($version = "5.1") {
+class generic::mysql::packages::client($version = "") {
 	# This conflicts with class mysql::packages.  DO NOT use them together
-	package { "mysql-client-${version}":
+	if !$version {
+		if versioncmp($::lsbdistrelease, "12.04") >= 0 {
+			$ver = "5.5"
+		}
+		else {
+			$ver = "5.1"
+		}
+	}
+	else {
+		$ver = $version
+	}
+
+	package { "mysql-client-${ver}":
 		ensure => latest,
 		alias  => "mysql-client",
 	}
@@ -626,10 +640,22 @@ class generic::mysql::packages::client($version = "5.1") {
 	}
 }
 
-class generic::mysql::packages::server($version = "5.1") {
+class generic::mysql::packages::server($version = "") {
 	# This conflicts with class mysql::packages.  DO NOT use them together
 	# if installed on a host with an external IP address, be sure to run a firewall.
-	package { "mysql-server-${version}":
+	if !$version {
+		if versioncmp($::lsbdistrelease, "12.04") >= 0 {
+			$ver = "5.5"
+		}
+		else {
+			$ver = "5.1"
+		}
+	}
+	else {
+		$ver = $version
+	}
+
+	package { "mysql-server-${ver}":
 		ensure => present,
 		alias  => "mysql-server"
 	}

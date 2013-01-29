@@ -5,7 +5,6 @@ import "generic-definitions.pp"
 import "base.pp"
 
 import "admins.pp"
-import "apaches.pp"
 import "backups.pp"
 import "certs.pp"
 import "dns.pp"
@@ -63,52 +62,6 @@ class newstandard {
 	include base,
 		ganglia,
 		ntp::client
-}
-
-#############################
-# Role classes
-#############################
-
-# TODO: Perhaps rename these classes to "role::<class>" to distinguish them
-# from classes inside service manifests
-# Update: migration is now in progress, into role/<class>.pp. Classes still here
-# are old, and probably need to be rewritten.
-
-
-# TODO: rewrite this old mess.
-class applicationserver_old {
-	class parent {
-		$cluster = "appserver"
-		$nagios_group = "${cluster}_${::site}"
-	}
-
-	# applicationserver::labs bootstrap a MediaWiki Apache for 'beta'
-	class labs inherits parent {
-		include standard,
-			nfs::upload::labs,
-			mediawiki::packages,
-			apaches::cron,
-			apaches::service,
-			apaches::monitoring::labs,
-			geoip
-	}
-
-	class jobrunner {
-		class {"mediawiki_new::jobrunner": }
-	}
-
-}
-
-class protoproxy::ssl {
-	$cluster = "ssl"
-
-	$enable_ipv6_proxy = true
-
-	include standard,
-		certificates::wmf_ca,
-		protoproxy::proxy_sites
-
-	monitor_service { "https": description => "HTTPS", check_command => "check_ssl_cert!*.wikimedia.org" }
 }
 
 
@@ -320,6 +273,10 @@ node /(arsenic|niobium|strontium|palladium)\.(wikimedia\.org|eqiad\.wmnet)/ {
 	include role::cache::bits
 }
 
+node /^(barium|colby)\.wikimedia\.org$/ {
+	include standard
+}
+
 node "bast1001.wikimedia.org" {
 	$cluster = "misc"
 	$domain_search = "wikimedia.org pmtpa.wmnet eqiad.wmnet esams.wikimedia.org"
@@ -352,15 +309,13 @@ node "brewster.wikimedia.org" {
 		backup::client
 }
 
-node  "cadmium.eqiad.wmnet" {
-	include	standard
-}
-
 node "calcium.wikimedia.org" {
 	$cluster = "misc"
 
 	include standard,
-		misc::smokeping
+		groups::wikidev,
+		accounts::robh
+
 }
 
 node /^(capella|nitrogen)\.wikimedia\.org$/ {
@@ -435,7 +390,7 @@ node /^cp300[12]\.esams\.wikimedia\.org$/ {
 	}
 }
 
-node /^cp300[34]\.esams\.wikimedia\.org$/ {
+node /^cp30(0[34789]|10)\.esams\.wikimedia\.org$/ {
 	if $::hostname =~ /^cp300[34]$/ {
 		$ganglia_aggregator = "true"
 	}
@@ -565,6 +520,7 @@ node /db(42|6[129]|7[0-7])\.pmtpa\.wmnet/{
 node /db10(01|17|42|43|49|50)\.eqiad\.wmnet/ {
 	if $hostname =~ /^db10(01|17)/ {
 		$ganglia_aggregator = "true"
+		include mha::manager
 	}
 
 	if $hostname == "db1043" {
@@ -608,7 +564,7 @@ node /db104[68]\.eqiad\.wmnet/ {
 }
 
 ## eqiad fundraising DBs
-node /db10(08|13|25)\.eqiad\.wmnet/ {
+node /^(db1008|db1025)\.eqiad\.wmnet/ {
 	include mysql::mysqluser,
 		mysql::datadirs,
 		mysql::packages,
@@ -616,11 +572,7 @@ node /db10(08|13|25)\.eqiad\.wmnet/ {
 
 	  if $hostname == "db1008" {
 		include role::fundraising::database::master
-	  }
-	  if $hostname == "db1013" {
-		include role::fundraising::database::slave
-	  }
-	  if $hostname == "db1025" {
+	  } elsif $hostname == "db1025" {
 		include role::fundraising::database::dump_slave
 	  }
 }
@@ -634,11 +586,7 @@ node /db1047\.eqiad\.wmnet/ {
 
 ## not currently in production and/or hardware issues
 node /db10(1[2456]|2[39]|3[012367]|4[45])\.eqiad\.wmnet/ {
-	  include role::db::core,
-		mysql::mysqluser,
-		mysql::datadirs,
-		mysql::conf,
-		mysql::packages
+
 }
 
 node "dobson.wikimedia.org" {
@@ -681,6 +629,10 @@ node "ekrem.wikimedia.org" {
 node "emery.wikimedia.org" inherits "base_analytics_logging_node" {
 	include
 		admins::mortals,
+		# RT 4312
+		accounts::dandreescu
+
+	include
 		generic::sysctl::high-bandwidth-rsync,
 		misc::udp2log::utilities,
 		misc::udp2log
@@ -781,7 +733,7 @@ node "fenari.wikimedia.org" {
 	$ircecho_chans = "#wikimedia-operations"
 	$ircecho_server = "irc.freenode.net"
 
-	include standard,
+	include role::applicationserver::maintenance,
 		svn::client,
 		nfs::netapp::home,
 		admins::roots,
@@ -800,7 +752,6 @@ node "fenari.wikimedia.org" {
 		squid::cachemgr,
 		accounts::awjrichards,
 		accounts::erosen,
-		mediawiki_new,
 		generic::wikidev-umask
 
 	install_certificate{ "star.wikimedia.org": }
@@ -908,6 +859,10 @@ node "locke.wikimedia.org" inherits "base_analytics_logging_node" {
 	include
 		accounts::dsc,
 		accounts::datasets,
+		# RT 4312
+		accounts::dandreescu
+
+	include
 		misc::udp2log::utilities,
 		misc::udp2log
 
@@ -1005,8 +960,9 @@ node "hooper.wikimedia.org" {
 node "hume.wikimedia.org" {
 	$cluster = "misc"
 
-	include standard,
+	include role::applicationserver::maintenance,
 		nfs::netapp::home,
+		nfs::upload,
 		misc::deployment::scap_scripts,
 		misc::maintenance::foundationwiki,
 		misc::maintenance::pagetriage,
@@ -1019,6 +975,7 @@ node "hume.wikimedia.org" {
 		misc::maintenance::update_special_pages,
 		misc::maintenance::parsercachepurging,
 		misc::maintenance::geodata,
+		misc::maintenance::cleanup_upload_stash,
 		admins::roots,
 		admins::mortals,
 		admins::restricted,
@@ -1043,11 +1000,6 @@ node "iron.wikimedia.org" {
 	include swift::utilities
 }
 
-node "ixia.pmtpa.wmnet" {
-	$ganglia_aggregator = "true"
-	include role::db::core
-}
-
 node "kaulen.wikimedia.org" {
 	system_role { "misc": description => "Bugzilla server" }
 	$gid = 500
@@ -1066,7 +1018,6 @@ node "kaulen.wikimedia.org" {
 
 	install_certificate{ "star.wikimedia.org": }
 
-	monitor_service { "memorysurge": description => "Memory using more than expected", check_command => "check_memory_used!500000!510000" }
 	sudo_user { [ "demon", "reedy" ]: privileges => ['ALL = (mwdeploy) NOPASSWD: ALL'] }
 }
 
@@ -1127,10 +1078,6 @@ node "linne.wikimedia.org" {
 			soa_name => "ns1.wikimedia.org",
 			master => $dns_auth_master
 		}
-}
-
-node "lomaria.pmtpa.wmnet" {
-	include role::db::core
 }
 
 node /lvs[1-6]\.wikimedia\.org/ {
@@ -1240,6 +1187,9 @@ node /lvs100[1-6]\.wikimedia\.org/ {
 			$sip['misc_web'][$::site],
 			],
 		/^lvs100[36]$/ => [
+			$sip['apaches'][$::site],
+			$sip['api'][$::site],
+			$sip['rendering'][$::site],
 			$sip['search_pool1'][$::site],
 			$sip['search_pool2'][$::site],
 			$sip['search_pool3'][$::site],
@@ -1387,6 +1337,7 @@ node "marmontel.wikimedia.org" {
 	include standard,
 		admins::roots,
 		svn::client,
+		generic::packages::git-core,
 		misc::blogs::wikimedia
 }
 
@@ -1396,11 +1347,20 @@ node /mc(1[0-9]|[0-9])\.pmtpa\.wmnet/ {
 		$ganglia_aggregator = "true"
 	}
 
+	case $::mw_primary {
+		'pmtpa': {
+			$redis_repl_site = false
+		}
+		'eqiad': {
+			$redis_repl_site = 'eqiad.wmnet'
+		}
+	}
+
 	# replication mappings may end up all over the place
 	# once servers die and are replaced, so making this
 	# explicit for now.
 	$redis_replication = {
-		'site' => false,
+		'site' => $redis_repl_site,
 		'mc1' => 'mc1001',
 		'mc2' => 'mc1002',
 		'mc3' => 'mc1003',
@@ -1437,8 +1397,17 @@ node /mc(10[01][0-9])\.eqiad\.wmnet/ {
 		$ganglia_aggregator = "true"
 	}
 
+	case $::mw_primary {
+		'pmtpa': {
+			$redis_repl_site = 'pmtpa.wmnet'
+		}
+		'eqiad': {
+			$redis_repl_site = false
+		}
+	}
+
 	$redis_replication = {
-		'site' => 'pmtpa.wmnet',
+		'site' => $redis_repl_site,
 		'mc1001' => 'mc1',
 		'mc1002' => 'mc2',
 		'mc1003' => 'mc3',
@@ -1483,6 +1452,7 @@ node "mchenry.wikimedia.org" {
 		nrpe,
 		role::ldap::client::corp,
 		backup::client,
+		generic::packages::git-core,
 		groups::wikidev,
 		accounts::jdavis
 
@@ -1498,12 +1468,6 @@ node "mchenry.wikimedia.org" {
 
 node /mobile100[1-4]\.wikimedia\.org/ {
 	include newstandard
-}
-
-node /ms[1-3]\.pmtpa\.wmnet/ {
-	include	standard
-
-	#interface_aggregate { "bond0": orig_interface => "eth0", members => [ "eth0", "eth1" ] }
 }
 
 node "ms5.pmtpa.wmnet" {
@@ -1529,9 +1493,7 @@ node /^ms(10|1001)\.wikimedia\.org$/ {
 }
 
 node "ms1002.eqiad.wmnet" {
-	include standard,
-		misc::images::rsyncd,
-		misc::images::rsync
+	include standard
 }
 
 node /ms100[4]\.eqiad\.wmnet/ {
@@ -1642,7 +1604,7 @@ node /mw([1-9]|1[0-6])\.pmtpa\.wmnet/ {
 		$ganglia_aggregator = "true"
 	}
 
-	include	role::applicationserver::jobrunner
+	class	{ role::applicationserver::jobrunner: run_jobs_enabled => false }
 }
 
 # mw17-59 are application servers (precise)
@@ -1668,7 +1630,7 @@ node /mw10(0[1-9]|1[0-6])\.eqiad\.wmnet/ {
 		$ganglia_aggregator = "true"
 	}
 
-	include	role::applicationserver::jobrunner
+	class  { role::applicationserver::jobrunner: run_jobs_enabled => true }
 }
 
 # mw 1017-1113 are apaches (precise)
@@ -1681,7 +1643,7 @@ node /mw1(01[7-9]|0[2-9][0-9]|10[0-9]|11[0-3])\.eqiad\.wmnet/ {
 }
 
 # mw 1114-1148 are api apaches (precise)
-node /mw11(1[4-9]|[23][0-9]|4[0-8])\.eqaid\.wmnet/ {
+node /mw11(1[4-9]|[23][0-9]|4[0-8])\.eqiad\.wmnet/ {
 	if $hostname =~ /^mw111[45]$/ {
 		$ganglia_aggregator = "true"
 	}
@@ -1690,7 +1652,7 @@ node /mw11(1[4-9]|[23][0-9]|4[0-8])\.eqaid\.wmnet/ {
 }
 
 # mw 1149-1152 are bits apaches (precise)
-node /mw11(49]|5[0-2])\.eqiad\.wmnet/ {
+node /mw11(49|5[0-2])\.eqiad\.wmnet/ {
 	if $hostname =~ /^mw115[12]$/ {
 		$ganglia_aggregator = "true"
 	}
@@ -1699,7 +1661,7 @@ node /mw11(49]|5[0-2])\.eqiad\.wmnet/ {
 }
 
 # mw 1153-1160 are imagescalers (precise)
-node /mw11(5[3-9]|60)\.eqaid\.wmnet/ {
+node /mw11(5[3-9]|60)\.eqiad\.wmnet/ {
 	if $hostname =~ /^mw115[34]$/ {
 		$ganglia_aggregator = "true"
 	}
@@ -1710,7 +1672,7 @@ node /mw11(5[3-9]|60)\.eqaid\.wmnet/ {
 node "neon.wikimedia.org" {
 	$domain_search = "wikimedia.org pmtpa.wmnet eqiad.wmnet esams.wikimedia.org"
 
-	$ircecho_infile = "/var/log/nagios/irc.log"
+	$ircecho_infile = "/var/log/icinga/irc.log"
 	$ircecho_nick = "icinga-wm"
 	$ircecho_chans = "#wikimedia-operations"
 	$ircecho_server = "irc.freenode.net"
@@ -1768,8 +1730,7 @@ node "nickel.wikimedia.org" {
 	$ganglia_aggregator = "true"
 
 	include standard,
-		ganglia::web,
-		generic::apache::no-default-site
+		ganglia::web
 
 	 install_certificate{ "star.wikimedia.org": }
 }
@@ -1814,6 +1775,10 @@ node "oxygen.wikimedia.org"  inherits "base_analytics_logging_node" {
 		accounts::datasets,
 		accounts::dsc,
 		accounts::diederik,
+		# RT 4312
+		accounts::dandreescu
+
+	include
 		misc::squid-logging::multicast-relay,
 		misc::logging::vanadium-relay,
 		misc::udp2log
@@ -2063,6 +2028,7 @@ node "sockpuppet.pmtpa.wmnet" {
 	class { puppetmaster:
 		allow_from => [ "*.wikimedia.org", "*.pmtpa.wmnet", "*.eqiad.wmnet" ],
 		config => {
+			'thin_storeconfigs' => true,
 			'dbadapter' => "mysql",
 			'dbuser' => "puppet",
 			'dbpassword' => $passwords::puppet::database::puppet_production_db_pass,
@@ -2218,7 +2184,7 @@ node /ssl[1-4]\.wikimedia\.org/ {
 		$ganglia_aggregator = "true"
 	}
 
-	include protoproxy::ssl
+	include role::protoproxy::ssl
 
 	interface_add_ip6_mapped { "main": interface => "eth0" }
 }
@@ -2230,7 +2196,7 @@ node /ssl100[1-4]\.wikimedia\.org/ {
 
 	interface_add_ip6_mapped { "main": interface => "eth0" }
 
-	include protoproxy::ssl
+	include role::protoproxy::ssl
 }
 
 node /ssl300[1-4]\.esams\.wikimedia\.org/ {
@@ -2240,7 +2206,7 @@ node /ssl300[1-4]\.esams\.wikimedia\.org/ {
 
 	interface_add_ip6_mapped { "main": interface => "eth0" }
 
-	include protoproxy::ssl
+	include role::protoproxy::ssl
 
 	if $hostname =~ /^ssl3001$/ {
 		include protoproxy::ipv6_labs
@@ -2330,6 +2296,7 @@ node "stafford.pmtpa.wmnet" {
 	class { puppetmaster:
 		allow_from => [ "*.wikimedia.org", "*.pmtpa.wmnet", "*.eqiad.wmnet" ],
 		config => {
+			'thin_storeconfigs' => true,
 			'ca' => "false",
 			'ca_server' => "sockpuppet.pmtpa.wmnet",
 			'dbadapter' => "mysql",
@@ -2401,7 +2368,8 @@ node "stat1001.wikimedia.org" {
 		accounts::diederik,
 		accounts::otto,
 		accounts::dsc,
-		accounts::dandreescu
+		accounts::dandreescu,
+		accounts::rfaulk #rt4258
 
 	sudo_user { "otto": privileges => ['ALL = NOPASSWD: ALL'] }
 }
@@ -2462,11 +2430,6 @@ node /^snapshot([1-4]\.pmtpa|100[1-4]\.eqiad)\.wmnet/ {
 		groups::wikidev
 }
 
-node "thistle.pmtpa.wmnet" {
-	$ganglia_aggregator = "true"
-	include role::db::core
-}
-
 node "tin.eqiad.wmnet" {
 	$cluster = "misc"
 	$domain_search = "wikimedia.org pmtpa.wmnet eqiad.wmnet esams.wikimedia.org"
@@ -2483,13 +2446,23 @@ node "tridge.wikimedia.org" {
 }
 
 # tmh1/tmh2 video encoding server (precise only)
-node /^tmh[12]\.pmtpa\.wmnet$/ {
+node /^tmh[1-2]\.pmtpa\.wmnet/ {
 	if $hostname =~ /^tmh[12]$/ {
 		$ganglia_aggregator = "true"
 	}
 
-	include	role::applicationserver::videoscaler,
-		nfs::upload
+	class { role::applicationserver::videoscaler: run_jobs_enabled => false }
+
+	include	nfs::upload
+}
+
+# tmh1001/tmh1002 video encoding server (precise only)
+node /^tmh100[1-2]\.eqiad\.wmnet/ {
+	if $hostname =~ /^tmh100[12]$/ {
+		$ganglia_aggregator = "true"
+	}
+	class { role::applicationserver::videoscaler: run_jobs_enabled => true }
+
 }
 
 node "vanadium.eqiad.wmnet" {
@@ -2641,13 +2614,6 @@ node /(caesium|xenon|wtp1001)\.eqiad\.wmnet/ {
 
 }
 
-node  "yongle.wikimedia.org" {
-	$gid=500
-	include	standard,
-		groups::wikidev,
-		accounts::catrope
-}
-
 node /^solr(100)?[1-3]\.(eqiad|pmtpa)\.wmnet/ {
 	include standard,
 		role::solr::geodata
@@ -2671,6 +2637,8 @@ node "zirconium.wikimedia.org" {
 	include standard,
 		admins::roots,
 		role::planet
+
+	interface_add_ip6_mapped { "main": interface => "eth0" }
 }
 
 node default {

@@ -4,10 +4,12 @@
 class misc::blogs::wikimedia {
 	system_role { "misc::blogs::wikimedia": description => "blog.wikimedia.org" }
 
-	require apaches::packages,
+	class {'webserver::php5': ssl => 'true'; }
+
+	require webserver::php5-mysql,
 		webserver::php5-gd,
 		webserver::apache2::rpaf
-		
+
 	package { "unzip":
 		ensure => latest;
 	}
@@ -63,5 +65,9 @@ class misc::blogs::wikimedia {
 	varnish::logging { "locke" :           listener_address => "208.80.152.138" }
 	varnish::logging { "emery" :           listener_address => "208.80.152.184" }
 	varnish::logging { "multicast_relay" : listener_address => "208.80.154.15", port => "8419" }
+
+	# Capture blog traffic logs on its own stream in analytics cluster.
+	# 208.80.154.154 == analytics1001.wikimedia.org
+	varnish::logging { "analytics-blog" :  listener_address => "208.80.154.154", port => "8411" }
 }
 

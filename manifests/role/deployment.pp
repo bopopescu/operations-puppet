@@ -13,7 +13,7 @@ class role::deployment::salt_masters::common($deployment_servers) {
       "l10n-slot1" => "http://${deploy_server_pmtpa}/mediawiki/l10n-slot1",
       "l10n-beta0" => "http://${deploy_server_pmtpa}/mediawiki/l10n-beta0",
       # parsoid is currently deployed from eqiad only
-      "parsoid/parsoid" => "http://${deploy_server_eqiad}/parsoid/parsoid",
+      "parsoid/Parsoid" => "http://${deploy_server_eqiad}/parsoid/Parsoid",
       "parsoid/config" => "http://${deploy_server_eqiad}/parsoid/config",
     },
     "eqiad" => {
@@ -101,10 +101,10 @@ class role::deployment::salt_masters::common($deployment_servers) {
 }
 
 class role::deployment::salt_masters::production {
-  $mediawiki_regex = "^(mw).*eqiad.*"
-  $parsoid_regex = "^(wtp1|mexia|tola|lardner|kuo|celsus|constable|wtp1001)\..*"
+  $mediawiki_regex = "^(srv|mw|snapshot|tmh)|(searchidx2|searchidx1001).*.(eqiad|pmtpa).wmnet$|^(hume|spence|fenari).wikimedia.org$"
+  $parsoid_regex = "^(wtp1|mexia|tola|lardner|kuo|celsus|constable|wtp1001|caesium|xenon|cerium|praseodymium)\..*"
   $deployment_servers = {
-    "pmtpa" => "deployment.pmtpa.wmnet",
+    "pmtpa" => "tin.eqiad.wmnet",
     "eqiad" => "tin.eqiad.wmnet",
   }
   class { "role::deployment::salt_masters::common":
@@ -219,7 +219,7 @@ class role::deployment::deployment_servers::production {
     vhost_name		=> "10.64.0.196",
     port		=> 80,
     docroot		=> "/srv/deployment",
-    docroot_dir_allows  => ["10.0.0.0/16","10.64.0.0/22","10.64.16.0/24","208.80.152.0/24"],
+    docroot_dir_allows  => ["10.0.0.0/16","10.64.0.0/22","10.64.16.0/24","208.80.152.0/22"],
     serveradmin		=> "noc@wikimedia.org",
     configure_firewall 	=> false,
   }

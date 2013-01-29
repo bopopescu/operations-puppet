@@ -59,30 +59,16 @@ class svn::server {
 	# hooks
 	file {
 		"/svnroot/mediawiki/hooks/pre-commit":
-			owner => root,
-			group => svnadm,
-			mode => 0555,
-			source => "puppet:///files/svn/hooks/pre-commit";
+			ensure => absent;
 		"/svnroot/mediawiki/hooks/post-commit":
-			owner => root,
-			group => svnadm,
-			mode => 0555,
-			source => "puppet:///files/svn/hooks/post-commit";
+			ensure => absent;
 		"/svnroot/mediawiki/hooks/HooksCommon.inc":
-			owner => root,
-			group => svnadm,
-			mode => 0555,
-			source => "puppet:///files/svn/hooks/HooksCommon.inc";
+			ensure => absent;
 		"/svnroot/mediawiki/hooks/deferred-updates.sh":
-			owner => root,
-			group => svnadm,
-			mode => 0555,
-			source => "puppet:///files/svn/hooks/deferred-updates.sh";
+			ensure => absent;
 	}
 
 	apache_site { "svn": name => "svn", prefix => "000-" }
-
-	include generic::apache::no-default-site
 
 	monitor_service { "https": description => "HTTPS", check_command => "check_ssl_cert!svn.wikimedia.org" }
 
@@ -180,10 +166,7 @@ class svn::server {
 
 	class cia {
 		file { "/usr/local/bin/ciabot_svn.py":
-			owner => root,
-			group => root,
-			mode  => 0555,
-			source => "puppet:///files/svn/ciabot_svn.py";
+			ensure => absent;
 		}
 	}
 

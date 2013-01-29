@@ -6,7 +6,7 @@ class applicationserver::config::apache(
 	$maxclients="40"
 	) {
 
-	Class["applicationserver::packages"] -> Class["applicationserver::config::apache"]
+	Class["applicationserver::apache_packages"] -> Class["applicationserver::config::apache"]
 
 	file {
 		"/etc/apache2/apache2.conf":
@@ -24,6 +24,16 @@ class applicationserver::config::apache(
 			owner => root,
 			group => root,
 			content => $::site;
+		"/usr/local/apache":
+			ensure => directory;
+	}
+
+	exec { "sync apache wmf config":
+		require => File["/usr/local/apache"],
+		path => "/bin:/sbin:/usr/bin:/usr/sbin",
+		command => "rsync -av 10.0.5.8::httpdconf/ /usr/local/apache/conf",
+		creates => "/usr/local/apache/conf",
+		notify => Service[apache]
 	}
 
 	Class["applicationserver::config::apache"] -> Class["applicationserver::config::base"]

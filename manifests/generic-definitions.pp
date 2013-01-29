@@ -91,11 +91,6 @@ define apache_confd($install="false", $enable="true", $ensure="present") {
 	}
 }
 
-class generic::apache::no-default-site {
-	file { "/etc/apache2/sites-enabled/000-default":
-		ensure => absent;
-	}
-}
 
 # Enables a certain Lighttpd config
 #
@@ -107,7 +102,7 @@ define lighttpd_config($install="false") {
 		command     => "/usr/sbin/service service lighttpd reload",
 		refreshonly => true,
 	}
-	
+
 	if $install == "true" {
 		file { "/etc/lighttpd/conf-available/${title}.conf":
 			source => "puppet:///files/lighttpd/${title}.conf",
@@ -119,8 +114,8 @@ define lighttpd_config($install="false") {
 		}
 	}
 
-	# Create a symlink to the available config file 
-	# in the conf-enabled directory.  Notify 
+	# Create a symlink to the available config file
+	# in the conf-enabled directory.  Notify
 	file { "/etc/lighttpd/conf-enabled/${title}.conf":
 		ensure => "/etc/lighttpd/conf-available/${title}.conf",
 		notify => Exec["lighttpd_reload_${title}"],
@@ -441,7 +436,7 @@ define interface_add_ip6_mapped($interface=undef, $ipv4_address=undef) {
 	else {
 		$intf = $interface
 	}
-	
+
 	if ! member(split($::interfaces, ","), $intf) {
 		warning("Not adding IPv6 address to $intf because this interface does not exist!")
 	}
@@ -452,7 +447,7 @@ define interface_add_ip6_mapped($interface=undef, $ipv4_address=undef) {
 		else {
 			$ip4_address = "::${ipv4_address}"
 		}
-	
+
 		$ipv6_address = inline_template("<%= require 'ipaddr'; (IPAddr.new(scope.lookupvar(\"::ipaddress6_${intf}\")).mask(64) | IPAddr.new(ip4_address.gsub('.', ':'))).to_s() %>")
 
 		interface_ip { $title:
@@ -563,6 +558,7 @@ class generic::gluster {
 
 	file { "/etc/logrotate.d/glusterlogs":
 		ensure => present,
+		mode => '0664',
 		source => "puppet:///files/logrotate/glusterlogs",
 		owner => 'root',
 	}
@@ -627,7 +623,7 @@ define git::clone(
 	$mode=0755) {
 
 	require generic::packages::git-core
-	
+
 	case $ensure {
 		"absent": {
 			# make sure $directory does not exist
@@ -654,7 +650,7 @@ define git::clone(
 
 			$deptharg = $depth ?  {
 				"full" => "",
-				default => " --depth=$depth" 
+				default => " --depth=$depth"
 			}
 
 			# set PATH for following execs
@@ -669,7 +665,7 @@ define git::clone(
 				group       => $group,
 				timeout     => $timeout,
 			}
-			
+
 			# pull if $ensure == latest and if there are changes to merge in.
 			if $ensure == "latest" {
 				exec { "git_pull_${title}":
@@ -704,7 +700,7 @@ define git::init($directory) {
 
 
 # Creating an apparmor service class
-# so we can notify the service when 
+# so we can notify the service when
 # apparmor files are changed by puppet.
 # This probably isn't included in your
 # class, so if you need to notify this
@@ -782,9 +778,9 @@ class generic::packages::maven {
 #    $number_prefix - The load order prefix number in the sysctl.d filename.  Default '60'.  You probably don't need to change this.
 #
 define sysctl(
-		$value         = undef, 
-		$content       = undef, 
-		$source        = undef, 
+		$value         = undef,
+		$content       = undef,
+		$source        = undef,
 		$ensure        = "present",
 		$number_prefix = "60")
 {

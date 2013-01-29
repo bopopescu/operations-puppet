@@ -153,6 +153,17 @@ class misc::maintenance::update_flaggedrev_stats{
 	}
 }
 
+class misc::maintenance::cleanup_upload_stash {
+	cron {
+		cleanup_upload_stash:
+			command => "/usr/local/bin/foreachwiki maintenance/cleanupUploadStash.php",
+			user => "apache",
+			hour => 1,
+			minute => 0,
+			ensure => present;
+	}
+}
+
 class misc::maintenance::update_special_pages {
 	cron {
 		update_special_pages:
@@ -257,12 +268,12 @@ class misc::maintenance::geodata {
 
 	cron {
 		"update-geodata":
-			command => "/usr/local/bin/update-geodata >/dev/null 2>&1",
+			command => "/usr/local/bin/update-geodata >/dev/null",
 			user => apache,
 			minute => "*/30",
 			ensure => present;
 		"clear-killlist":
-			command => "/usr/local/bin/clear-killlist >/dev/null 2>&1",
+			command => "/usr/local/bin/clear-killlist >/dev/null",
 			user => apache,
 			hour => 8,
 			minute => 45,

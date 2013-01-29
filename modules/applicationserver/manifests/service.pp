@@ -1,7 +1,8 @@
 # applicationserver::service
 
 class applicationserver::service {
-	Class["applicationserver::packages"] -> Class["applicationserver::service"]
+	Class["applicationserver::apache_packages"] -> Class["applicationserver::service"]
+	Class["applicationserver::config::base"] -> Class["applicationserver::service"]
 	include mediawiki_new::sync
 
 	# Start apache but not at boot
@@ -9,6 +10,7 @@ class applicationserver::service {
 		name => "apache2",
 		enable => false,
 		subscribe => Exec['mw-sync'],
+		require => Exec['mw-sync'],
 		ensure => running;
 	}
 

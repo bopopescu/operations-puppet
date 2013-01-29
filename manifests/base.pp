@@ -114,7 +114,7 @@ class base::puppet($server="puppet", $certname=undef) {
 		}
 		'labs': {
 			exec { "puppet snmp trap":
-				command => "snmptrap -v 1 -c public nagios-main.pmtpa.wmflabs .1.3.6.1.4.1.33298 `hostname -f` 6 1004 `uptime | awk '{ split(\$3,a,\":\"); print (a[1]*60+a[2])*60 }'`",
+				command => "snmptrap -v 1 -c public nagios-main.pmtpa.wmflabs .1.3.6.1.4.1.33298 ${::instancename}.${::site}.wmflabs 6 1004 `uptime | awk '{ split(\$3,a,\":\"); print (a[1]*60+a[2])*60 }'`",
 				path => "/bin:/usr/bin",
 				require => Package["snmp"]
 			}
@@ -292,7 +292,7 @@ class base::sysctl {
 class base::standard-packages {
 	$packages = [ "wikimedia-base", "wipe", "tzdata", "zsh-beta", "jfsutils",
 				"xfsprogs", "wikimedia-raid-utils", "screen", "gdb", "iperf",
-				"atop", "htop", "vim", "sysstat", "ngrep" ]
+				"atop", "htop", "vim", "sysstat", "ngrep", "acct" ]
 
 	if $::lsbdistid == "Ubuntu" {
 		package { $packages:
@@ -384,18 +384,9 @@ class base::monitoring::host($contact_group = "admins") {
 }
 
 class base::decommissioned {
-	# There has to be a better way to check for array membership!
-	define decommissioned_host_role {
-		if $::hostname == $title {
-			system_role { "base::decommissioned": description => "DECOMMISSIONED server" }
-		}
-		else {
-			debug("${title} is not ${::hostname}, so not decommissioning.")
-		}
+	if $::hostname in $decommissioned_servers {
+		system_role { "base::decommissioned": description => "DECOMMISSIONED server" }
 	}
-
-	# Evaluate for every member in $decommissioned_servers
-	decommissioned_host_role { $decommissioned_servers: }
 }
 
 class base::instance-upstarts {

@@ -68,8 +68,7 @@ class icinga::monitor::configuration::variables {
 class icinga::monitor::apache {
 	class {"webserver::php5": ssl => "true";}
 
-	include webserver::php5-gd,
-		generic::apache::no-default-site
+	include webserver::php5-gd
 
 	file {
 		"/usr/share/icinga/htdocs/images/logos/ubuntu.png":
@@ -172,19 +171,19 @@ class icinga::monitor::configuration::files {
 			mode => 0644;
 
 		"/etc/icinga/contactgroups.cfg":
-			source => "puppet:///files/nagios/contactgroups_fake.cfg",
+			source => "puppet:///files/nagios/contactgroups.cfg",
 			owner => root,
 			group => root,
 			mode => 0644;
 
 		"/etc/icinga/contacts.cfg":
-			source => "puppet:///private/nagios/contacts_fake.cfg",
+			source => "puppet:///private/nagios/contacts.cfg",
 			owner => root,
 			group => root,
 			mode => 0644;
 
 		"/etc/icinga/misccommands.cfg":
-			source => "puppet:///files/nagios/misccommands.cfg",
+			source => "puppet:///files/icinga/misccommands.cfg",
 			owner => root,
 			group => root,
 			mode => 0644;
@@ -602,6 +601,7 @@ class icinga::monitor::firewall {
 		iptables_add_service{ "public_152": source => "208.80.152.0/24", service => "all", jump => "ACCEPT" }
 		iptables_add_service{ "public_153": source => "208.80.153.128/26", service => "all", jump => "ACCEPT" }
 		iptables_add_service{ "public_154": source => "208.80.154.0/24", service => "all", jump => "ACCEPT" }
+		iptables_add_service{ "public_fundraising": source => "208.80.155.0/27", service => "all", jump => "ACCEPT" }
 		iptables_add_service{ "public_esams": source => "91.198.174.0/25", service => "all", jump => "ACCEPT" }
 	}
 
@@ -744,8 +744,11 @@ class icinga::monitor::service {
 
 	service { "icinga":
 		ensure => running,
+		hasstatus => false,
 		subscribe => [ File[$icinga::monitor::configuration::variables::puppet_files],
 			       File[$icinga::monitor::configuration::variables::static_files],
+			       File["/etc/icinga/puppet_services.cfg"],
+			       File["/etc/icinga/puppet_hostextinfo.cfg"],
 			       File["/etc/icinga/puppet_hosts.cfg"]];
 	}
 }
@@ -753,20 +756,30 @@ class icinga::monitor::service {
 class icinga::monitor::snmp {
 
 	file { "/etc/snmp/snmptrapd.conf":
-		source => "puppet:///files/snmp/snmptrapd.conf.icinga",
-		owner => root,
-		group => root,
-		mode => 0600;
+			source => "puppet:///files/snmp/snmptrapd.conf.icinga",
+			owner => root,
+			group => root,
+			mode => 0600;
 	       "/etc/snmp/snmptt.conf":
-		source => "puppet:///files/snmp/snmptt.conf.icinga",
-		owner => root,
-		group => root,
-		mode => 0644;
+			source => "puppet:///files/snmp/snmptt.conf.icinga",
+			owner => root,
+			group => root,
+			mode => 0644;
 	       "/etc/init.d/snmptt":
-		source => "puppet:///files/snmp/snmptt.init",
-		owner => root,
-		group => root,
-		mode => 0755;
+			source => "puppet:///files/snmp/snmptt.init",
+			owner => root,
+			group => root,
+			mode => 0755;
+		"/etc/init.d/snmptrapd":
+			source => "puppet:///files/snmp/snmptrapd.init",
+			owner => root,
+			group => root,
+			mode => 0755;
+		"/etc/init.d/snmpd":
+			source => "puppet:///files/snmp/snmpd.init",
+			owner => root,
+			group => root,
+			mode => 0755;
 	}
 
 	# snmp tarp stuff
@@ -788,7 +801,25 @@ class icinga::monitor::snmp {
 			       File["/etc/snmp/snmptrapd.conf"]];
 	}
 
-	service { snmpd:
-		ensure => running;
+	service { snmptrapd:
+		ensure => running,
+		hasstatus => false,
+		subscribe => File["/etc/init.d/snmptrapd"];
 	}
+
+	service { snmpd:
+		ensure => running,
+		hasstatus => false,
+		subscribe => File["/etc/init.d/snmpd"];
+	}
+
+	# FIXME: smptt crashes periodically on precise
+	cron { "restart_snmptt":
+		command => "service snmptt restart",
+		user => root,
+		hour => [0, 4, 8, 12, 16, 20],
+		minute => 7,
+		ensure => present;
+	} 
+
 }
