@@ -10,6 +10,18 @@ class kraken::monitoring::jmxtrans {
 	}
 }
 
+# set up jvm monitoring on hadoop datanodes
+class kraken::monitoring::hadoop::datanode inherits kraken::monitoring::jmxtrans {
+	jmxtrans::metrics { "hadoop-datanode-$hostname":
+		jmx	=> "$fqdn:9981",
+		queries => [
+			{
+				"obj"	=> "java.lang:type=Memory",
+				"attr"	=> [ "HeapMemoryUsage", "NonHeapMemoryUsage" ]
+			}
+		]
+}
+
 # set up jmx monitoring for kafka broker server
 class kraken::monitoring::kafka::server inherits kraken::monitoring::jmxtrans {
 	# query kafka for jmx metrics
