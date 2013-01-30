@@ -39,6 +39,10 @@ class kraken::hadoop::config {
 class kraken::hadoop::worker {
 	# hadoop worker (datanode, etc.)
 	include cdh4::hadoop::worker
+	
+	# include jmx ganglia/graphite monitoring
+	# setups for hadoop datanodes
+	include kraken::monitoring::hadoop::datanode
 }
 
 # == Class kraken::hadoop::master
