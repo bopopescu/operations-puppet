@@ -11,7 +11,12 @@ class kraken::proxy {
 	}
 
 	include kraken::proxy::haproxy
-	include kraken::proxy::apache
+
+	# Ensuring that the apache proxy is disabled.
+	# That was a BAAAAAD IDEA.
+ 	class { "kraken::proxy::apache": 
+ 		ensure => "absent",
+ 	}
 }
 
 # == Class kraken::proxy::haproxy
@@ -65,7 +70,8 @@ class kraken::proxy::haproxy {
 # access to internal Kraken web services.
 #
 # Note: Do not include this class directly, instead include kraken::proxy.
-class kraken::proxy::apache {
+# 
+class kraken::proxy::apache($ensure = "present") {
 	include webserver::apache
 	webserver::apache::module { "rewrite": require => Class["webserver::apache"] }
 
@@ -98,8 +104,13 @@ class kraken::proxy::apache {
 		content => template("kraken/apache-proxy.vhost.erb"),
 		require => File["/srv/.htpasswd"]
 	}
+
+
 	file { "/etc/apache2/sites-enabled/proxy.vhost":
-		ensure  => "/etc/apache2/sites-available/proxy.vhost",
+		ensure  => $ensure ? {
+			"absent" => "absent",
+			default  => "/etc/apache2/sites-available/proxy.vhost",
+		},
 		notify  => Class[webserver::apache::service],
 	}
 
