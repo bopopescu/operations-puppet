@@ -21,7 +21,7 @@ mod_filter_command = "/usr/bin/awk '{if ($2 % #{webrequest_producer_count} == #{
 # I have manually copied it into /usr/local/bin. - otto
 
 # udp2log packet loss monitoring
-pipe 10 /usr/local/bin/packet-loss 10 >> /var/log/udp2log/webrequest/packet-loss.log
+pipe 10 /usr/bin/packet-loss 10 '\t' >> /var/log/udp2log/webrequest/packet-loss.log
 
 # sampled log saved to local disk for debugging purposes
 file 10000 /var/lib/hadoop/data/e/udp2log/sampled-10000.log
