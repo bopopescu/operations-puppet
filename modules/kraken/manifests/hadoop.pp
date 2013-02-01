@@ -30,7 +30,7 @@ class kraken::hadoop::config {
 		io_file_buffer_size  => 131072,
 		reduce_parallel_copies => 10,
 		mapreduce_job_reuse_jvm_num_tasks => -1,
-		mapreduce_child_java_opts => "-Xmx512M",
+		mapreduce_child_java_opts => "-Xmx1024M",
 	}
 }
 
